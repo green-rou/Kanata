@@ -1,4 +1,4 @@
-# Contributing to AnimeViewer
+# Contributing to Kanata
 
 Thanks for taking the time to contribute! Here's everything you need to know.
 

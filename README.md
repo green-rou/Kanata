@@ -1,4 +1,4 @@
-# AnimeViewer
+# Kanata
 
 An Android app for browsing anime information and streaming episodes from third-party sources.
 
@@ -95,7 +95,7 @@ Each feature has its own `State` / `Event` model pair. ViewModels expose `StateF
 
 1. Clone the repo:
    ```bash
-   git clone https://github.com/your-username/AnimeViewer.git
+   git clone https://github.com/green-rou/Kanata.git
    ```
 
 2. Open in Android Studio and let Gradle sync.
@@ -125,4 +125,4 @@ Pull requests are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
 
 ## License
 
-[MIT](LICENSE) © 2026 AnimeViewer Contributors
+[MIT](LICENSE) © 2026 Kanata Contributors
