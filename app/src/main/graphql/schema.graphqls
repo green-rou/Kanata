@@ -1,0 +1,112 @@
+schema {
+  query: Query
+}
+
+type Query {
+  Page(page: Int, perPage: Int): Page
+  Media(id: Int, type: MediaType, isAdult: Boolean): Media
+}
+
+type Page {
+  pageInfo: PageInfo
+  media(
+    id: Int
+    type: MediaType
+    isAdult: Boolean
+    sort: [MediaSort]
+    search: String
+    genre_in: [String]
+    tag_in: [String]
+  ): [Media]
+}
+
+type PageInfo {
+  total: Int
+  currentPage: Int
+  lastPage: Int
+  hasNextPage: Boolean
+  perPage: Int
+}
+
+type Media {
+  id: Int!
+  title: MediaTitle
+  type: MediaType
+  format: MediaFormat
+  status: MediaStatus
+  description(asHtml: Boolean): String
+  startDate: FuzzyDate
+  episodes: Int
+  coverImage: MediaCoverImage
+  genres: [String]
+  averageScore: Int
+  meanScore: Int
+  popularity: Int
+  isAdult: Boolean
+}
+
+type MediaTitle {
+  romaji: String
+  english: String
+  native: String
+  userPreferred: String
+}
+
+type MediaCoverImage {
+  extraLarge: String
+  large: String
+  medium: String
+  color: String
+}
+
+type FuzzyDate {
+  year: Int
+  month: Int
+  day: Int
+}
+
+enum MediaType {
+  ANIME
+  MANGA
+}
+
+enum MediaFormat {
+  TV
+  TV_SHORT
+  MOVIE
+  SPECIAL
+  OVA
+  ONA
+  MUSIC
+  MANGA
+  NOVEL
+  ONE_SHOT
+}
+
+enum MediaStatus {
+  FINISHED
+  RELEASING
+  NOT_YET_RELEASED
+  CANCELLED
+  HIATUS
+}
+
+enum MediaSort {
+  ID
+  ID_DESC
+  SCORE
+  SCORE_DESC
+  POPULARITY
+  POPULARITY_DESC
+  TRENDING
+  TRENDING_DESC
+  START_DATE
+  START_DATE_DESC
+  TITLE_ROMAJI
+  TITLE_ROMAJI_DESC
+  SEARCH_MATCH
+  FAVOURITES
+  FAVOURITES_DESC
+  UPDATED_AT
+  UPDATED_AT_DESC
+}

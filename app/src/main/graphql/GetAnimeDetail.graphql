@@ -1,0 +1,25 @@
+query GetAnimeDetail($id: Int!) {
+  Media(id: $id, type: ANIME) {
+    id
+    title {
+      userPreferred
+      english
+    }
+    description(asHtml: false)
+    coverImage {
+      large
+    }
+    format
+    status
+    episodes
+    genres
+    averageScore
+    meanScore
+    popularity
+    startDate {
+      year
+      month
+      day
+    }
+  }
+}

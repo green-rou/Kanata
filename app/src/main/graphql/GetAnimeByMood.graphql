@@ -1,0 +1,22 @@
+query GetAnimeByMood($page: Int!, $perPage: Int!, $genres: [String], $tags: [String], $isAdult: Boolean) {
+  Page(page: $page, perPage: $perPage) {
+    pageInfo {
+      hasNextPage
+      currentPage
+    }
+    media(type: ANIME, genre_in: $genres, tag_in: $tags, isAdult: $isAdult, sort: [SCORE_DESC, POPULARITY_DESC]) {
+      id
+      title {
+        userPreferred
+      }
+      coverImage {
+        large
+      }
+      format
+      averageScore
+      genres
+      episodes
+      isAdult
+    }
+  }
+}

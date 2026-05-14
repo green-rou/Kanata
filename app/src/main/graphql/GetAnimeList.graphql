@@ -1,0 +1,22 @@
+query GetAnimeList($page: Int!, $perPage: Int!, $isAdult: Boolean) {
+  Page(page: $page, perPage: $perPage) {
+    pageInfo {
+      hasNextPage
+      currentPage
+    }
+    media(type: ANIME, isAdult: $isAdult, sort: [POPULARITY_DESC]) {
+      id
+      title {
+        userPreferred
+      }
+      coverImage {
+        large
+      }
+      format
+      averageScore
+      genres
+      episodes
+      isAdult
+    }
+  }
+}
