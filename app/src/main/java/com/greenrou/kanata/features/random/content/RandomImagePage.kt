@@ -6,7 +6,13 @@ import android.content.Context
 import android.net.Uri
 import android.os.Environment
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -37,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -50,6 +57,7 @@ import coil.request.SuccessResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 
 @Composable
 internal fun RandomImagePage(
@@ -58,6 +66,8 @@ internal fun RandomImagePage(
     error: String?,
     onRefresh: () -> Unit,
     bottomPadding: Dp,
+    isImmersive: Boolean = false,
+    onImmersiveChange: (Boolean) -> Unit = {},
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -73,107 +83,138 @@ internal fun RandomImagePage(
                 AsyncImage(
                     model = imageUrl,
                     contentDescription = "Random Anime Wallpaper",
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop,
-                )
-
-                Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .align(Alignment.TopCenter)
-                        .background(
-                            Brush.verticalGradient(
-                                listOf(Color.Black.copy(alpha = 0.6f), Color.Transparent)
-                            )
-                        ),
-                )
-
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                        .height(280.dp)
-                        .background(
-                            Brush.verticalGradient(
-                                listOf(Color.Transparent, Color.Black.copy(alpha = 0.9f))
-                            )
-                        ),
-                )
-
-                Row(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                        .padding(horizontal = 32.dp)
-                        .padding(bottom = bottomPadding + 16.dp),
-                    horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    FilledTonalIconButton(
-                        onClick = {
-                            downloadImage(context, imageUrl)
-                            Toast.makeText(context, "Download started", Toast.LENGTH_SHORT).show()
-                        },
-                        modifier = Modifier.size(52.dp),
-                        shape = RoundedCornerShape(14.dp),
-                        colors = IconButtonDefaults.filledTonalIconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        ),
-                    ) {
-                        Icon(Icons.Rounded.Download, contentDescription = "Download")
-                    }
-
-                    FilledTonalIconButton(
-                        onClick = {
-                            if (!isSettingWallpaper) {
-                                isSettingWallpaper = true
-                                scope.launch {
-                                    try {
-                                        setAsWallpaper(context, imageUrl)
-                                        Toast.makeText(context, "Wallpaper set!", Toast.LENGTH_SHORT).show()
-                                    } catch (e: Exception) {
-                                        Toast.makeText(context, "Failed to set wallpaper", Toast.LENGTH_SHORT).show()
-                                    } finally {
-                                        isSettingWallpaper = false
-                                    }
+                        .fillMaxSize()
+                        .pointerInput(imageUrl) {
+                            awaitEachGesture {
+                                awaitFirstDown(requireUnconsumed = false)
+                                val longPressed = withTimeoutOrNull(viewConfiguration.longPressTimeoutMillis) {
+                                    waitForUpOrCancellation()
+                                } == null
+                                if (longPressed) {
+                                    onImmersiveChange(true)
+                                    waitForUpOrCancellation()
+                                    onImmersiveChange(false)
                                 }
                             }
                         },
-                        modifier = Modifier.size(52.dp),
-                        shape = RoundedCornerShape(14.dp),
-                        colors = IconButtonDefaults.filledTonalIconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        ),
-                        enabled = !isSettingWallpaper,
-                    ) {
-                        if (isSettingWallpaper) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(22.dp),
-                                strokeWidth = 2.5.dp,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            )
-                        } else {
-                            Icon(Icons.Rounded.Wallpaper, contentDescription = "Set as wallpaper")
-                        }
-                    }
+                    contentScale = ContentScale.Crop,
+                )
 
-                    Button(
-                        onClick = onRefresh,
+                AnimatedVisibility(
+                    visible = !isImmersive,
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                ) {
+                    Box(
                         modifier = Modifier
-                            .weight(1f)
-                            .height(52.dp),
-                        shape = RoundedCornerShape(14.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        ),
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(Color.Black.copy(alpha = 0.6f), Color.Transparent)
+                                )
+                            ),
+                    )
+                }
+
+                AnimatedVisibility(
+                    visible = !isImmersive,
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(280.dp)
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(Color.Transparent, Color.Black.copy(alpha = 0.9f))
+                                )
+                            ),
+                    )
+                }
+
+                AnimatedVisibility(
+                    visible = !isImmersive,
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 32.dp)
+                            .padding(bottom = bottomPadding + 16.dp),
+                        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Icon(Icons.Rounded.Refresh, null, modifier = Modifier.size(18.dp))
-                        androidx.compose.foundation.layout.Spacer(Modifier.size(6.dp))
-                        Text("New", fontWeight = FontWeight.SemiBold, maxLines = 1)
+                        FilledTonalIconButton(
+                            onClick = {
+                                downloadImage(context, imageUrl)
+                                Toast.makeText(context, "Download started", Toast.LENGTH_SHORT).show()
+                            },
+                            modifier = Modifier.size(52.dp),
+                            shape = RoundedCornerShape(14.dp),
+                            colors = IconButtonDefaults.filledTonalIconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            ),
+                        ) {
+                            Icon(Icons.Rounded.Download, contentDescription = "Download")
+                        }
+
+                        FilledTonalIconButton(
+                            onClick = {
+                                if (!isSettingWallpaper) {
+                                    isSettingWallpaper = true
+                                    scope.launch {
+                                        try {
+                                            setAsWallpaper(context, imageUrl)
+                                            Toast.makeText(context, "Wallpaper set!", Toast.LENGTH_SHORT).show()
+                                        } catch (e: Exception) {
+                                            Toast.makeText(context, "Failed to set wallpaper", Toast.LENGTH_SHORT).show()
+                                        } finally {
+                                            isSettingWallpaper = false
+                                        }
+                                    }
+                                }
+                            },
+                            modifier = Modifier.size(52.dp),
+                            shape = RoundedCornerShape(14.dp),
+                            colors = IconButtonDefaults.filledTonalIconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            ),
+                            enabled = !isSettingWallpaper,
+                        ) {
+                            if (isSettingWallpaper) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(22.dp),
+                                    strokeWidth = 2.5.dp,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                )
+                            } else {
+                                Icon(Icons.Rounded.Wallpaper, contentDescription = "Set as wallpaper")
+                            }
+                        }
+
+                        Button(
+                            onClick = onRefresh,
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(52.dp),
+                            shape = RoundedCornerShape(14.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            ),
+                        ) {
+                            Icon(Icons.Rounded.Refresh, null, modifier = Modifier.size(18.dp))
+                            androidx.compose.foundation.layout.Spacer(Modifier.size(6.dp))
+                            Text("New", fontWeight = FontWeight.SemiBold, maxLines = 1)
+                        }
                     }
                 }
             }

@@ -222,6 +222,8 @@ fun MainScreen(
                         onToggleAdultContent = { viewModel.handleEvent(MainEvent.ToggleAdultContent) },
                         isDarkTheme = state.isDarkTheme,
                         onToggleTheme = { viewModel.handleEvent(MainEvent.ToggleTheme) },
+                        coverFillsTopBar = state.coverFillsTopBar,
+                        onToggleCoverLayout = { viewModel.handleEvent(MainEvent.ToggleCoverLayout) },
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(contentPadding),
