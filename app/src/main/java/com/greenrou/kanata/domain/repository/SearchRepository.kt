@@ -1,6 +1,7 @@
 package com.greenrou.kanata.domain.repository
 
+import com.greenrou.kanata.domain.model.VideoSource
+
 interface SearchRepository {
-    suspend fun searchOnYummy(query: String): Result<String>
-    suspend fun searchOnAniwave(query: String): Result<String>
+    suspend fun searchAll(query: String): List<VideoSource>
 }

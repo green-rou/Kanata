@@ -16,19 +16,18 @@ class VideoRepositoryImpl(
 
     override suspend fun getVideoStream(siteUrl: String): Result<String> = withContext(Dispatchers.IO) {
         runCatching {
+            if (isDirectStreamUrl(siteUrl)) return@runCatching siteUrl
+
             val document = Jsoup.connect(siteUrl).userAgent(userAgent).get()
 
             val standardIframe = document
                 .select("iframe[src*=/serial/], iframe[src*=/video/], iframe[src*=kodik]")
                 .firstOrNull()?.attr("src")
-            if (standardIframe != null) {
-                return@runCatching resolveUrl(siteUrl, standardIframe)
-            }
+            if (standardIframe != null) return@runCatching resolveUrl(siteUrl, standardIframe)
 
             val litespeedIframe = document.select("iframe[data-litespeed-src]").firstOrNull()
             if (litespeedIframe != null) {
-                val iframeUrl = litespeedIframe.attr("data-litespeed-src")
-                return@runCatching tryExtractHlsOrReturn(siteUrl, iframeUrl)
+                return@runCatching tryExtractHlsOrReturn(siteUrl, litespeedIframe.attr("data-litespeed-src"))
             }
 
             val videoSrc = document.select("video source, video").firstOrNull()?.attr("src")
@@ -72,8 +71,13 @@ class VideoRepositoryImpl(
             val m3u8 = Regex("""https?://[^\s"']+\.m3u8[^\s"']*""").find(playerDoc.html())?.value
             if (m3u8 != null) return m3u8
 
-            playerUrl // return player page URL as last resort
+            playerUrl
         }.getOrDefault(playerUrl)
+    }
+
+    private fun isDirectStreamUrl(url: String): Boolean {
+        val path = url.substringBefore("?").substringBefore("#").lowercase()
+        return path.endsWith(".m3u8") || path.endsWith(".mp4") || path.endsWith(".mpd")
     }
 
     private fun resolveUrl(base: String, url: String): String = when {
