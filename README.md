@@ -85,7 +85,7 @@ Each feature has its own `State` / `Event` model pair. ViewModels expose `StateF
 | [Mikai](https://mikai.me) | Ukrainian dub | REST API | ✅ Active |
 | [YummyAnime](https://yummyanime.tv) | Russian dub | HTML scraping | ✅ Active |
 | [Aniwave](https://aniwave.dk) | English sub | HTML scraping | ✅ Active |
-| [YouTube](https://youtube.com) | Ukrainian | NewPipe extractor — playlist search | ✅ Active |
+| [YouTube](https://youtube.com) | Various | NewPipe extractor — playlist search | ✅ Active |
 | [Archive.org](https://archive.org) | Various | Public metadata API — direct MP4/MKV | ✅ Active |
 | Kodik | — | Embedded player format resolved by VideoRepository | ✅ Active |
 | ~~[AniTube](https://anitube.in.ua)~~ | ~~Ukrainian dub/sub~~ | ~~HTML scraping~~ | ❌ Disabled (DLE player detection) |
