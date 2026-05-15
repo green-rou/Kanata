@@ -10,12 +10,6 @@ on:
 permissions:
   contents: write
 
-# Required GitHub Secrets for the release job:
-#   KEYSTORE_BASE64   — base64-encoded keystore:  base64 -w 0 your.jks
-#   KEYSTORE_PASSWORD — keystore password
-#   KEY_ALIAS         — key alias inside the keystore
-#   KEY_PASSWORD      — key password
-
 jobs:
   build:
     name: Build debug
@@ -32,6 +26,9 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: gradle
+
+      - name: Install NDK
+        run: ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager "ndk;27.2.12479018"
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
@@ -55,6 +52,9 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
+      - name: Install NDK
+        run: ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager "ndk;27.2.12479018"
+
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
@@ -70,9 +70,7 @@ jobs:
           VERSION_NAME: ${{ github.ref_name }}
 
       - name: Rename APK
-        run: |
-          mv app/build/outputs/apk/release/app-release.apk \
-             Kanata-${{ github.ref_name }}.apk
+        run: mv app/build/outputs/apk/release/app-release.apk Kanata-${{ github.ref_name }}.apk
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

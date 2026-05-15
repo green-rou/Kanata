@@ -15,11 +15,13 @@ android {
         version = release(36)
     }
 
+    ndkVersion = "27.2.12479018"
+
     defaultConfig {
         applicationId = "com.greenrou.kanata"
         minSdk = 28
         targetSdk = 36
-        versionCode = 1
+        versionCode = 2
         versionName = System.getenv("VERSION_NAME")?.removePrefix("v") ?: "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
