@@ -1,5 +1,6 @@
 package com.greenrou.kanata.data.remote.dto
 
+import android.text.Html
 import com.greenrou.kanata.domain.model.Anime
 
 data class AnimeListItemDto(
@@ -36,7 +37,10 @@ fun AnimeDetailDto.toDomain() = Anime(
     type = type,
     imageUrl = imageUrl,
     score = score,
-    synopsis = synopsis,
+    synopsis = synopsis.stripHtml(),
     genres = genres,
     episodes = episodes,
 )
+
+internal fun String.stripHtml(): String =
+    Html.fromHtml(this, Html.FROM_HTML_MODE_COMPACT).toString().trim()

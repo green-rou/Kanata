@@ -75,11 +75,16 @@ fun AnimeDetailsScreen(
                         onClick = { viewModel.handleEvent(AnimeDetailsEvent.ToggleFavorite) }
                     )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent,
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White,
-                ),
+                colors = if (state.coverFillsTopBar) {
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent,
+                        titleContentColor = Color.White,
+                        navigationIconContentColor = Color.White,
+                        actionIconContentColor = Color.White,
+                    )
+                } else {
+                    TopAppBarDefaults.topAppBarColors()
+                },
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -98,6 +103,7 @@ fun AnimeDetailsScreen(
                     onSourceClick = { viewModel.handleEvent(AnimeDetailsEvent.OpenEpisodeList(it)) },
                     topPadding = padding.calculateTopPadding(),
                     bottomPadding = padding.calculateBottomPadding(),
+                    coverFillsTopBar = state.coverFillsTopBar,
                 )
                 state.error != null -> Column(
                     modifier = Modifier

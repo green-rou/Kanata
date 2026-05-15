@@ -8,6 +8,7 @@ sealed interface MainEvent {
     data object SearchClicked : MainEvent
     data object ToggleAdultContent : MainEvent
     data object ToggleTheme : MainEvent
+    data object ToggleCoverLayout : MainEvent
     data class ToggleFavorite(val animeId: Int) : MainEvent
 
     data class NavigateToDetail(val animeId: Int) : MainEvent
