@@ -83,6 +83,8 @@ class VideoRepositoryImpl(
 
     override suspend fun getVideoStream(siteUrl: String): Result<String> = withContext(Dispatchers.IO) {
         runCatching {
+            if (isDirectStreamUrl(siteUrl)) return@runCatching siteUrl
+
             if (isKodikUrl(siteUrl)) {
                 val params = parseQueryParams(siteUrl)
                 val yref = params["yref"] ?: siteUrl
@@ -176,6 +178,11 @@ class VideoRepositoryImpl(
     private fun isKodikUrl(url: String): Boolean {
         val host = runCatching { URL(url).host }.getOrElse { return false }
         return host.contains("kodik") || host.contains("kodikplayer")
+    }
+
+    private fun isDirectStreamUrl(url: String): Boolean {
+        val path = url.substringBefore("?").substringBefore("#").lowercase()
+        return path.endsWith(".m3u8") || path.endsWith(".mp4") || path.endsWith(".mpd")
     }
 
     private fun extractKodikStream(referer: String, playerUrl: String): String {
