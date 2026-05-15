@@ -66,6 +66,7 @@
 
 # ── Jsoup ─────────────────────────────────────────────────────────────────────
 -keep class org.jsoup.** { *; }
+-dontwarn com.google.re2j.**
 
 # ── Media3 / ExoPlayer ────────────────────────────────────────────────────────
 -keep class androidx.media3.** { *; }
@@ -93,6 +94,9 @@
 -dontwarn org.schabi.newpipe.extractor.**
 -keep class com.grack.nanojson.** { *; }
 -dontwarn com.grack.nanojson.**
+-dontwarn org.mozilla.javascript.**
+-dontwarn java.beans.**
+-dontwarn javax.script.**
 
 # ── App domain / data models ──────────────────────────────────────────────────
 -keep class com.greenrou.kanata.domain.model.** { *; }
