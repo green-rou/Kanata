@@ -1,5 +1,8 @@
 package com.greenrou.kanata.features.random
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +16,9 @@ import androidx.compose.material.icons.rounded.Image
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,6 +41,7 @@ fun RandomScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val pagerState = rememberPagerState(pageCount = { 2 })
     val scope = rememberCoroutineScope()
+    var isImmersive by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
@@ -67,22 +74,31 @@ fun RandomScreen(
                     error = state.imageError,
                     onRefresh = { viewModel.handleEvent(RandomEvent.RefreshImage) },
                     bottomPadding = contentPadding.calculateBottomPadding(),
+                    isImmersive = isImmersive,
+                    onImmersiveChange = { isImmersive = it },
                 )
             }
         }
 
-        PillTabRow(
-            currentPage = pagerState.currentPage,
-            pageOffset = pagerState.currentPageOffsetFraction,
-            tabs = listOf(
-                Icons.Rounded.AutoAwesome to "Random Anime",
-                Icons.Rounded.Image to "Wallpaper",
-            ),
-            onTabClick = { scope.launch { pagerState.animateScrollToPage(it) } },
+        AnimatedVisibility(
+            visible = !isImmersive,
+            enter = fadeIn(),
+            exit = fadeOut(),
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .fillMaxWidth()
                 .statusBarsPadding(),
-        )
+        ) {
+            PillTabRow(
+                currentPage = pagerState.currentPage,
+                pageOffset = pagerState.currentPageOffsetFraction,
+                tabs = listOf(
+                    Icons.Rounded.AutoAwesome to "Random Anime",
+                    Icons.Rounded.Image to "Wallpaper",
+                ),
+                onTabClick = { scope.launch { pagerState.animateScrollToPage(it) } },
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
     }
 }

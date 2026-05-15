@@ -10,4 +10,5 @@ data class AnimeDetailsState(
     val videoSources: List<VideoSource> = emptyList(),
     val isSearching: Boolean = false,
     val error: String? = null,
+    val coverFillsTopBar: Boolean = true,
 )

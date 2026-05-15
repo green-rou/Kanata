@@ -5,6 +5,7 @@ import com.apollographql.apollo.api.Optional
 import com.greenrou.kanata.data.remote.anilist.GetAnimeByMoodQuery
 import com.greenrou.kanata.data.remote.anilist.GetAnimeDetailQuery
 import com.greenrou.kanata.data.remote.anilist.GetAnimeListQuery
+import com.greenrou.kanata.data.remote.dto.stripHtml
 import com.greenrou.kanata.domain.model.Anime
 import com.greenrou.kanata.domain.model.AnimeListPage
 import com.greenrou.kanata.domain.repository.AniListRepository
@@ -98,7 +99,7 @@ class AniListRepositoryImpl(
         type = format?.rawValue ?: "",
         imageUrl = coverImage?.large ?: "",
         score = (averageScore ?: 0) / 10.0,
-        synopsis = description ?: "",
+        synopsis = description.orEmpty().stripHtml(),
         genres = genres?.filterNotNull() ?: emptyList(),
         episodes = episodes ?: 0,
     )

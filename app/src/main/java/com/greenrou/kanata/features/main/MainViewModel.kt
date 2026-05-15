@@ -61,13 +61,14 @@ class MainViewModel(
     private fun observeSettings() {
         combine(
             settingsManager.showAdultContent,
-            settingsManager.isDarkTheme
-        ) { showAdult, isDark ->
+            settingsManager.isDarkTheme,
+            settingsManager.coverFillsTopBar,
+        ) { showAdult, isDark, coverFills ->
             if (_state.value.showAdultContent != showAdult) {
                 _state.update { it.copy(showAdultContent = showAdult, animeList = emptyList()) }
                 loadAnime(showAdultContent = showAdult)
             }
-            _state.update { it.copy(isDarkTheme = isDark) }
+            _state.update { it.copy(isDarkTheme = isDark, coverFillsTopBar = coverFills) }
         }.launchIn(viewModelScope)
     }
 
@@ -96,6 +97,11 @@ class MainViewModel(
             MainEvent.ToggleTheme -> {
                 viewModelScope.launch {
                     settingsManager.setDarkTheme(!_state.value.isDarkTheme)
+                }
+            }
+            MainEvent.ToggleCoverLayout -> {
+                viewModelScope.launch {
+                    settingsManager.setCoverFillsTopBar(!_state.value.coverFillsTopBar)
                 }
             }
             is MainEvent.ToggleFavorite -> toggleFavorite(event.animeId)

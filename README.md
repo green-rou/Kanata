@@ -12,6 +12,7 @@ An Android app for browsing anime information and streaming episodes from third-
 ![Architecture](https://img.shields.io/badge/Architecture-MVVM%20%2B%20Clean%20Arch-orange)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 [![Contributing](https://img.shields.io/badge/PRs-welcome-brightgreen)](CONTRIBUTING.md)
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/C0C31ZLH6K)
 
 ---
 
@@ -20,8 +21,8 @@ An Android app for browsing anime information and streaming episodes from third-
 - **Anime catalogue** — browsable grid powered by the [Anime News Network](https://www.animenewsnetwork.com/encyclopedia/) encyclopedia API
 - **Detail screen** — title, score, genres, synopsis, episode count, cover image
 - **Favourites** — persist liked anime locally with Room
-- **External search** — automatically finds the anime on YummyAnime and Aniwave after you open it
-- **Available streams** — clickable source chips (YummyAnime / Aniwave) appear when found
+- **External search** — automatically finds the anime on multiple sources after you open it
+- **Available streams** — clickable source chips (YummyAnime / Aniwave / Mikai) appear when found
 - **Episode list** — browse all episodes from the selected source
 - **Video player** — built-in HLS player via Media3 / ExoPlayer, auto-locks to landscape
 
@@ -36,10 +37,12 @@ app/
 │   └── network/        # OkHttp + Retrofit setup
 ├── data/
 │   ├── local/          # Room DB (favourites)
+│   ├── parsers/        # Per-site parsers (search + episode extraction)
 │   ├── remote/         # Retrofit API interfaces + DTO
-│   └── repository/     # Repository implementations + web scraping (Jsoup)
+│   └── repository/     # Repository implementations
 ├── domain/
 │   ├── model/          # Pure Kotlin models
+│   ├── parser/         # SiteParser interface
 │   ├── repository/     # Repository interfaces
 │   └── usecase/        # Single-responsibility use cases
 ├── features/
@@ -76,14 +79,16 @@ Each feature has its own `State` / `Event` model pair. ViewModels expose `StateF
 
 ## Data Sources
 
-| Source | Purpose |
-|---|---|
-| [Anime News Network Encyclopedia](https://www.animenewsnetwork.com/encyclopedia/) | Anime list & metadata (XML API) |
-| [YummyAnime](https://yummyanime.tv) | Russian-dubbed episode streams |
-| [Aniwave](https://aniwave.dk) | English-subbed episode streams |
+| Source | Language | Method |
+|---|---|---|
+| [Anime News Network Encyclopedia](https://www.animenewsnetwork.com/encyclopedia/) | — | XML API — anime list & metadata |
+| [Mikai](https://mikai.me) | Ukrainian dub | REST API |
+| [YummyAnime](https://yummyanime.tv) | Russian dub | HTML scraping |
+| [Aniwave](https://aniwave.dk) | English sub | HTML scraping |
+| [AniTube](https://anitube.in.ua) | Ukrainian dub/sub | HTML scraping *(experimental)* |
+| Kodik | — | Embedded player format resolved by VideoRepository |
 
-> **Note:** Streaming is achieved via HTML scraping of publicly accessible pages.  
-> No credentials or private APIs are used.
+> **Note:** Streaming sources are publicly accessible. No credentials or private APIs are used.
 
 ---
 

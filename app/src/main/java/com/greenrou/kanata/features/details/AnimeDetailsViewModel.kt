@@ -2,6 +2,7 @@ package com.greenrou.kanata.features.details
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.greenrou.kanata.domain.repository.SettingsManager
 import com.greenrou.kanata.domain.usecase.AddFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.GetAnimeByIdUseCase
 import com.greenrou.kanata.domain.usecase.GetVideoStreamUseCase
@@ -13,6 +14,8 @@ import com.greenrou.kanata.features.details.model.AnimeDetailsState
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -24,6 +27,7 @@ class AnimeDetailsViewModel(
     private val removeFavorite: RemoveFavoriteUseCase,
     private val searchExternalAnime: SearchExternalAnimeUseCase,
     private val getVideoStreamUseCase: GetVideoStreamUseCase,
+    private val settingsManager: SettingsManager,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AnimeDetailsState())
@@ -33,6 +37,12 @@ class AnimeDetailsViewModel(
 
     private val _events = Channel<AnimeDetailsEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
+
+    init {
+        settingsManager.coverFillsTopBar
+            .onEach { enabled -> _state.update { it.copy(coverFillsTopBar = enabled) } }
+            .launchIn(viewModelScope)
+    }
 
     fun handleEvent(event: AnimeDetailsEvent) {
         when (event) {

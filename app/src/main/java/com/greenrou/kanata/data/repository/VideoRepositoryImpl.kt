@@ -1,10 +1,17 @@
 package com.greenrou.kanata.data.repository
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Base64
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import com.greenrou.kanata.domain.repository.VideoRepository
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import okhttp3.Dns
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
@@ -12,6 +19,9 @@ import okhttp3.Request
 import org.json.JSONObject
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import org.schabi.newpipe.extractor.ServiceList
+import org.schabi.newpipe.extractor.stream.StreamInfo
+import org.schabi.newpipe.extractor.stream.VideoStream
 import java.net.InetAddress
 import java.net.URL
 import java.net.URLDecoder
@@ -85,6 +95,12 @@ class VideoRepositoryImpl(
         runCatching {
             if (isDirectStreamUrl(siteUrl)) return@runCatching siteUrl
 
+            if (isYouTubeUrl(siteUrl)) return@runCatching extractYouTubeStream(siteUrl)
+
+            if (isHanimeUrl(siteUrl)) return@runCatching extractHanimeStream(siteUrl)
+
+            if (isArchiveOrgDetailsUrl(siteUrl)) return@runCatching extractArchiveOrgStream(siteUrl)
+
             if (isKodikUrl(siteUrl)) {
                 val params = parseQueryParams(siteUrl)
                 val yref = params["yref"] ?: siteUrl
@@ -108,6 +124,9 @@ class VideoRepositoryImpl(
 
             val videoSrc = document.select("video source, video").firstOrNull()?.attr("src")
             if (videoSrc != null) return@runCatching videoSrc
+
+            val inlineStream = Regex("""https?://[^\s"']+\.(m3u8|mp4)[^\s"']*""").find(document.html())?.value
+            if (inlineStream != null) return@runCatching inlineStream
 
             val xfplayer = document
                 .select(".tabs-block__content:not(.d-none):not(.hidden) .xfplayer[data-params]")
@@ -180,9 +199,244 @@ class VideoRepositoryImpl(
         return host.contains("kodik") || host.contains("kodikplayer")
     }
 
+    private fun isYouTubeUrl(url: String): Boolean {
+        val host = runCatching { URL(url).host }.getOrElse { return false }
+        return "youtube" in host || "youtu.be" in host
+    }
+
+    private fun extractYouTubeStream(videoUrl: String): String {
+        val info = runCatching { StreamInfo.getInfo(ServiceList.YouTube, videoUrl) }
+            .getOrThrow()
+
+        val best: VideoStream? =
+            info.videoStreams
+                .filter { it.content?.isNotBlank() == true }
+                .maxByOrNull { parseYouTubeResolution(it.resolution) }
+                ?: info.videoOnlyStreams
+                    .filter { it.content?.isNotBlank() == true }
+                    .maxByOrNull { parseYouTubeResolution(it.resolution) }
+
+        return best?.content ?: error("No video streams found for: $videoUrl")
+    }
+
+    private fun parseYouTubeResolution(resolution: String?): Int =
+        resolution?.filter { it.isDigit() }?.toIntOrNull() ?: 0
+
+    private fun isHanimeUrl(url: String) =
+        runCatching { URL(url).host }.getOrDefault("").let { "hanime.tv" in it }
+
+    private fun isArchiveOrgDetailsUrl(url: String) = "archive.org/details/" in url
+
+    private fun extractArchiveOrgStream(detailsUrl: String): String {
+        val identifier = detailsUrl.trimEnd('/').substringAfterLast("/")
+
+        val response = Jsoup.connect("https://archive.org/metadata/$identifier")
+            .userAgent(userAgent)
+            .ignoreContentType(true)
+            .execute()
+
+        val files = JSONObject(response.body()).optJSONArray("files")
+            ?: error("No files in Archive.org metadata for $identifier")
+
+        for (i in 0 until files.length()) {
+            val file = files.getJSONObject(i)
+            val name = file.optString("name")
+            val nameLower = name.lowercase()
+            if (nameLower.endsWith(".mp4") && ARCHIVE_DERIVATIVE_SUFFIXES.none { nameLower.contains(it) }) {
+                val streamUrl = "https://archive.org/download/$identifier/$name"
+                return streamUrl
+            }
+        }
+        for (i in 0 until files.length()) {
+            val name = files.getJSONObject(i).optString("name")
+            if (name.lowercase().endsWith(".mp4")) {
+                val streamUrl = "https://archive.org/download/$identifier/$name"
+                return streamUrl
+            }
+        }
+        error("No MP4 found in Archive.org item $identifier")
+    }
+
+    private suspend fun extractHanimeStream(pageUrl: String): String {
+        val cleanUrl = pageUrl.substringBefore("?")
+        val slug = cleanUrl.trimEnd('/').substringAfterLast("/")
+        val hid = parseQueryParams(pageUrl)["hid"]
+
+        val apiCandidates = buildList {
+            if (hid != null) {
+                add("https://cached.freeanimehentai.net/api/v8/hentai-video?id=$hid")
+                add("https://hanime.tv/api/v8/hentai-video?id=$hid")
+            }
+            add("https://cached.freeanimehentai.net/api/v8/hentai-video?slug=$slug")
+            add("https://hanime.tv/api/v8/hentai-video?slug=$slug")
+        }
+        for (apiUrl in apiCandidates) {
+            runCatching {
+                val r = Jsoup.connect(apiUrl)
+                    .userAgent(userAgent)
+                    .header("Referer", "https://hanime.tv/")
+                    .ignoreContentType(true).execute()
+                if (r.statusCode() == 200) {
+                    hanimeManifestStream(JSONObject(r.body()), slug)?.let { return it }
+                }
+            }
+        }
+
+        runCatching {
+            val doc = Jsoup.connect(cleanUrl).userAgent(userAgent).get()
+            val nextScript = doc.getElementById("__NEXT_DATA__")
+            if (nextScript != null) {
+                val pageProps = JSONObject(nextScript.data())
+                    .optJSONObject("props")?.optJSONObject("pageProps")
+                val videoObj = pageProps?.optJSONObject("video") ?: pageProps?.optJSONObject("hentai_video")
+                if (videoObj != null) {
+                    hanimeManifestStream(videoObj, slug)?.let { return it }
+                }
+            }
+            Regex("""https?://[^\s"'\\]+\.(m3u8|mp4)[^\s"'\\]*""").find(doc.html())?.value
+                ?.let { return it }
+        }
+
+        return extractHanimeStreamViaWebView(cleanUrl)
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    private suspend fun extractHanimeStreamViaWebView(pageUrl: String): String {
+        val deferred = CompletableDeferred<String>()
+        var webViewRef: WebView? = null
+
+        withContext(Dispatchers.Main) {
+            val webView = WebView(context)
+            webViewRef = webView
+            with(webView.settings) {
+                javaScriptEnabled = true
+                domStorageEnabled = true
+                userAgentString = "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+                mediaPlaybackRequiresUserGesture = false
+                mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+            }
+
+            val slug = pageUrl.trimEnd('/').substringAfterLast("/")
+            webView.webViewClient = object : WebViewClient() {
+                override fun onPageStarted(view: WebView, url: String, favicon: android.graphics.Bitmap?) {
+                    view.evaluateJavascript(
+                        """
+                        Object.defineProperty(navigator,'webdriver',{get:()=>undefined});
+                        Object.defineProperty(navigator,'plugins',{get:()=>({length:5})});
+                        Object.defineProperty(navigator,'languages',{get:()=>['en-US','en']});
+                        """.trimIndent(), null
+                    )
+                }
+
+                override fun shouldInterceptRequest(
+                    view: WebView,
+                    request: WebResourceRequest,
+                ): WebResourceResponse? {
+                    val url = request.url.toString()
+                    if (deferred.isCompleted) return null
+
+                    if ("freeanimehentai.net" in url && "hentai-video" in url) {
+                        Thread {
+                            runCatching {
+                                val body = Jsoup.connect(url)
+                                    .userAgent(userAgent)
+                                    .header("Referer", "https://hanime.tv/")
+                                    .ignoreContentType(true).execute().body()
+                                hanimeManifestStream(JSONObject(body), slug)?.let {
+                                    deferred.complete(it)
+                                }
+                            }
+                        }.start()
+                    }
+
+                    val isStream = ".m3u8" in url
+                        || (".mp4" in url && ("hanime" in url || "cdn" in url))
+                        || ("hanime-cdn.com/videos" in url)
+                    if (isStream) {
+                        deferred.complete(url)
+                    }
+                    return null
+                }
+
+                override fun onPageFinished(view: WebView, url: String) {
+                    if (deferred.isCompleted) return
+
+                    val cm = android.webkit.CookieManager.getInstance()
+                    val cookieHanime = cm.getCookie("https://hanime.tv") ?: ""
+                    val cookieCdn = cm.getCookie("https://cached.freeanimehentai.net") ?: ""
+                    val allCookies = listOf(cookieHanime, cookieCdn).filter { it.isNotBlank() }.joinToString("; ")
+
+                    val hid = parseQueryParams(pageUrl)["hid"]
+                    val apiUrls = buildList {
+                        if (hid != null) add("https://cached.freeanimehentai.net/api/v8/hentai-video?id=$hid")
+                        add("https://cached.freeanimehentai.net/api/v8/hentai-video?slug=$slug")
+                    }
+                    Thread {
+                        for (apiUrl in apiUrls) {
+                            if (deferred.isCompleted) break
+                            runCatching {
+                                val body = Jsoup.connect(apiUrl)
+                                    .userAgent(userAgent)
+                                    .header("Referer", "https://hanime.tv/")
+                                    .header("Cookie", allCookies)
+                                    .ignoreContentType(true).execute().body()
+                                hanimeManifestStream(JSONObject(body), slug)?.let {
+                                    deferred.complete(it)
+                                }
+                            }
+                        }
+
+                        if (!deferred.isCompleted) {
+                            Thread.sleep(5_000)
+                            view.post {
+                                view.evaluateJavascript(
+                                    """(function(){var v=document.querySelector('video');if(!v)return'no-video';if(v.currentSrc&&v.currentSrc.length>10)return v.currentSrc;return'empty';})()""",
+                                ) { result ->
+                                    val src = result?.trim('"')?.takeIf { it.length > 10 && it != "no-video" && it != "empty" }
+                                    if (src != null && !deferred.isCompleted) {
+                                        deferred.complete(src)
+                                    }
+                                }
+                            }
+                        }
+                    }.start()
+                }
+            }
+
+            webView.webChromeClient = android.webkit.WebChromeClient()
+
+            webView.loadUrl(pageUrl)
+        }
+
+        val stream = withTimeoutOrNull(90_000) { deferred.await() }
+
+        withContext(Dispatchers.Main) {
+            webViewRef?.destroy()
+        }
+
+        return stream ?: error("WebView timeout: no stream URL intercepted for $pageUrl")
+    }
+
+    private fun hanimeManifestStream(json: JSONObject, slug: String): String? {
+        val servers = json.optJSONObject("videos_manifest")?.optJSONArray("servers")
+        if (servers == null) {
+            return null
+        }
+        var bestUrl = ""; var bestHeight = 0
+        for (i in 0 until servers.length()) {
+            val streams = servers.getJSONObject(i).optJSONArray("streams") ?: continue
+            for (j in 0 until streams.length()) {
+                val s = streams.getJSONObject(j)
+                val url = s.optString("url"); val h = s.optInt("height", 0)
+                if (url.isNotBlank() && h > bestHeight) { bestHeight = h; bestUrl = url }
+            }
+        }
+        return bestUrl.ifBlank { null }
+    }
+
     private fun isDirectStreamUrl(url: String): Boolean {
         val path = url.substringBefore("?").substringBefore("#").lowercase()
-        return path.endsWith(".m3u8") || path.endsWith(".mp4") || path.endsWith(".mpd")
+        return path.endsWith(".m3u8") || path.endsWith(".mp4") || path.endsWith(".mpd") || path.endsWith(".mkv")
     }
 
     private fun extractKodikStream(referer: String, playerUrl: String): String {
@@ -367,5 +621,9 @@ class VideoRepositoryImpl(
         url.startsWith("//") -> "https:$url"
         !url.startsWith("http") -> URL(base).run { "$protocol://$host$url" }
         else -> url
+    }
+
+    companion object {
+        private val ARCHIVE_DERIVATIVE_SUFFIXES = listOf("_512kb", "_128kb", "_256kb", "_64kb", "_h264", "_hq", "_lq")
     }
 }

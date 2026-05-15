@@ -1,8 +1,10 @@
 package com.greenrou.kanata.core.di
 
 import com.greenrou.kanata.data.parsers.AniwaveSiteParser
-// import com.greenrou.kanata.data.parsers.AnitubeSiteParser
+import com.greenrou.kanata.data.parsers.ArchiveOrgSiteParser
+import com.greenrou.kanata.data.parsers.MikaiSiteParser
 import com.greenrou.kanata.data.parsers.YummyAnimeSiteParser
+import com.greenrou.kanata.data.parsers.YouTubeSiteParser
 import com.greenrou.kanata.data.repository.AnimeRepositoryImpl
 import com.greenrou.kanata.data.repository.EpisodeListRepositoryImpl
 import com.greenrou.kanata.data.repository.RandomRepositoryImpl
@@ -23,14 +25,15 @@ val repositoryModule = module {
         listOf(
             YummyAnimeSiteParser(),
             AniwaveSiteParser(),
-            // TODO: Re-enable once AnitubeSiteParser can reliably find the DLE player and extract episodes
-            // AnitubeSiteParser(),
+            MikaiSiteParser(),
+            YouTubeSiteParser(),
+            ArchiveOrgSiteParser(),
         )
     }
     single<AnimeRepository> { AnimeRepositoryImpl(get()) }
     single<SettingsManager> { SettingsManagerImpl(get()) }
     single<RandomRepository> { RandomRepositoryImpl(get(), get()) }
     single<VideoRepository> { VideoRepositoryImpl(get()) }
-    single<SearchRepository> { SearchRepositoryImpl(get()) }
+    single<SearchRepository> { SearchRepositoryImpl(get(), get()) }
     single<EpisodeListRepository> { EpisodeListRepositoryImpl(get()) }
 }

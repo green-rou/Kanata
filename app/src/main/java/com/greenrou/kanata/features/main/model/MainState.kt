@@ -12,4 +12,5 @@ data class MainState(
     val error: String? = null,
     val showAdultContent: Boolean = false,
     val isDarkTheme: Boolean = false,
+    val coverFillsTopBar: Boolean = true,
 )

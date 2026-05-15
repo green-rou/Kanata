@@ -88,6 +88,12 @@
 -keep class * extends android.webkit.WebViewClient { *; }
 -keep class * extends android.webkit.WebChromeClient { *; }
 
+# ── NewPipe Extractor ─────────────────────────────────────────────────────────
+-keep class org.schabi.newpipe.extractor.** { *; }
+-dontwarn org.schabi.newpipe.extractor.**
+-keep class com.grack.nanojson.** { *; }
+-dontwarn com.grack.nanojson.**
+
 # ── App domain / data models ──────────────────────────────────────────────────
 -keep class com.greenrou.kanata.domain.model.** { *; }
 -keep class com.greenrou.kanata.data.local.** { *; }
