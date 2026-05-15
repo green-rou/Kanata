@@ -45,9 +45,12 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import com.greenrou.kanata.features.player.content.EpisodeSideButtons
+import com.greenrou.kanata.features.player.content.PlayerErrorContent
 import com.greenrou.kanata.features.player.content.PlayerStatusOverlay
 import com.greenrou.kanata.features.player.model.PlayerEvent
 import org.koin.androidx.compose.koinViewModel
@@ -81,6 +84,10 @@ fun PlayerScreen(
         }
     }
 
+    LaunchedEffect(state.error) {
+        if (state.error != null) isFullscreen = false
+    }
+
     LaunchedEffect(isFullscreen) {
         activity?.let { act ->
             act.requestedOrientation = if (isFullscreen)
@@ -111,7 +118,20 @@ fun PlayerScreen(
     }
 
     val exoPlayer = remember { ExoPlayer.Builder(context).build().apply { playWhenReady = true } }
-    DisposableEffect(exoPlayer) { onDispose { exoPlayer.release() } }
+    DisposableEffect(exoPlayer) {
+        val listener = object : Player.Listener {
+            override fun onPlayerError(error: PlaybackException) {
+                viewModel.handleEvent(
+                    PlayerEvent.PlaybackError(error.cause?.message ?: error.message ?: "Playback failed")
+                )
+            }
+        }
+        exoPlayer.addListener(listener)
+        onDispose {
+            exoPlayer.removeListener(listener)
+            exoPlayer.release()
+        }
+    }
 
     LaunchedEffect(state.streamUrl) {
         state.streamUrl?.let { url ->
@@ -199,7 +219,7 @@ fun PlayerScreen(
                 }
             }
 
-            PlayerStatusOverlay(isLoading = state.isLoading, error = state.error)
+            PlayerStatusOverlay(isLoading = state.isLoading, error = null)
         }
     } else {
         Scaffold(
@@ -212,8 +232,10 @@ fun PlayerScreen(
                         }
                     },
                     actions = {
-                        IconButton(onClick = { isFullscreen = true }) {
-                            Icon(Icons.Filled.Fullscreen, contentDescription = "Fullscreen")
+                        if (state.error == null) {
+                            IconButton(onClick = { isFullscreen = true }) {
+                                Icon(Icons.Filled.Fullscreen, contentDescription = "Fullscreen")
+                            }
                         }
                     },
                 )
@@ -224,20 +246,28 @@ fun PlayerScreen(
                     .fillMaxSize()
                     .padding(padding)
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(16f / 9f)
-                        .background(Color.Black),
-                ) {
-                    AndroidView(factory = playerFactory, modifier = Modifier.fillMaxSize())
-                    EpisodeSideButtons(
-                        state = state,
-                        controlsVisible = controlsVisible,
-                        onPrevious = { viewModel.handleEvent(PlayerEvent.PreviousEpisode) },
-                        onNext = { viewModel.handleEvent(PlayerEvent.NextEpisode) },
+                if (state.error != null) {
+                    PlayerErrorContent(
+                        error = state.error!!,
+                        onRetry = { viewModel.handleEvent(PlayerEvent.Retry) },
+                        modifier = Modifier.fillMaxSize(),
                     )
-                    PlayerStatusOverlay(isLoading = state.isLoading, error = state.error)
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(16f / 9f)
+                            .background(Color.Black),
+                    ) {
+                        AndroidView(factory = playerFactory, modifier = Modifier.fillMaxSize())
+                        EpisodeSideButtons(
+                            state = state,
+                            controlsVisible = controlsVisible,
+                            onPrevious = { viewModel.handleEvent(PlayerEvent.PreviousEpisode) },
+                            onNext = { viewModel.handleEvent(PlayerEvent.NextEpisode) },
+                        )
+                        PlayerStatusOverlay(isLoading = state.isLoading, error = null)
+                    }
                 }
             }
         }

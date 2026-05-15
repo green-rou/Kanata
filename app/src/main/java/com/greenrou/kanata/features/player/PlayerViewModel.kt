@@ -1,5 +1,6 @@
 package com.greenrou.kanata.features.player
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.greenrou.kanata.domain.usecase.GetVideoStreamUseCase
@@ -47,6 +48,16 @@ class PlayerViewModel(
             }
             PlayerEvent.PreviousEpisode -> previousEpisode()
             PlayerEvent.NextEpisode -> nextEpisode()
+            PlayerEvent.Retry -> loadStream()
+            is PlayerEvent.PlaybackError -> {
+                Log.e("Kanata:Player", "ExoPlayer error: ${event.message} | streamUrl=${_state.value.streamUrl}")
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = "${event.message}\n\nURL: ${it.streamUrl ?: "unknown"}",
+                    )
+                }
+            }
             PlayerEvent.NavigateBack -> Unit
         }
     }
@@ -79,14 +90,17 @@ class PlayerViewModel(
 
     private fun loadStream() {
         val url = episodeUrls.getOrNull(currentIndex) ?: return
+        Log.d("Kanata:Player", "Loading episode [$currentIndex]: $url")
         loadJob?.cancel()
         loadJob = viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
             getVideoStream(url)
                 .onSuccess { streamUrl ->
+                    Log.d("Kanata:Player", "Stream URL: $streamUrl")
                     _state.update { it.copy(isLoading = false, streamUrl = streamUrl) }
                 }
                 .onFailure { e ->
+                    Log.e("Kanata:Player", "Failed to get stream for $url", e)
                     _state.update { it.copy(isLoading = false, error = e.message) }
                 }
         }

@@ -106,6 +106,7 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
 
     implementation(libs.jsoup)
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.ffmpeg.android)
     implementation(libs.media3.exoplayer)
     implementation(libs.media3.exoplayer.hls)
