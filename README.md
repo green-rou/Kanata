@@ -1,5 +1,9 @@
 # Kanata
 
+<p align="center">
+  <img src="AppIcon.png" width="120" alt="Kanata icon" />
+</p>
+
 An Android app for browsing anime information and streaming episodes from third-party sources.
 
 ![Min SDK](https://img.shields.io/badge/Min%20SDK-28%20(Android%209)-brightgreen)
