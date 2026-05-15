@@ -1,7 +1,7 @@
 # Kanata
 
 <p align="center">
-  <img src="AppIcon.png" width="600" alt="Kanata icon" />
+  <img src="AppIcon.png" width="120" alt="Kanata icon" />
 </p>
 
 An Android app for browsing anime information and streaming episodes from third-party sources.
@@ -22,7 +22,7 @@ An Android app for browsing anime information and streaming episodes from third-
 - **Detail screen** — title, score, genres, synopsis, episode count, cover image
 - **Favourites** — persist liked anime locally with Room
 - **External search** — automatically finds the anime on multiple sources after you open it
-- **Available streams** — clickable source chips (YummyAnime / Aniwave / Mikai) appear when found
+- **Available streams** — clickable source chips (YummyAnime / Aniwave / Mikai / YouTube / Archive.org) appear when found
 - **Episode list** — browse all episodes from the selected source
 - **Video player** — built-in HLS player via Media3 / ExoPlayer, auto-locks to landscape
 
@@ -79,16 +79,19 @@ Each feature has its own `State` / `Event` model pair. ViewModels expose `StateF
 
 ## Data Sources
 
-| Source | Language | Method |
-|---|---|---|
-| [Anime News Network Encyclopedia](https://www.animenewsnetwork.com/encyclopedia/) | — | XML API — anime list & metadata |
-| [Mikai](https://mikai.me) | Ukrainian dub | REST API |
-| [YummyAnime](https://yummyanime.tv) | Russian dub | HTML scraping |
-| [Aniwave](https://aniwave.dk) | English sub | HTML scraping |
-| [AniTube](https://anitube.in.ua) | Ukrainian dub/sub | HTML scraping *(experimental)* |
-| Kodik | — | Embedded player format resolved by VideoRepository |
+| Source | Language | Method | Status |
+|---|---|---|---|
+| [Anime News Network Encyclopedia](https://www.animenewsnetwork.com/encyclopedia/) | — | XML API — anime list & metadata | ✅ Active |
+| [Mikai](https://mikai.me) | Ukrainian dub | REST API | ✅ Active |
+| [YummyAnime](https://yummyanime.tv) | Russian dub | HTML scraping | ✅ Active |
+| [Aniwave](https://aniwave.dk) | English sub | HTML scraping | ✅ Active |
+| [YouTube](https://youtube.com) | Ukrainian | NewPipe extractor — playlist search | ✅ Active |
+| [Archive.org](https://archive.org) | Various | Public metadata API — direct MP4/MKV | ✅ Active |
+| Kodik | — | Embedded player format resolved by VideoRepository | ✅ Active |
+| ~~[AniTube](https://anitube.in.ua)~~ | ~~Ukrainian dub/sub~~ | ~~HTML scraping~~ | ❌ Disabled (DLE player detection) |
+| ~~[Hanime.tv](https://hanime.tv)~~ | ~~Japanese~~ | ~~WebView + API~~ | ❌ Disabled (WebView detection blocks stream) |
 
-> **Note:** Streaming sources are publicly accessible. No credentials or private APIs are used.
+> **Note:** All active streaming sources are publicly accessible. No credentials or private APIs are used.
 
 ---
 
