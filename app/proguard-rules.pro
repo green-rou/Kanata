@@ -1,21 +1,94 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# ── General ───────────────────────────────────────────────────────────────────
+-keepattributes *Annotation*, InnerClasses, Signature, EnclosingMethod
+-keepattributes SourceFile, LineNumberTable
+-renamesourcefileattribute SourceFile
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# ── Kotlin ────────────────────────────────────────────────────────────────────
+-keep class kotlin.Metadata { *; }
+-dontwarn kotlin.**
+-keepclassmembers class **$WhenMappings { <fields>; }
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# ── Coroutines ────────────────────────────────────────────────────────────────
+-keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
+-keepnames class kotlinx.coroutines.CoroutineExceptionHandler {}
+-keepclassmembers class kotlinx.coroutines.** { volatile <fields>; }
+-dontwarn kotlinx.coroutines.**
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# ── Kotlinx Serialization ─────────────────────────────────────────────────────
+-keepclassmembers class kotlinx.serialization.json.** { *** Companion; }
+-keepclasseswithmembers class kotlinx.serialization.json.** {
+    kotlinx.serialization.KSerializer serializer(...);
+}
+-keep,includedescriptorclasses class com.greenrou.kanata.**$$serializer { *; }
+-keepclassmembers class com.greenrou.kanata.** {
+    *** Companion;
+}
+-keepclasseswithmembers class com.greenrou.kanata.** {
+    kotlinx.serialization.KSerializer serializer(...);
+}
+-dontwarn kotlinx.serialization.**
+
+# ── OkHttp + Okio ─────────────────────────────────────────────────────────────
+-dontwarn okhttp3.**
+-dontwarn okio.**
+-keep class okhttp3.** { *; }
+-keep interface okhttp3.** { *; }
+-keepnames class okhttp3.internal.publicsuffix.PublicSuffixDatabase
+
+# ── Retrofit ──────────────────────────────────────────────────────────────────
+-keepclassmembernames interface * {
+    @retrofit2.http.* <methods>;
+}
+-keep,allowobfuscation interface * {
+    @retrofit2.http.GET *;
+    @retrofit2.http.POST *;
+    @retrofit2.http.PUT *;
+    @retrofit2.http.DELETE *;
+    @retrofit2.http.HEAD *;
+    @retrofit2.http.OPTIONS *;
+    @retrofit2.http.HTTP *;
+}
+-dontwarn retrofit2.**
+-keep class retrofit2.** { *; }
+-keep interface retrofit2.** { *; }
+
+# ── Apollo GraphQL ────────────────────────────────────────────────────────────
+-keep class com.greenrou.kanata.data.remote.anilist.** { *; }
+-dontwarn com.apollographql.**
+-keep class com.apollographql.** { *; }
+-keep interface com.apollographql.** { *; }
+
+# ── Room ──────────────────────────────────────────────────────────────────────
+-keep @androidx.room.Entity class * { *; }
+-keep @androidx.room.Dao interface * { *; }
+-keep class * extends androidx.room.RoomDatabase { *; }
+-keepclassmembers @androidx.room.Entity class * { *; }
+
+# ── Jsoup ─────────────────────────────────────────────────────────────────────
+-keep class org.jsoup.** { *; }
+
+# ── Media3 / ExoPlayer ────────────────────────────────────────────────────────
+-keep class androidx.media3.** { *; }
+-dontwarn androidx.media3.**
+
+# ── Coil ──────────────────────────────────────────────────────────────────────
+-dontwarn coil.**
+
+# ── DataStore ─────────────────────────────────────────────────────────────────
+-keepclassmembers class * extends com.google.protobuf.GeneratedMessageLite* { <fields>; }
+-dontwarn com.google.protobuf.**
+
+# ── Koin ──────────────────────────────────────────────────────────────────────
+-dontwarn org.koin.**
+
+# ── WebView JS interface ──────────────────────────────────────────────────────
+-keepclassmembers class * {
+    @android.webkit.JavascriptInterface <methods>;
+}
+-keep class * extends android.webkit.WebViewClient { *; }
+-keep class * extends android.webkit.WebChromeClient { *; }
+
+# ── App domain / data models ──────────────────────────────────────────────────
+-keep class com.greenrou.kanata.domain.model.** { *; }
+-keep class com.greenrou.kanata.data.local.** { *; }
+-keep class com.greenrou.kanata.data.remote.dto.** { *; }
