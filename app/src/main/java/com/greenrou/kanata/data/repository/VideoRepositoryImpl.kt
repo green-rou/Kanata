@@ -2,6 +2,7 @@ package com.greenrou.kanata.data.repository
 
 import android.content.Context
 import android.util.Base64
+import android.util.Log
 import com.greenrou.kanata.domain.repository.VideoRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -12,6 +13,9 @@ import okhttp3.Request
 import org.json.JSONObject
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import org.schabi.newpipe.extractor.ServiceList
+import org.schabi.newpipe.extractor.stream.StreamInfo
+import org.schabi.newpipe.extractor.stream.VideoStream
 import java.net.InetAddress
 import java.net.URL
 import java.net.URLDecoder
@@ -84,6 +88,8 @@ class VideoRepositoryImpl(
     override suspend fun getVideoStream(siteUrl: String): Result<String> = withContext(Dispatchers.IO) {
         runCatching {
             if (isDirectStreamUrl(siteUrl)) return@runCatching siteUrl
+
+            if (isYouTubeUrl(siteUrl)) return@runCatching extractYouTubeStream(siteUrl)
 
             if (isKodikUrl(siteUrl)) {
                 val params = parseQueryParams(siteUrl)
@@ -182,6 +188,42 @@ class VideoRepositoryImpl(
         val host = runCatching { URL(url).host }.getOrElse { return false }
         return host.contains("kodik") || host.contains("kodikplayer")
     }
+
+    private fun isYouTubeUrl(url: String): Boolean {
+        val host = runCatching { URL(url).host }.getOrElse { return false }
+        return "youtube" in host || "youtu.be" in host
+    }
+
+    private fun extractYouTubeStream(videoUrl: String): String {
+        Log.d(TAG, "extractYouTubeStream: $videoUrl")
+        val info = runCatching { StreamInfo.getInfo(ServiceList.YouTube, videoUrl) }
+            .onFailure { e -> Log.e(TAG, "extractYouTubeStream: NewPipe failed (${e.javaClass.simpleName}): ${e.message}") }
+            .getOrThrow()
+        Log.d(TAG, "extractYouTubeStream: title='${info.name}'")
+
+        Log.d(TAG, "videoStreams (combined audio+video): ${info.videoStreams.size}")
+        info.videoStreams.forEach { s ->
+            Log.d(TAG, "  [combined] ${s.resolution} format=${s.format?.name} url=${s.content?.take(80)}")
+        }
+        Log.d(TAG, "videoOnlyStreams: ${info.videoOnlyStreams.size}")
+        info.videoOnlyStreams.forEach { s ->
+            Log.d(TAG, "  [video-only] ${s.resolution} format=${s.format?.name} url=${s.content?.take(80)}")
+        }
+
+        val best: VideoStream? =
+            info.videoStreams
+                .filter { it.content?.isNotBlank() == true }
+                .maxByOrNull { parseYouTubeResolution(it.resolution) }
+                ?: info.videoOnlyStreams
+                    .filter { it.content?.isNotBlank() == true }
+                    .maxByOrNull { parseYouTubeResolution(it.resolution) }
+
+        Log.d(TAG, "extractYouTubeStream: selected ${best?.resolution} → ${best?.content?.take(100)}")
+        return best?.content ?: error("No video streams found for: $videoUrl")
+    }
+
+    private fun parseYouTubeResolution(resolution: String?): Int =
+        resolution?.filter { it.isDigit() }?.toIntOrNull() ?: 0
 
     private fun isDirectStreamUrl(url: String): Boolean {
         val path = url.substringBefore("?").substringBefore("#").lowercase()
@@ -370,5 +412,9 @@ class VideoRepositoryImpl(
         url.startsWith("//") -> "https:$url"
         !url.startsWith("http") -> URL(base).run { "$protocol://$host$url" }
         else -> url
+    }
+
+    companion object {
+        private const val TAG = "VideoRepo"
     }
 }
