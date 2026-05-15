@@ -115,6 +115,9 @@ class VideoRepositoryImpl(
             val videoSrc = document.select("video source, video").firstOrNull()?.attr("src")
             if (videoSrc != null) return@runCatching videoSrc
 
+            val inlineStream = Regex("""https?://[^\s"']+\.(m3u8|mp4)[^\s"']*""").find(document.html())?.value
+            if (inlineStream != null) return@runCatching inlineStream
+
             val xfplayer = document
                 .select(".tabs-block__content:not(.d-none):not(.hidden) .xfplayer[data-params]")
                 .firstOrNull() ?: error("No video player found on page")
