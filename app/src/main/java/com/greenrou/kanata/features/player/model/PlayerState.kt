@@ -7,4 +7,5 @@ data class PlayerState(
     val error: String? = null,
     val currentIndex: Int = 0,
     val episodeCount: Int = 1,
+    val nextEpisodeTitle: String? = null,
 )

@@ -1,6 +1,5 @@
 package com.greenrou.kanata.core.di
 
-import com.greenrou.kanata.data.parsers.AniwaveSiteParser
 import com.greenrou.kanata.data.parsers.ArchiveOrgSiteParser
 import com.greenrou.kanata.data.parsers.MikaiSiteParser
 import com.greenrou.kanata.data.parsers.YummyAnimeSiteParser
@@ -24,7 +23,7 @@ val repositoryModule = module {
     single<List<SiteParser>> {
         listOf(
             YummyAnimeSiteParser(),
-            AniwaveSiteParser(),
+            // AniwaveSiteParser(),
             MikaiSiteParser(),
             YouTubeSiteParser(),
             ArchiveOrgSiteParser(),

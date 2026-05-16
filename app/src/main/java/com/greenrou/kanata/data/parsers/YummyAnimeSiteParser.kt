@@ -1,6 +1,7 @@
 package com.greenrou.kanata.data.parsers
 
 import com.greenrou.kanata.domain.model.Episode
+import com.greenrou.kanata.domain.model.VideoSourceType
 import com.greenrou.kanata.domain.parser.SiteParser
 import org.json.JSONObject
 import org.jsoup.Jsoup
@@ -12,6 +13,7 @@ class YummyAnimeSiteParser : SiteParser {
     private val userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
 
     override val label = "YummyAnime"
+    override val sourceType = VideoSourceType.YUMMY_ANIME
 
     override fun supports(host: String) = "yummyanime" in host
 
