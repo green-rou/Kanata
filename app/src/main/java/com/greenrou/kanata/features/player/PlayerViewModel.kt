@@ -1,24 +1,31 @@
 package com.greenrou.kanata.features.player
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.greenrou.kanata.domain.usecase.GetEpisodeDownloadStatusUseCase
 import com.greenrou.kanata.domain.usecase.GetVideoStreamUseCase
+import com.greenrou.kanata.domain.usecase.StartEpisodeDownloadUseCase
 import com.greenrou.kanata.features.player.model.PlayerEvent
 import com.greenrou.kanata.features.player.model.PlayerState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class PlayerViewModel(
     private val getVideoStream: GetVideoStreamUseCase,
+    private val startEpisodeDownload: StartEpisodeDownloadUseCase,
+    private val getEpisodeDownloadStatus: GetEpisodeDownloadStatusUseCase,
     private val episodeUrls: List<String>,
     private val episodeTitles: List<String>,
     startIndex: Int,
+    private val animeTitle: String = "",
+    private val sourceName: String = "",
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
@@ -37,9 +44,11 @@ class PlayerViewModel(
 
     private var currentIndex = startIndex
     private var loadJob: Job? = null
+    private var statusJob: Job? = null
 
     init {
         loadStream()
+        observeDownloadStatus()
     }
 
     fun handleEvent(event: PlayerEvent) {
@@ -51,13 +60,20 @@ class PlayerViewModel(
             PlayerEvent.NextEpisode -> nextEpisode()
             PlayerEvent.Retry -> loadStream()
             is PlayerEvent.PlaybackError -> {
-                Log.e("Kanata:Player", "ExoPlayer error: ${event.message} | streamUrl=${_state.value.streamUrl}")
                 _state.update {
                     it.copy(
                         isLoading = false,
                         error = "${event.message}\n\nURL: ${it.streamUrl ?: "unknown"}",
                     )
                 }
+            }
+            is PlayerEvent.DownloadCurrentEpisode -> viewModelScope.launch {
+                startEpisodeDownload(
+                    animeTitle = event.animeTitle,
+                    sourceName = event.sourceName,
+                    episodeTitle = event.episodeTitle,
+                    episodePageUrl = event.episodePageUrl,
+                )
             }
             PlayerEvent.NavigateBack -> Unit
         }
@@ -68,6 +84,7 @@ class PlayerViewModel(
             currentIndex--
             updateIndexState()
             loadStream()
+            observeDownloadStatus()
         }
     }
 
@@ -76,6 +93,7 @@ class PlayerViewModel(
             currentIndex++
             updateIndexState()
             loadStream()
+            observeDownloadStatus()
         }
     }
 
@@ -86,25 +104,41 @@ class PlayerViewModel(
                 title = episodeTitles.getOrElse(currentIndex) { "" },
                 nextEpisodeTitle = episodeTitles.getOrNull(currentIndex + 1),
                 streamUrl = null,
+                currentEpisodeDownloadStatus = null,
             )
         }
     }
 
     private fun loadStream() {
         val url = episodeUrls.getOrNull(currentIndex) ?: return
-        Log.d("Kanata:Player", "Loading episode [$currentIndex]: $url")
+        if (url.startsWith("file://")) {
+            _state.update { it.copy(isLoading = false, streamUrl = url) }
+            return
+        }
         loadJob?.cancel()
         loadJob = viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
             getVideoStream(url)
                 .onSuccess { streamUrl ->
-                    Log.d("Kanata:Player", "Stream URL: $streamUrl")
                     _state.update { it.copy(isLoading = false, streamUrl = streamUrl) }
                 }
                 .onFailure { e ->
-                    Log.e("Kanata:Player", "Failed to get stream for $url", e)
                     _state.update { it.copy(isLoading = false, error = e.message) }
                 }
         }
     }
+
+    private fun observeDownloadStatus() {
+        val url = episodeUrls.getOrNull(currentIndex) ?: return
+        if (url.startsWith("file://")) return
+        statusJob?.cancel()
+        statusJob = getEpisodeDownloadStatus(url)
+            .onEach { item -> _state.update { it.copy(currentEpisodeDownloadStatus = item?.status) } }
+            .launchIn(viewModelScope)
+    }
+
+    fun currentEpisodePageUrl() = episodeUrls.getOrNull(currentIndex).orEmpty()
+    fun currentEpisodeTitle() = episodeTitles.getOrElse(currentIndex) { "" }
+    fun animeTitle() = animeTitle
+    fun sourceName() = sourceName
 }

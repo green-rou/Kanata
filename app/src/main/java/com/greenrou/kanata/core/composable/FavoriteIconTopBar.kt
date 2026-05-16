@@ -1,4 +1,4 @@
-package com.greenrou.kanata.core.сomposable
+package com.greenrou.kanata.core.composable
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn

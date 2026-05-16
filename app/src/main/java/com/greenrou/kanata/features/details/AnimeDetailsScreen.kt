@@ -31,7 +31,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.greenrou.kanata.domain.model.VideoSource
 import com.greenrou.kanata.features.details.content.AnimeDetailContent
 import com.greenrou.kanata.features.details.model.AnimeDetailsEvent
-import com.greenrou.kanata.core.сomposable.FavoriteIconTopBar
+import com.greenrou.kanata.core.composable.FavoriteIconTopBar
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,7 +39,8 @@ import org.koin.androidx.compose.koinViewModel
 fun AnimeDetailsScreen(
     animeId: Int,
     onNavigateBack: () -> Unit,
-    onNavigateToEpisodeList: (VideoSource) -> Unit,
+    onNavigateToEpisodeList: (VideoSource, animeTitle: String) -> Unit,
+    onNavigateToOfflinePlayer: (localFilePaths: List<String>, titles: List<String>) -> Unit,
     viewModel: AnimeDetailsViewModel = koinViewModel(key = animeId.toString()),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -54,7 +55,13 @@ fun AnimeDetailsScreen(
             when (event) {
                 AnimeDetailsEvent.NavigateBack -> onNavigateBack()
                 is AnimeDetailsEvent.ShowError -> snackbarHostState.showSnackbar(event.message)
-                is AnimeDetailsEvent.NavigateToEpisodeList -> onNavigateToEpisodeList(event.source)
+                is AnimeDetailsEvent.NavigateToEpisodeList ->
+                    onNavigateToEpisodeList(event.source, event.animeTitle)
+                is AnimeDetailsEvent.NavigateToOfflinePlayer -> {
+                    val paths = event.items.mapNotNull { it.localFilePath }.map { "file://$it" }
+                    val titles = event.items.map { it.episodeTitle }
+                    if (paths.isNotEmpty()) onNavigateToOfflinePlayer(paths, titles)
+                }
                 else -> Unit
             }
         }
@@ -104,6 +111,8 @@ fun AnimeDetailsScreen(
                     topPadding = padding.calculateTopPadding(),
                     bottomPadding = padding.calculateBottomPadding(),
                     coverFillsTopBar = state.coverFillsTopBar,
+                    downloadedEpisodeCount = state.downloadedEpisodeCount,
+                    onWatchOffline = { viewModel.handleEvent(AnimeDetailsEvent.WatchOffline) },
                 )
                 state.error != null -> Column(
                     modifier = Modifier

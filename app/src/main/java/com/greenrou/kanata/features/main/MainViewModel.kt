@@ -9,6 +9,7 @@ import com.greenrou.kanata.domain.usecase.GetAnimeListUseCase
 import com.greenrou.kanata.domain.usecase.GetFavoritesUseCase
 import com.greenrou.kanata.domain.usecase.IsFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.RemoveFavoriteUseCase
+import com.greenrou.kanata.domain.usecase.SetDownloadFolderUseCase
 import com.greenrou.kanata.domain.repository.SettingsManager
 import com.greenrou.kanata.features.main.model.MainEvent
 import com.greenrou.kanata.features.main.model.MainState
@@ -21,6 +22,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -33,6 +35,7 @@ class MainViewModel(
     private val isFavorite: IsFavoriteUseCase,
     private val getFavorites: GetFavoritesUseCase,
     private val settingsManager: SettingsManager,
+    private val setDownloadFolder: SetDownloadFolderUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(MainState())
@@ -75,6 +78,10 @@ class MainViewModel(
             }
             _state.update { it.copy(isDarkTheme = isDark, coverFillsTopBar = coverFills) }
         }.launchIn(viewModelScope)
+
+        settingsManager.downloadFolder
+            .onEach { folder -> _state.update { it.copy(downloadFolder = folder) } }
+            .launchIn(viewModelScope)
     }
 
     private fun toggleFavorite(animeId: Int) {
@@ -142,6 +149,9 @@ class MainViewModel(
             MainEvent.ClearFilters -> {
                 _state.update { it.copy(selectedGenres = emptySet(), selectedFormats = emptySet()) }
                 reloadWithCurrentFilters()
+            }
+            is MainEvent.SetDownloadFolder -> viewModelScope.launch {
+                setDownloadFolder(event.uri)
             }
             else -> Unit
         }

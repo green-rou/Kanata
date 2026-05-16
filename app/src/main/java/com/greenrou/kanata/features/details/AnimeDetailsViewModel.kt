@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.greenrou.kanata.domain.repository.SettingsManager
 import com.greenrou.kanata.domain.usecase.AddFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.GetAnimeByIdUseCase
+import com.greenrou.kanata.domain.usecase.GetCompletedDownloadsUseCase
 import com.greenrou.kanata.domain.usecase.GetVideoStreamUseCase
 import com.greenrou.kanata.domain.usecase.IsFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.RemoveFavoriteUseCase
@@ -14,6 +15,7 @@ import com.greenrou.kanata.features.details.model.AnimeDetailsState
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -28,6 +30,7 @@ class AnimeDetailsViewModel(
     private val searchExternalAnime: SearchExternalAnimeUseCase,
     private val getVideoStreamUseCase: GetVideoStreamUseCase,
     private val settingsManager: SettingsManager,
+    private val getCompletedDownloads: GetCompletedDownloadsUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AnimeDetailsState())
@@ -55,7 +58,15 @@ class AnimeDetailsViewModel(
                 _events.send(AnimeDetailsEvent.NavigateBack)
             }
             is AnimeDetailsEvent.OpenEpisodeList -> viewModelScope.launch {
-                _events.send(AnimeDetailsEvent.NavigateToEpisodeList(event.source))
+                val animeTitle = _state.value.anime?.title.orEmpty()
+                _events.send(AnimeDetailsEvent.NavigateToEpisodeList(event.source, animeTitle))
+            }
+            AnimeDetailsEvent.WatchOffline -> viewModelScope.launch {
+                val animeTitle = _state.value.anime?.title.orEmpty()
+                val matching = getCompletedDownloads().first().filter { it.animeTitle == animeTitle }
+                if (matching.isNotEmpty()) {
+                    _events.send(AnimeDetailsEvent.NavigateToOfflinePlayer(matching))
+                }
             }
             else -> Unit
         }
@@ -85,12 +96,22 @@ class AnimeDetailsViewModel(
                 .onSuccess { anime ->
                     _state.update { it.copy(isLoading = false, anime = anime) }
                     searchOnExternal(anime.title)
+                    observeDownloadedCount(anime.title)
                 }
                 .onFailure { e ->
                     _state.update { it.copy(isLoading = false, error = e.message) }
                     _events.send(AnimeDetailsEvent.ShowError(e.message ?: "Unknown error"))
                 }
         }
+    }
+
+    private fun observeDownloadedCount(animeTitle: String) {
+        getCompletedDownloads()
+            .onEach { downloads ->
+                val count = downloads.count { it.animeTitle == animeTitle }
+                _state.update { it.copy(downloadedEpisodeCount = count) }
+            }
+            .launchIn(viewModelScope)
     }
 
     private fun searchOnExternal(title: String) {

@@ -20,6 +20,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.ContentCopy
+import androidx.compose.material.icons.rounded.PlayCircle
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -61,6 +65,8 @@ internal fun AnimeDetailContent(
     topPadding: Dp,
     bottomPadding: Dp = 0.dp,
     coverFillsTopBar: Boolean = true,
+    downloadedEpisodeCount: Int = 0,
+    onWatchOffline: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -171,6 +177,37 @@ internal fun AnimeDetailContent(
                         color = UiConstants.StarColor,
                         fontWeight = FontWeight.SemiBold,
                     )
+                }
+            }
+
+            if (downloadedEpisodeCount > 0) {
+                Spacer(Modifier.height(12.dp))
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    ),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.PlayCircle,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                        )
+                        Text(
+                            text = "$downloadedEpisodeCount episode${if (downloadedEpisodeCount > 1) "s" else ""} downloaded",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            modifier = Modifier.weight(1f),
+                        )
+                        TextButton(onClick = onWatchOffline) {
+                            Text("Watch offline")
+                        }
+                    }
                 }
             }
 

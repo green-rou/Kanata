@@ -19,6 +19,7 @@ data class MainState(
     val selectedGenres: Set<String> = emptySet(),
     val selectedFormats: Set<AnimeFormat> = emptySet(),
     val isFilterSheetVisible: Boolean = false,
+    val downloadFolder: String = "",
 ) {
     val hasActiveFilters: Boolean get() = selectedGenres.isNotEmpty() || selectedFormats.isNotEmpty()
 }

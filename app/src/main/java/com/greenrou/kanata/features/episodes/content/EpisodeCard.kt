@@ -11,9 +11,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.DownloadDone
+import androidx.compose.material.icons.rounded.ErrorOutline
+import androidx.compose.material.icons.rounded.HourglassTop
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -23,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.greenrou.kanata.domain.model.DownloadStatus
 
 @Composable
 internal fun EpisodeCard(
@@ -30,6 +37,8 @@ internal fun EpisodeCard(
     title: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    downloadStatus: DownloadStatus? = null,
+    onDownloadClick: () -> Unit = {},
 ) {
     ElevatedCard(
         onClick = onClick,
@@ -66,6 +75,33 @@ internal fun EpisodeCard(
                 )
             }
             Spacer(Modifier.width(8.dp))
+            IconButton(onClick = onDownloadClick) {
+                when (downloadStatus) {
+                    DownloadStatus.COMPLETED -> Icon(
+                        imageVector = Icons.Rounded.DownloadDone,
+                        contentDescription = "Downloaded",
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                    DownloadStatus.DOWNLOADING -> CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp,
+                    )
+                    DownloadStatus.QUEUED -> Icon(
+                        imageVector = Icons.Rounded.HourglassTop,
+                        contentDescription = "Queued for download",
+                        tint = MaterialTheme.colorScheme.secondary,
+                    )
+                    DownloadStatus.FAILED -> Icon(
+                        imageVector = Icons.Rounded.ErrorOutline,
+                        contentDescription = "Download failed",
+                        tint = MaterialTheme.colorScheme.error,
+                    )
+                    else -> Icon(
+                        imageVector = Icons.Rounded.Download,
+                        contentDescription = "Download episode $number",
+                    )
+                }
+            }
             FilledIconButton(onClick = onClick) {
                 Icon(
                     imageVector = Icons.Filled.PlayArrow,

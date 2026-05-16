@@ -19,6 +19,8 @@ sealed interface MainEvent {
     data class FormatToggled(val format: AnimeFormat) : MainEvent
     data object ClearFilters : MainEvent
 
+    data class SetDownloadFolder(val uri: String) : MainEvent
+
     data class NavigateToDetail(val animeId: Int) : MainEvent
     data class ShowError(val message: String) : MainEvent
 }

@@ -1,5 +1,9 @@
 package com.greenrou.kanata.features.settings
 
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.ui.unit.Dp
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -11,6 +15,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Code
 import androidx.compose.material.icons.rounded.DarkMode
+import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material.icons.rounded.Fullscreen
 import androidx.compose.material.icons.rounded.FullscreenExit
 import androidx.compose.material.icons.rounded.Info
@@ -39,6 +44,9 @@ fun SettingsScreen(
     onToggleTheme: () -> Unit,
     coverFillsTopBar: Boolean,
     onToggleCoverLayout: () -> Unit,
+    downloadFolder: String = "",
+    onSetDownloadFolder: (String) -> Unit = {},
+    bottomPadding: Dp = 0.dp,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -47,6 +55,18 @@ fun SettingsScreen(
         runCatching {
             context.packageManager.getPackageInfo(context.packageName, 0).versionName
         }.getOrDefault("—")
+    }
+
+    val folderPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocumentTree()
+    ) { uri ->
+        uri?.let {
+            context.contentResolver.takePersistableUriPermission(
+                it,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+            )
+            onSetDownloadFolder(it.toString())
+        }
     }
 
     Column(
@@ -83,6 +103,15 @@ fun SettingsScreen(
             )
         }
 
+        SettingsSection(title = "Downloads") {
+            SettingsLinkItem(
+                icon = Icons.Rounded.Folder,
+                title = "Download folder",
+                subtitle = downloadFolder.ifBlank { "Default (app external storage)" },
+                onClick = { folderPickerLauncher.launch(null) },
+            )
+        }
+
         SettingsSection(title = "About") {
             SettingsLinkItem(
                 icon = Icons.Rounded.Info,
@@ -103,6 +132,6 @@ fun SettingsScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(8.dp + bottomPadding))
     }
 }
