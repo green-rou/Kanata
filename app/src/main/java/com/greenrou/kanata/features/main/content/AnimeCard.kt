@@ -25,7 +25,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.greenrou.kanata.core.util.UiConstants
-import com.greenrou.kanata.core.сomposable.FavoriteIcon
+import com.greenrou.kanata.core.composable.FavoriteIcon
 import com.greenrou.kanata.domain.model.Anime
 
 @Composable

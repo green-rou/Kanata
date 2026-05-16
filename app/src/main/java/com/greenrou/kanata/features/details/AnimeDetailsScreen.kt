@@ -31,7 +31,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.greenrou.kanata.domain.model.VideoSource
 import com.greenrou.kanata.features.details.content.AnimeDetailContent
 import com.greenrou.kanata.features.details.model.AnimeDetailsEvent
-import com.greenrou.kanata.core.сomposable.FavoriteIconTopBar
+import com.greenrou.kanata.core.composable.FavoriteIconTopBar
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
