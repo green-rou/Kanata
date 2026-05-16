@@ -31,11 +31,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -66,15 +68,19 @@ fun PlayerScreen(
     episodeUrls: List<String>,
     episodeTitles: List<String>,
     startIndex: Int,
+    animeTitle: String = "",
+    sourceName: String = "",
     onNavigateBack: () -> Unit,
     viewModel: PlayerViewModel = koinViewModel(
         key = episodeUrls.firstOrNull() ?: "player",
-        parameters = { parametersOf(episodeUrls, episodeTitles, startIndex) },
+        parameters = { parametersOf(episodeUrls, episodeTitles, startIndex, animeTitle, sourceName) },
     ),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val activity = context as? Activity
+
+    val isDarkTheme by rememberUpdatedState(MaterialTheme.colorScheme.background.luminance() < 0.5f)
 
     var isFullscreen by remember { mutableStateOf(false) }
     var controlsVisible by remember { mutableStateOf(true) }
@@ -107,6 +113,7 @@ fun PlayerScreen(
                 } else {
                     ctrl.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
                     ctrl.show(WindowInsetsCompat.Type.systemBars())
+                    ctrl.isAppearanceLightNavigationBars = !isDarkTheme
                 }
             }
         }
@@ -119,6 +126,7 @@ fun PlayerScreen(
                 WindowCompat.getInsetsController(w, w.decorView).apply {
                     systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
                     show(WindowInsetsCompat.Type.systemBars())
+                    isAppearanceLightNavigationBars = !isDarkTheme
                 }
             }
         }
@@ -279,6 +287,17 @@ fun PlayerScreen(
                         title = state.title,
                         currentIndex = state.currentIndex,
                         episodeCount = state.episodeCount,
+                        downloadStatus = state.currentEpisodeDownloadStatus,
+                        onDownloadClick = {
+                            viewModel.handleEvent(
+                                PlayerEvent.DownloadCurrentEpisode(
+                                    episodePageUrl = viewModel.currentEpisodePageUrl(),
+                                    episodeTitle = viewModel.currentEpisodeTitle(),
+                                    animeTitle = viewModel.animeTitle(),
+                                    sourceName = viewModel.sourceName(),
+                                )
+                            )
+                        },
                     )
                     state.nextEpisodeTitle?.let { nextTitle ->
                         NextEpisodeCard(

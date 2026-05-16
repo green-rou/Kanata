@@ -36,9 +36,14 @@ import org.koin.core.parameter.parametersOf
 fun EpisodeListScreen(
     animePageUrl: String,
     label: String,
+    animeTitle: String = "",
+    animeId: Int = 0,
     onNavigateBack: () -> Unit,
     onEpisodeClick: (urls: List<String>, titles: List<String>, index: Int) -> Unit,
-    viewModel: EpisodeListViewModel = koinViewModel(key = animePageUrl, parameters = { parametersOf(animePageUrl, label) }),
+    viewModel: EpisodeListViewModel = koinViewModel(
+        key = animePageUrl,
+        parameters = { parametersOf(animePageUrl, label, animeTitle, animeId) }
+    ),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -107,6 +112,19 @@ fun EpisodeListScreen(
                                 onClick = {
                                     viewModel.handleEvent(
                                         EpisodeListEvent.EpisodeClicked(urls, titles, index)
+                                    )
+                                },
+                                downloadStatus = state.downloadStatuses[episode.url]?.status,
+                                onDownloadClick = {
+                                    viewModel.handleEvent(
+                                        EpisodeListEvent.DownloadEpisode(
+                                            episodePageUrl = episode.url,
+                                            animePageUrl = viewModel.animePageUrl,
+                                            episodeTitle = episode.title,
+                                            animeTitle = viewModel.animeTitle,
+                                            sourceName = viewModel.label,
+                                            animeId = viewModel.animeId,
+                                        )
                                     )
                                 },
                             )

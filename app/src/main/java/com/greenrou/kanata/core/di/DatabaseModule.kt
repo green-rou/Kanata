@@ -2,6 +2,7 @@ package com.greenrou.kanata.core.di
 
 import android.content.Context
 import androidx.room.Room
+import com.greenrou.kanata.data.local.DownloadDao
 import com.greenrou.kanata.data.local.FavoritesDao
 import com.greenrou.kanata.data.local.StorageDao
 import com.greenrou.kanata.data.local.StorageDatabase
@@ -19,11 +20,16 @@ val databaseModule = module {
             get(),
             StorageDatabase::class.java,
             "storage_database"
+        ).addMigrations(
+            StorageDatabase.MIGRATION_2_3,
+            StorageDatabase.MIGRATION_3_4,
+            StorageDatabase.MIGRATION_4_5,
         ).build()
     }
     
     single<StorageDao> { get<StorageDatabase>().storageDao() }
     single<FavoritesDao> { get<StorageDatabase>().favoritesDao() }
+    single<DownloadDao> { get<StorageDatabase>().downloadDao() }
     
     single { StorageDataSource(get()) }
     

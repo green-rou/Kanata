@@ -22,7 +22,7 @@ android {
         minSdk = 28
         targetSdk = 36
         versionCode = 2
-        versionName = System.getenv("VERSION_NAME")?.removePrefix("v") ?: "0.1.3"
+        versionName = System.getenv("VERSION_NAME")?.removePrefix("v") ?: "0.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -119,6 +119,7 @@ dependencies {
     implementation(libs.media3.exoplayer)
     implementation(libs.media3.exoplayer.hls)
     implementation(libs.media3.ui)
+    implementation(libs.androidx.work.runtime.ktx)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

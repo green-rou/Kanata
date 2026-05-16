@@ -49,6 +49,7 @@ fun MoodScreen(
         if (mood == null) {
             MoodSelectionContent(
                 onMoodSelected = { viewModel.handleEvent(MoodEvent.SelectMood(it)) },
+                topPadding = contentPadding.calculateTopPadding(),
                 bottomPadding = contentPadding.calculateBottomPadding(),
             )
         } else {
@@ -57,6 +58,7 @@ fun MoodScreen(
                 state = state,
                 onBack = { viewModel.handleEvent(MoodEvent.ClearMood) },
                 onAnimeClick = { viewModel.handleEvent(MoodEvent.AnimeClicked(it)) },
+                topPadding = contentPadding.calculateTopPadding(),
                 bottomPadding = contentPadding.calculateBottomPadding(),
             )
         }

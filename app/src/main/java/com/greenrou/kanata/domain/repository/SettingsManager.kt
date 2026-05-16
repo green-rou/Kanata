@@ -6,8 +6,10 @@ interface SettingsManager {
     val showAdultContent: Flow<Boolean>
     val isDarkTheme: Flow<Boolean>
     val coverFillsTopBar: Flow<Boolean>
+    val downloadFolder: Flow<String>
 
     suspend fun setShowAdultContent(show: Boolean)
     suspend fun setDarkTheme(isDark: Boolean)
     suspend fun setCoverFillsTopBar(enabled: Boolean)
+    suspend fun setDownloadFolder(path: String)
 }

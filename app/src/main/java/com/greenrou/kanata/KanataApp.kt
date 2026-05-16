@@ -6,6 +6,7 @@ import com.greenrou.kanata.core.di.databaseModule
 import com.greenrou.kanata.core.di.repositoryModule
 import com.greenrou.kanata.core.di.useCaseModule
 import com.greenrou.kanata.core.di.viewModelModule
+import com.greenrou.kanata.core.di.workManagerModule
 import com.greenrou.kanata.core.network.networkModule
 import com.greenrou.kanata.data.youtube.NewPipeDownloader
 import okhttp3.OkHttpClient
@@ -27,7 +28,7 @@ class KanataApp : Application() {
         startKoin {
             androidLogger()
             androidContext(this@KanataApp)
-            modules(networkModule, databaseModule, repositoryModule, useCaseModule, viewModelModule, aniListModule)
+            modules(networkModule, databaseModule, repositoryModule, useCaseModule, viewModelModule, aniListModule, workManagerModule)
         }
     }
 }

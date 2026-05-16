@@ -98,6 +98,10 @@
 -dontwarn java.beans.**
 -dontwarn javax.script.**
 
+# ── WorkManager ───────────────────────────────────────────────────────────────
+-keep class * extends androidx.work.ListenableWorker { *; }
+-dontwarn androidx.work.**
+
 # ── App domain / data models ──────────────────────────────────────────────────
 -keep class com.greenrou.kanata.domain.model.** { *; }
 -keep class com.greenrou.kanata.data.local.** { *; }
