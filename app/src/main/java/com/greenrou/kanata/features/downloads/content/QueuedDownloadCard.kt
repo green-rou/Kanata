@@ -23,9 +23,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.greenrou.kanata.R
 import com.greenrou.kanata.domain.model.DownloadItem
 import com.greenrou.kanata.domain.model.DownloadStatus
 
@@ -83,7 +85,7 @@ internal fun QueuedDownloadCard(
             }
             if (!isFailed) {
                 IconButton(onClick = onCancel) {
-                    Icon(Icons.Rounded.Close, contentDescription = "Cancel download")
+                    Icon(Icons.Rounded.Close, contentDescription = stringResource(R.string.download_card_cd_cancel))
                 }
             } else {
                 Icon(
@@ -104,7 +106,7 @@ internal fun QueuedDownloadCard(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = item.errorMessage ?: "Unknown error",
+                    text = item.errorMessage ?: stringResource(R.string.download_card_unknown_error),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.weight(1f),
@@ -114,11 +116,11 @@ internal fun QueuedDownloadCard(
                 if (onRetry != null) {
                     TextButton(onClick = onRetry) {
                         Icon(Icons.Rounded.Refresh, null, modifier = Modifier.size(16.dp))
-                        Text(" Retry")
+                        Text(" ${stringResource(R.string.download_card_retry)}")
                     }
                 }
                 IconButton(onClick = onCancel) {
-                    Icon(Icons.Rounded.Close, "Remove", modifier = Modifier.size(18.dp))
+                    Icon(Icons.Rounded.Close, stringResource(R.string.download_card_remove), modifier = Modifier.size(18.dp))
                 }
             }
         }

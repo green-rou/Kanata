@@ -47,20 +47,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.greenrou.kanata.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.greenrou.kanata.features.downloads.content.CompletedDownloadCard
 import com.greenrou.kanata.features.downloads.content.QueuedDownloadCard
 import com.greenrou.kanata.features.downloads.model.DownloadManagerEvent
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
-
-private val PAGE_LABELS = listOf("Downloaded", "Queue")
 
 @Composable
 fun DownloadManagerScreen(
@@ -90,18 +90,14 @@ fun DownloadManagerScreen(
 
     Column(modifier = modifier.fillMaxSize()) {
         TabRow(selectedTabIndex = pagerState.currentPage) {
-            PAGE_LABELS.forEachIndexed { index, label ->
+            listOf(
+                stringResource(R.string.downloads_tab_downloaded, state.completedDownloads.size),
+                stringResource(R.string.downloads_tab_queue, state.queuedDownloads.size),
+            ).forEachIndexed { index, label ->
                 Tab(
                     selected = pagerState.currentPage == index,
                     onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
-                    text = {
-                        Text(
-                            when (index) {
-                                0 -> "$label (${state.completedDownloads.size})"
-                                else -> "$label (${state.queuedDownloads.size})"
-                            }
-                        )
-                    },
+                    text = { Text(label) },
                 )
             }
         }
@@ -147,8 +143,8 @@ private fun QueueTab(
     if (items.isEmpty()) {
         DownloadsEmptyState(
             icon = Icons.Outlined.Download,
-            title = "Queue is empty",
-            subtitle = "Tap the download button on any episode to start downloading",
+            title = stringResource(R.string.downloads_queue_empty_title),
+            subtitle = stringResource(R.string.downloads_queue_empty_subtitle),
             modifier = modifier.fillMaxSize(),
         )
         return
@@ -181,7 +177,7 @@ private fun QueueTab(
                 dragHandle = {
                     Icon(
                         imageVector = Icons.Rounded.DragHandle,
-                        contentDescription = "Drag to reorder",
+                        contentDescription = stringResource(R.string.downloads_cd_drag),
                         tint = if (isDragging) MaterialTheme.colorScheme.primary
                                else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.pointerInput(item.id) {
@@ -259,8 +255,8 @@ private fun DownloadedTab(
     if (items.isEmpty()) {
         DownloadsEmptyState(
             icon = Icons.Outlined.VideoLibrary,
-            title = "No downloads yet",
-            subtitle = "Episodes you download will appear here",
+            title = stringResource(R.string.downloads_empty_title),
+            subtitle = stringResource(R.string.downloads_empty_subtitle),
             modifier = modifier.fillMaxSize(),
         )
         return
@@ -294,7 +290,7 @@ private fun DownloadedTab(
                         ) {
                             Icon(
                                 imageVector = Icons.Rounded.Info,
-                                contentDescription = "Anime details",
+                                contentDescription = stringResource(R.string.downloads_cd_anime_details),
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(18.dp),
                             )
@@ -313,7 +309,7 @@ private fun DownloadedTab(
                         ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Rounded.OpenInNew,
-                                contentDescription = "Open episode list",
+                                contentDescription = stringResource(R.string.downloads_cd_episode_list),
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(18.dp),
                             )

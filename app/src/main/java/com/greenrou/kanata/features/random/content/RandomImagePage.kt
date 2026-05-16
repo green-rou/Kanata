@@ -46,9 +46,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.greenrou.kanata.R
 import androidx.core.graphics.drawable.toBitmap
 import coil.compose.AsyncImage
 import coil.imageLoader
@@ -82,7 +84,7 @@ internal fun RandomImagePage(
             imageUrl != null -> {
                 AsyncImage(
                     model = imageUrl,
-                    contentDescription = "Random Anime Wallpaper",
+                    contentDescription = stringResource(R.string.random_cd_wallpaper),
                     modifier = Modifier
                         .fillMaxSize()
                         .pointerInput(imageUrl) {
@@ -153,7 +155,7 @@ internal fun RandomImagePage(
                         FilledTonalIconButton(
                             onClick = {
                                 downloadImage(context, imageUrl)
-                                Toast.makeText(context, "Download started", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, context.getString(R.string.random_download_started), Toast.LENGTH_SHORT).show()
                             },
                             modifier = Modifier.size(52.dp),
                             shape = RoundedCornerShape(14.dp),
@@ -162,7 +164,7 @@ internal fun RandomImagePage(
                                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                             ),
                         ) {
-                            Icon(Icons.Rounded.Download, contentDescription = "Download")
+                            Icon(Icons.Rounded.Download, contentDescription = stringResource(R.string.random_cd_download))
                         }
 
                         FilledTonalIconButton(
@@ -172,9 +174,9 @@ internal fun RandomImagePage(
                                     scope.launch {
                                         try {
                                             setAsWallpaper(context, imageUrl)
-                                            Toast.makeText(context, "Wallpaper set!", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(context, context.getString(R.string.random_wallpaper_set), Toast.LENGTH_SHORT).show()
                                         } catch (e: Exception) {
-                                            Toast.makeText(context, "Failed to set wallpaper", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(context, context.getString(R.string.random_wallpaper_failed), Toast.LENGTH_SHORT).show()
                                         } finally {
                                             isSettingWallpaper = false
                                         }
@@ -196,7 +198,7 @@ internal fun RandomImagePage(
                                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                                 )
                             } else {
-                                Icon(Icons.Rounded.Wallpaper, contentDescription = "Set as wallpaper")
+                                Icon(Icons.Rounded.Wallpaper, contentDescription = stringResource(R.string.random_cd_set_wallpaper))
                             }
                         }
 
@@ -213,7 +215,7 @@ internal fun RandomImagePage(
                         ) {
                             Icon(Icons.Rounded.Refresh, null, modifier = Modifier.size(18.dp))
                             androidx.compose.foundation.layout.Spacer(Modifier.size(6.dp))
-                            Text("New", fontWeight = FontWeight.SemiBold, maxLines = 1)
+                            Text(stringResource(R.string.random_new), fontWeight = FontWeight.SemiBold, maxLines = 1)
                         }
                     }
                 }
@@ -225,8 +227,8 @@ internal fun RandomImagePage(
 private fun downloadImage(context: Context, url: String) {
     val filename = "anime_wallpaper_${System.currentTimeMillis()}.jpg"
     val request = DownloadManager.Request(Uri.parse(url)).apply {
-        setTitle("Anime Wallpaper")
-        setDescription("Saving to Pictures")
+        setTitle(context.getString(R.string.random_wallpaper_dm_title))
+        setDescription(context.getString(R.string.random_wallpaper_dm_desc))
         setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
         setDestinationInExternalPublicDir(Environment.DIRECTORY_PICTURES, "Kanata/$filename")
         setMimeType("image/jpeg")

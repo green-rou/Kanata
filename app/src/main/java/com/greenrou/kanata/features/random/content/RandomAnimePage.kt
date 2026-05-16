@@ -20,9 +20,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.greenrou.kanata.R
 import com.greenrou.kanata.domain.model.Anime
 import com.greenrou.kanata.features.main.content.AnimeCard
 
@@ -58,7 +60,7 @@ internal fun RandomAnimePage(
 
                 if (anime != null) {
                     Text(
-                        text = "Your random pick",
+                        text = stringResource(R.string.random_your_pick),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -83,7 +85,7 @@ internal fun RandomAnimePage(
                 ) {
                     Icon(Icons.Rounded.Refresh, null)
                     Spacer(Modifier.width(8.dp))
-                    Text("Pick Another", fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(R.string.random_pick_another), fontWeight = FontWeight.SemiBold)
                 }
             }
         }

@@ -20,7 +20,9 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.greenrou.kanata.R
 import com.greenrou.kanata.domain.model.AnimeFormat
 
 private val ALL_GENRES = listOf(
@@ -60,15 +62,15 @@ internal fun FilterBottomSheet(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text("Filters", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.filter_title), style = MaterialTheme.typography.titleMedium)
                 if (hasFilters) {
                     TextButton(onClick = onClearFilters) {
-                        Text("Clear all")
+                        Text(stringResource(R.string.filter_clear_all))
                     }
                 }
             }
 
-            Text("Format", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+            Text(stringResource(R.string.filter_section_format), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 AnimeFormat.entries.forEach { format ->
                     FilterChip(
@@ -79,7 +81,7 @@ internal fun FilterBottomSheet(
                 }
             }
 
-            Text("Genre", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+            Text(stringResource(R.string.filter_section_genre), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 ALL_GENRES.forEach { genre ->
                     FilterChip(

@@ -55,8 +55,10 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import com.greenrou.kanata.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.greenrou.kanata.features.favorites.FavoritesScreen
 import com.greenrou.kanata.features.main.content.AnimeGrid
@@ -156,7 +158,7 @@ fun MainScreen(
                                         TextField(
                                             value = state.searchQuery,
                                             onValueChange = { viewModel.handleEvent(MainEvent.SearchQueryChanged(it)) },
-                                            placeholder = { Text("Search anime...") },
+                                            placeholder = { Text(stringResource(R.string.main_search_anime_hint)) },
                                             singleLine = true,
                                             colors = TextFieldDefaults.colors(
                                                 focusedContainerColor = Color.Transparent,
@@ -177,13 +179,13 @@ fun MainScreen(
                                                 ),
                                             )
                                             Text(
-                                                text = "Kanata",
+                                                text = stringResource(R.string.main_title),
                                                 style = MaterialTheme.typography.titleLarge.merge(
                                                     TextStyle(brush = gradientBrush)
                                                 ),
                                             )
                                             Text(
-                                                text = "Discover anime",
+                                                text = stringResource(R.string.main_subtitle),
                                                 style = MaterialTheme.typography.bodySmall,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                             )
@@ -196,7 +198,7 @@ fun MainScreen(
                                             downloadSearchQuery = q
                                             downloadsViewModel.handleEvent(DownloadManagerEvent.SearchQueryChanged(q))
                                         },
-                                        placeholder = { Text("Search downloads…") },
+                                        placeholder = { Text(stringResource(R.string.main_search_downloads_hint)) },
                                         singleLine = true,
                                         colors = TextFieldDefaults.colors(
                                             focusedContainerColor = Color.Transparent,
@@ -209,22 +211,28 @@ fun MainScreen(
                                             .focusRequester(downloadSearchFocus),
                                     )
                                 } else {
-                                    Text(selectedTab.label)
+                                    Text(when (selectedTab) {
+                                        BottomNavItem.AnimeList -> stringResource(R.string.tab_anime)
+                                        BottomNavItem.Favorites -> stringResource(R.string.tab_favorites)
+                                        BottomNavItem.Discover -> stringResource(R.string.tab_discover)
+                                        BottomNavItem.Downloads -> stringResource(R.string.tab_downloads)
+                                        BottomNavItem.Settings -> stringResource(R.string.tab_settings)
+                                    })
                                 }
                             },
                             actions = {
                                 if (selectedTab == BottomNavItem.AnimeList) {
                                     if (state.isSearchActive) {
                                         IconButton(onClick = { viewModel.handleEvent(MainEvent.ToggleSearch) }) {
-                                            Icon(Icons.Rounded.Close, contentDescription = "Close search")
+                                            Icon(Icons.Rounded.Close, contentDescription = stringResource(R.string.main_cd_close_search))
                                         }
                                     } else {
                                         IconButton(onClick = { viewModel.handleEvent(MainEvent.ToggleSearch) }) {
-                                            Icon(Icons.Rounded.Search, contentDescription = "Search")
+                                            Icon(Icons.Rounded.Search, contentDescription = stringResource(R.string.main_cd_search))
                                         }
                                         BadgedBox(badge = { if (state.hasActiveFilters) Badge() }) {
                                             IconButton(onClick = { viewModel.handleEvent(MainEvent.ToggleFilterSheet) }) {
-                                                Icon(Icons.Rounded.FilterList, contentDescription = "Filter")
+                                                Icon(Icons.Rounded.FilterList, contentDescription = stringResource(R.string.main_cd_filter))
                                             }
                                         }
                                     }
@@ -236,11 +244,11 @@ fun MainScreen(
                                             downloadSearchQuery = ""
                                             downloadsViewModel.handleEvent(DownloadManagerEvent.SearchQueryChanged(""))
                                         }) {
-                                            Icon(Icons.Rounded.Close, contentDescription = "Close search")
+                                            Icon(Icons.Rounded.Close, contentDescription = stringResource(R.string.main_cd_close_search))
                                         }
                                     } else {
                                         IconButton(onClick = { isDownloadSearchActive = true }) {
-                                            Icon(Icons.Rounded.Search, contentDescription = "Search downloads")
+                                            Icon(Icons.Rounded.Search, contentDescription = stringResource(R.string.main_cd_search_downloads))
                                         }
                                     }
                                 }
@@ -319,7 +327,7 @@ fun MainScreen(
                                     )
 
                                     state.animeList.isEmpty() -> Text(
-                                        "No anime found",
+                                        stringResource(R.string.main_no_anime_found),
                                         modifier = Modifier
                                             .align(Alignment.Center)
                                             .padding(contentPadding),
@@ -386,6 +394,8 @@ fun MainScreen(
                         onToggleCoverLayout = { viewModel.handleEvent(MainEvent.ToggleCoverLayout) },
                         downloadFolder = state.downloadFolder,
                         onSetDownloadFolder = { viewModel.handleEvent(MainEvent.SetDownloadFolder(it)) },
+                        accentColor = state.accentColor,
+                        onSetAccentColor = { viewModel.handleEvent(MainEvent.SetAccentColor(it)) },
                         bottomPadding = contentPadding.calculateBottomPadding(),
                         modifier = Modifier
                             .fillMaxSize()

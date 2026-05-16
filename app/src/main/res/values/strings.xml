@@ -1,3 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Kanata</string>
+
+    <!-- Common -->
+    <string name="action_retry">Retry</string>
+    <string name="action_back">Back</string>
+    <string name="error_something_wrong">Something went wrong</string>
+
+    <!-- Bottom nav -->
+    <string name="tab_anime">Anime</string>
+    <string name="tab_favorites">Favorites</string>
+    <string name="tab_discover">Discover</string>
+    <string name="tab_downloads">Downloads</string>
+    <string name="tab_settings">Settings</string>
+
+    <!-- Main screen -->
+    <string name="main_title">Kanata</string>
+    <string name="main_subtitle">Discover anime</string>
+    <string name="main_search_anime_hint">Search anime…</string>
+    <string name="main_search_downloads_hint">Search downloads…</string>
+    <string name="main_cd_close_search">Close search</string>
+    <string name="main_cd_search">Search</string>
+    <string name="main_cd_filter">Filter</string>
+    <string name="main_cd_search_downloads">Search downloads</string>
+    <string name="main_no_anime_found">No anime found</string>
+
+    <!-- Anime details -->
+    <string name="detail_title_fallback">Anime Detail</string>
+    <string name="detail_error">Error: %s</string>
+    <string name="detail_episodes_count">%d episodes</string>
+    <string name="detail_watch_offline">Watch offline</string>
+    <string name="detail_available_streams">Available streams</string>
+    <string name="detail_no_streams">No streams found</string>
+    <string name="detail_tap_source">Tap a source to browse episodes</string>
+    <string name="detail_synopsis">Synopsis</string>
+    <string name="detail_source_ann">Source: Anime News Network</string>
+    <string name="detail_cd_copy">Copy</string>
+    <string name="detail_cd_copied">Copied</string>
+    <plurals name="detail_downloaded_episodes">
+        <item quantity="one">%d episode downloaded</item>
+        <item quantity="other">%d episodes downloaded</item>
+    </plurals>
+
+    <!-- Episodes -->
+    <string name="episode_list_count">%d episodes</string>
+    <string name="episode_empty_title">No episodes found</string>
+    <string name="episode_empty_subtitle">This source has no episodes available</string>
+    <string name="episode_cd_downloaded">Downloaded</string>
+    <string name="episode_cd_queued">Queued for download</string>
+    <string name="episode_cd_failed">Download failed</string>
+    <string name="episode_cd_download">Download episode %d</string>
+    <string name="episode_cd_play">Play episode %d</string>
+
+    <!-- Favorites -->
+    <string name="favorites_empty_title">No favorites yet</string>
+    <string name="favorites_empty_subtitle">Anime you bookmark will appear here</string>
+    <string name="favorites_explore">Explore anime</string>
+
+    <!-- Downloads screen -->
+    <string name="downloads_tab_downloaded">Downloaded (%d)</string>
+    <string name="downloads_tab_queue">Queue (%d)</string>
+    <string name="downloads_cd_drag">Drag to reorder</string>
+    <string name="downloads_queue_empty_title">Queue is empty</string>
+    <string name="downloads_queue_empty_subtitle">Tap the download button on any episode to start downloading</string>
+    <string name="downloads_empty_title">No downloads yet</string>
+    <string name="downloads_empty_subtitle">Episodes you download will appear here</string>
+    <string name="downloads_cd_anime_details">Anime details</string>
+    <string name="downloads_cd_episode_list">Open episode list</string>
+
+    <!-- Download card -->
+    <string name="download_card_cd_cancel">Cancel download</string>
+    <string name="download_card_unknown_error">Unknown error</string>
+    <string name="download_card_retry">Retry</string>
+    <string name="download_card_remove">Remove</string>
+    <string name="download_card_cd_play">Play</string>
+    <string name="download_card_cd_delete">Delete</string>
+
+    <!-- Notifications -->
+    <string name="notif_channel_downloads">Downloads</string>
+    <string name="notif_downloading">Downloading: %s</string>
+
+    <!-- Player -->
+    <string name="player_cd_exit_fullscreen">Exit fullscreen</string>
+    <string name="player_cd_fullscreen">Fullscreen</string>
+    <string name="player_cd_prev_episode">Previous episode</string>
+    <string name="player_cd_next_episode">Next episode</string>
+    <string name="player_up_next">Up next</string>
+    <string name="player_cd_play_next">Play next episode</string>
+    <string name="player_error_title">Playback failed</string>
+    <string name="player_error_subtitle">Something went wrong while loading this episode</string>
+    <string name="player_try_again">Try again</string>
+    <string name="player_episode_of">Episode %1$d of %2$d</string>
+    <string name="player_cd_downloaded">Downloaded</string>
+    <string name="player_cd_queued">Queued for download</string>
+    <string name="player_cd_failed">Download failed</string>
+    <string name="player_cd_download">Download episode</string>
+
+    <!-- Mood -->
+    <string name="mood_title">How are you feeling?</string>
+    <string name="mood_subtitle">Pick a vibe and discover your perfect anime</string>
+    <string name="mood_no_results">No anime found for this mood</string>
+
+    <!-- Random / Discover -->
+    <string name="tab_by_mood">By Mood</string>
+    <string name="tab_random">Random</string>
+    <string name="tab_wallpaper">Wallpaper</string>
+    <string name="random_your_pick">Your random pick</string>
+    <string name="random_pick_another">Pick Another</string>
+    <string name="random_cd_wallpaper">Random Anime Wallpaper</string>
+    <string name="random_download_started">Download started</string>
+    <string name="random_cd_download">Download</string>
+    <string name="random_wallpaper_set">Wallpaper set!</string>
+    <string name="random_wallpaper_failed">Failed to set wallpaper</string>
+    <string name="random_cd_set_wallpaper">Set as wallpaper</string>
+    <string name="random_new">New</string>
+    <string name="random_wallpaper_dm_title">Anime Wallpaper</string>
+    <string name="random_wallpaper_dm_desc">Saving to Pictures</string>
+
+    <!-- Filters -->
+    <string name="filter_title">Filters</string>
+    <string name="filter_clear_all">Clear all</string>
+    <string name="filter_section_format">Format</string>
+    <string name="filter_section_genre">Genre</string>
+
+    <!-- Settings -->
+    <string name="settings_section_appearance">Appearance</string>
+    <string name="settings_theme_dark">Dark Theme</string>
+    <string name="settings_theme_light">Light Theme</string>
+    <string name="settings_theme_subtitle">Switch between light and dark mode</string>
+    <string name="settings_cover_title">Cover under top bar</string>
+    <string name="settings_cover_extends">Image extends behind the top bar</string>
+    <string name="settings_cover_below">Image shown fully below the top bar</string>
+    <string name="settings_accent_color_title">Accent color</string>
+    <string name="settings_language_title">Language</string>
+    <string name="settings_language_system">System default</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_language_uk">Українська</string>
+    <string name="settings_section_content">Content</string>
+    <string name="settings_adult_on_title">18+ Mode</string>
+    <string name="settings_adult_off_title">Adult Content</string>
+    <string name="settings_adult_on_subtitle">Showing only 18+ titles</string>
+    <string name="settings_adult_off_subtitle">Show only non-adult titles</string>
+    <string name="settings_section_downloads">Downloads</string>
+    <string name="settings_download_folder_title">Download folder</string>
+    <string name="settings_download_folder_default">Default (app external storage)</string>
+    <string name="settings_section_about">About</string>
+    <string name="settings_version">Kanata v%s</string>
+    <string name="settings_made_by">Made by GreenRou</string>
+    <string name="settings_github">GitHub</string>
+    <string name="settings_github_subtitle">green-rou/Kanata</string>
+    <string name="settings_support">Support me on Ko-fi</string>
+    <string name="settings_support_subtitle">ko-fi.com/C0C31ZLH6K</string>
 </resources>

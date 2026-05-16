@@ -16,11 +16,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.greenrou.kanata.R
 import com.greenrou.kanata.features.mood.model.Mood
 
 @Composable
@@ -56,14 +58,14 @@ internal fun MoodSelectionContent(
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 Text(
-                    text = "How are you feeling?",
+                    text = stringResource(R.string.mood_title),
                     style = MaterialTheme.typography.headlineSmall.merge(
                         TextStyle(brush = gradientBrush)
                     ),
                     fontWeight = FontWeight.ExtraBold,
                 )
                 Text(
-                    text = "Pick a vibe and discover your perfect anime",
+                    text = stringResource(R.string.mood_subtitle),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,

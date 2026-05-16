@@ -30,8 +30,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.greenrou.kanata.R
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -150,8 +152,15 @@ private fun NavBarItem(
                 clip = false,
             ),
         ) {
-            Text(
-                text = "  ${item.label}",
+            val label = when (item) {
+            BottomNavItem.AnimeList -> stringResource(R.string.tab_anime)
+            BottomNavItem.Favorites -> stringResource(R.string.tab_favorites)
+            BottomNavItem.Discover -> stringResource(R.string.tab_discover)
+            BottomNavItem.Downloads -> stringResource(R.string.tab_downloads)
+            BottomNavItem.Settings -> stringResource(R.string.tab_settings)
+        }
+        Text(
+                text = "  $label",
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = contentColor,

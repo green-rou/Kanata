@@ -26,7 +26,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.greenrou.kanata.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.greenrou.kanata.domain.model.VideoSource
 import com.greenrou.kanata.features.details.content.AnimeDetailContent
@@ -70,10 +72,10 @@ fun AnimeDetailsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(state.anime?.title ?: "Anime Detail") },
+                title = { Text(state.anime?.title ?: stringResource(R.string.detail_title_fallback)) },
                 navigationIcon = {
                     IconButton(onClick = { viewModel.handleEvent(AnimeDetailsEvent.BackClicked) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 },
                 actions = {
@@ -122,9 +124,9 @@ fun AnimeDetailsScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    Text("Error: ${state.error}", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.detail_error, state.error ?: ""), color = MaterialTheme.colorScheme.error)
                     Button(onClick = { viewModel.handleEvent(AnimeDetailsEvent.LoadAnime(animeId)) }) {
-                        Text("Retry")
+                        Text(stringResource(R.string.action_retry))
                     }
                 }
             }

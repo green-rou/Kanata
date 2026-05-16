@@ -23,9 +23,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.greenrou.kanata.R
 import com.greenrou.kanata.features.main.content.AnimeGrid
 import com.greenrou.kanata.features.mood.model.Mood
 import com.greenrou.kanata.features.mood.model.MoodState
@@ -50,7 +52,7 @@ internal fun MoodResultContent(
             IconButton(onClick = onBack) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                    contentDescription = "Back",
+                    contentDescription = stringResource(R.string.action_back),
                     tint = MaterialTheme.colorScheme.onSurface,
                 )
             }
@@ -91,7 +93,7 @@ internal fun MoodResultContent(
                         tint = mood.color.copy(alpha = 0.4f),
                     )
                     Text(
-                        text = "No anime found for this mood",
+                        text = stringResource(R.string.mood_no_results),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

@@ -18,9 +18,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.greenrou.kanata.R
 
 @Composable
 internal fun NextEpisodeCard(
@@ -40,7 +42,7 @@ internal fun NextEpisodeCard(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Up next",
+                    text = stringResource(R.string.player_up_next),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.SemiBold,
@@ -59,7 +61,7 @@ internal fun NextEpisodeCard(
             ) {
                 Icon(
                     imageVector = Icons.Filled.SkipNext,
-                    contentDescription = "Play next episode",
+                    contentDescription = stringResource(R.string.player_cd_play_next),
                 )
             }
         }

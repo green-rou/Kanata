@@ -39,8 +39,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.greenrou.kanata.R
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -204,7 +206,7 @@ fun PlayerScreen(
                         IconButton(onClick = { viewModel.handleEvent(PlayerEvent.BackClicked) }) {
                             Icon(
                                 Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
+                                contentDescription = stringResource(R.string.action_back),
                                 tint = Color.White,
                             )
                         }
@@ -219,7 +221,7 @@ fun PlayerScreen(
                         IconButton(onClick = { isFullscreen = false }) {
                             Icon(
                                 Icons.Filled.FullscreenExit,
-                                contentDescription = "Exit fullscreen",
+                                contentDescription = stringResource(R.string.player_cd_exit_fullscreen),
                                 tint = Color.White,
                             )
                         }
@@ -243,13 +245,13 @@ fun PlayerScreen(
                     title = { Text(state.title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                     navigationIcon = {
                         IconButton(onClick = { viewModel.handleEvent(PlayerEvent.BackClicked) }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
                         }
                     },
                     actions = {
                         if (state.error == null) {
                             IconButton(onClick = { isFullscreen = true }) {
-                                Icon(Icons.Filled.Fullscreen, contentDescription = "Fullscreen")
+                                Icon(Icons.Filled.Fullscreen, contentDescription = stringResource(R.string.player_cd_fullscreen))
                             }
                         }
                     },

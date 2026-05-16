@@ -44,10 +44,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.greenrou.kanata.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import coil.compose.AsyncImage
@@ -164,7 +167,7 @@ internal fun AnimeDetailContent(
                 }
                 if (anime.episodes > 0) {
                     Text(
-                        text = "${anime.episodes} episodes",
+                        text = stringResource(R.string.detail_episodes_count, anime.episodes),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -199,13 +202,13 @@ internal fun AnimeDetailContent(
                             tint = MaterialTheme.colorScheme.onSecondaryContainer,
                         )
                         Text(
-                            text = "$downloadedEpisodeCount episode${if (downloadedEpisodeCount > 1) "s" else ""} downloaded",
+                            text = pluralStringResource(R.plurals.detail_downloaded_episodes, downloadedEpisodeCount, downloadedEpisodeCount),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSecondaryContainer,
                             modifier = Modifier.weight(1f),
                         )
                         TextButton(onClick = onWatchOffline) {
-                            Text("Watch offline")
+                            Text(stringResource(R.string.detail_watch_offline))
                         }
                     }
                 }
@@ -222,7 +225,7 @@ internal fun AnimeDetailContent(
 
             Spacer(Modifier.height(16.dp))
             Text(
-                text = "Available streams",
+                text = stringResource(R.string.detail_available_streams),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
             )
@@ -235,13 +238,13 @@ internal fun AnimeDetailContent(
                     trackColor = MaterialTheme.colorScheme.surfaceVariant,
                 )
                 videoSources.isEmpty() -> Text(
-                    text = "No streams found",
+                    text = stringResource(R.string.detail_no_streams),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 else -> Column {
                     Text(
-                        text = "Tap a source to browse episodes",
+                        text = stringResource(R.string.detail_tap_source),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -264,7 +267,7 @@ internal fun AnimeDetailContent(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     Text(
-                        text = "Synopsis",
+                        text = stringResource(R.string.detail_synopsis),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.weight(1f),
@@ -281,7 +284,7 @@ internal fun AnimeDetailContent(
 
             Spacer(Modifier.height(16.dp))
             Text(
-                text = "Source: Anime News Network",
+                text = stringResource(R.string.detail_source_ann),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.outline,
             )
@@ -308,7 +311,7 @@ private fun CopyIconButton(text: String) {
     ) {
         Icon(
             imageVector = if (copied) Icons.Rounded.Check else Icons.Rounded.ContentCopy,
-            contentDescription = if (copied) "Copied" else "Copy",
+            contentDescription = if (copied) stringResource(R.string.detail_cd_copied) else stringResource(R.string.detail_cd_copy),
             tint = if (copied) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(18.dp),
         )

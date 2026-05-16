@@ -17,6 +17,7 @@ import okhttp3.Request
 import java.util.concurrent.TimeUnit
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import com.greenrou.kanata.R
 import java.io.File
 import java.io.FileOutputStream
 
@@ -210,7 +211,7 @@ class EpisodeDownloadWorker(
     private fun createNotificationChannel() {
         val channel = NotificationChannel(
             NOTIFICATION_CHANNEL_ID,
-            "Downloads",
+            appContext.getString(R.string.notif_channel_downloads),
             NotificationManager.IMPORTANCE_LOW
         )
         val manager = appContext.getSystemService(NotificationManager::class.java)
@@ -219,7 +220,7 @@ class EpisodeDownloadWorker(
 
     private fun createForegroundInfo(title: String, progress: Int): ForegroundInfo {
         val notification = NotificationCompat.Builder(appContext, NOTIFICATION_CHANNEL_ID)
-            .setContentTitle("Downloading: $title")
+            .setContentTitle(appContext.getString(R.string.notif_downloading, title))
             .setProgress(100, progress, progress == 0)
             .setSmallIcon(android.R.drawable.stat_sys_download)
             .setOngoing(true)

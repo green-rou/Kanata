@@ -20,6 +20,7 @@ sealed interface MainEvent {
     data object ClearFilters : MainEvent
 
     data class SetDownloadFolder(val uri: String) : MainEvent
+    data class SetAccentColor(val name: String) : MainEvent
 
     data class NavigateToDetail(val animeId: Int) : MainEvent
     data class ShowError(val message: String) : MainEvent

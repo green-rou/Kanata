@@ -19,9 +19,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.greenrou.kanata.R
 import com.greenrou.kanata.domain.model.DownloadStatus
 
 @Composable
@@ -47,7 +49,7 @@ internal fun PlayerInfoSection(
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text = "Episode ${currentIndex + 1} of $episodeCount",
+                text = stringResource(R.string.player_episode_of, currentIndex + 1, episodeCount),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -56,7 +58,7 @@ internal fun PlayerInfoSection(
             when (downloadStatus) {
                 DownloadStatus.COMPLETED -> Icon(
                     imageVector = Icons.Rounded.DownloadDone,
-                    contentDescription = "Downloaded",
+                    contentDescription = stringResource(R.string.player_cd_downloaded),
                     tint = MaterialTheme.colorScheme.primary,
                 )
                 DownloadStatus.DOWNLOADING -> CircularProgressIndicator(
@@ -65,17 +67,17 @@ internal fun PlayerInfoSection(
                 )
                 DownloadStatus.QUEUED -> Icon(
                     imageVector = Icons.Rounded.HourglassTop,
-                    contentDescription = "Queued for download",
+                    contentDescription = stringResource(R.string.player_cd_queued),
                     tint = MaterialTheme.colorScheme.secondary,
                 )
                 DownloadStatus.FAILED -> Icon(
                     imageVector = Icons.Rounded.ErrorOutline,
-                    contentDescription = "Download failed",
+                    contentDescription = stringResource(R.string.player_cd_failed),
                     tint = MaterialTheme.colorScheme.error,
                 )
                 else -> Icon(
                     imageVector = Icons.Rounded.Download,
-                    contentDescription = "Download episode",
+                    contentDescription = stringResource(R.string.player_cd_download),
                 )
             }
         }
