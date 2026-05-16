@@ -26,7 +26,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -212,9 +211,9 @@ internal fun AnimeDetailContent(
                     Spacer(Modifier.height(8.dp))
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         videoSources.forEach { source ->
-                            SuggestionChip(
+                            VideoSourceChip(
+                                source = source,
                                 onClick = { onSourceClick(source) },
-                                label = { Text(source.label) },
                             )
                         }
                     }

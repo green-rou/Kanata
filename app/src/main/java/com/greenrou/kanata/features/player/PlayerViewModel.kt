@@ -27,6 +27,7 @@ class PlayerViewModel(
             title = episodeTitles.getOrElse(startIndex) { "" },
             currentIndex = startIndex,
             episodeCount = episodeUrls.size,
+            nextEpisodeTitle = episodeTitles.getOrNull(startIndex + 1),
         )
     )
     val state = _state.asStateFlow()
@@ -83,6 +84,7 @@ class PlayerViewModel(
             it.copy(
                 currentIndex = currentIndex,
                 title = episodeTitles.getOrElse(currentIndex) { "" },
+                nextEpisodeTitle = episodeTitles.getOrNull(currentIndex + 1),
                 streamUrl = null,
             )
         }

@@ -1,6 +1,7 @@
 package com.greenrou.kanata.data.parsers
 
 import com.greenrou.kanata.domain.model.Episode
+import com.greenrou.kanata.domain.model.VideoSourceType
 import com.greenrou.kanata.domain.parser.SiteParser
 import org.json.JSONArray
 import org.json.JSONObject
@@ -12,6 +13,7 @@ class HanimeSiteParser : SiteParser {
     private val userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
 
     override val label = "Hanime"
+    override val sourceType = VideoSourceType.HANIME
     override val isAdultOnly = true
 
     override fun supports(host: String) = "hanime.tv" in host

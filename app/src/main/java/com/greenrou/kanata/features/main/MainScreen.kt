@@ -274,6 +274,7 @@ fun MainScreen(
 
                     BottomNavItem.Favorites -> FavoritesScreen(
                         onNavigateToDetails = onNavigateToDetails,
+                        onExploreClick = { onTabSelected(BottomNavItem.AnimeList.name) },
                         contentPadding = contentPadding,
                         modifier = Modifier.fillMaxSize(),
                     )
