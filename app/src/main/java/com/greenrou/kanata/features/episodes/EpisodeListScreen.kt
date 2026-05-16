@@ -23,7 +23,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.greenrou.kanata.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.greenrou.kanata.features.episodes.content.EpisodeCard
 import com.greenrou.kanata.features.episodes.content.EpisodeEmptyState
@@ -68,7 +70,7 @@ fun EpisodeListScreen(
                                 style = MaterialTheme.typography.titleMedium,
                             )
                             Text(
-                                text = "${state.episodes.size} episodes",
+                                text = stringResource(R.string.episode_list_count, state.episodes.size),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -79,7 +81,7 @@ fun EpisodeListScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = { viewModel.handleEvent(EpisodeListEvent.BackClicked) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 },
             )
@@ -93,7 +95,7 @@ fun EpisodeListScreen(
             when {
                 state.isLoading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 state.error != null -> Text(
-                    text = "Error: ${state.error}",
+                    text = stringResource(R.string.detail_error, state.error ?: ""),
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.align(Alignment.Center).padding(horizontal = 24.dp),
                 )

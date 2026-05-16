@@ -18,6 +18,7 @@ class SettingsManagerImpl(private val context: Context) : SettingsManager {
         val IS_DARK_THEME = booleanPreferencesKey("is_dark_theme")
         val COVER_FILLS_TOP_BAR = booleanPreferencesKey("cover_fills_top_bar")
         val DOWNLOAD_FOLDER = stringPreferencesKey("download_folder")
+        val ACCENT_COLOR = stringPreferencesKey("accent_color")
     }
 
     override val showAdultContent: Flow<Boolean> = context.dataStore.data
@@ -38,6 +39,11 @@ class SettingsManagerImpl(private val context: Context) : SettingsManager {
     override val downloadFolder: Flow<String> = context.dataStore.data
         .map { preferences ->
             preferences[PreferencesKeys.DOWNLOAD_FOLDER] ?: ""
+        }
+
+    override val accentColor: Flow<String> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.ACCENT_COLOR] ?: "Green"
         }
 
     override suspend fun setShowAdultContent(show: Boolean) {
@@ -61,6 +67,12 @@ class SettingsManagerImpl(private val context: Context) : SettingsManager {
     override suspend fun setDownloadFolder(path: String) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.DOWNLOAD_FOLDER] = path
+        }
+    }
+
+    override suspend fun setAccentColor(name: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.ACCENT_COLOR] = name
         }
     }
 }

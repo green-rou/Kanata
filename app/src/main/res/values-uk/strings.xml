@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Kanata</string>
+
+    <!-- Common -->
+    <string name="action_retry">Повторити</string>
+    <string name="action_back">Назад</string>
+    <string name="error_something_wrong">Щось пішло не так</string>
+
+    <!-- Bottom nav -->
+    <string name="tab_anime">Аніме</string>
+    <string name="tab_favorites">Улюблені</string>
+    <string name="tab_discover">Відкрити</string>
+    <string name="tab_downloads">Завантаження</string>
+    <string name="tab_settings">Налаштування</string>
+
+    <!-- Main screen -->
+    <string name="main_title">Kanata</string>
+    <string name="main_subtitle">Відкривай аніме</string>
+    <string name="main_search_anime_hint">Пошук аніме…</string>
+    <string name="main_search_downloads_hint">Пошук завантажень…</string>
+    <string name="main_cd_close_search">Закрити пошук</string>
+    <string name="main_cd_search">Пошук</string>
+    <string name="main_cd_filter">Фільтр</string>
+    <string name="main_cd_search_downloads">Пошук завантажень</string>
+    <string name="main_no_anime_found">Аніме не знайдено</string>
+
+    <!-- Anime details -->
+    <string name="detail_title_fallback">Деталі аніме</string>
+    <string name="detail_error">Помилка: %s</string>
+    <string name="detail_episodes_count">%d епізодів</string>
+    <string name="detail_watch_offline">Дивитись офлайн</string>
+    <string name="detail_available_streams">Доступні джерела</string>
+    <string name="detail_no_streams">Джерел не знайдено</string>
+    <string name="detail_tap_source">Натисніть на джерело, щоб переглянути епізоди</string>
+    <string name="detail_synopsis">Синопсис</string>
+    <string name="detail_source_ann">Джерело: Anime News Network</string>
+    <string name="detail_cd_copy">Копіювати</string>
+    <string name="detail_cd_copied">Скопійовано</string>
+    <plurals name="detail_downloaded_episodes">
+        <item quantity="one">%d епізод завантажено</item>
+        <item quantity="few">%d епізоди завантажено</item>
+        <item quantity="many">%d епізодів завантажено</item>
+        <item quantity="other">%d епізоди завантажено</item>
+    </plurals>
+
+    <!-- Episodes -->
+    <string name="episode_list_count">%d епізодів</string>
+    <string name="episode_empty_title">Епізодів не знайдено</string>
+    <string name="episode_empty_subtitle">Це джерело не має доступних епізодів</string>
+    <string name="episode_cd_downloaded">Завантажено</string>
+    <string name="episode_cd_queued">У черзі завантаження</string>
+    <string name="episode_cd_failed">Помилка завантаження</string>
+    <string name="episode_cd_download">Завантажити епізод %d</string>
+    <string name="episode_cd_play">Відтворити епізод %d</string>
+
+    <!-- Favorites -->
+    <string name="favorites_empty_title">Немає вподобань</string>
+    <string name="favorites_empty_subtitle">Аніме, які ви додасте, з\'являться тут</string>
+    <string name="favorites_explore">Переглянути аніме</string>
+
+    <!-- Downloads screen -->
+    <string name="downloads_tab_downloaded">Завантажено (%d)</string>
+    <string name="downloads_tab_queue">Черга (%d)</string>
+    <string name="downloads_cd_drag">Перетягніть, щоб змінити порядок</string>
+    <string name="downloads_queue_empty_title">Черга порожня</string>
+    <string name="downloads_queue_empty_subtitle">Натисніть кнопку завантаження на будь-якому епізоді</string>
+    <string name="downloads_empty_title">Ще немає завантажень</string>
+    <string name="downloads_empty_subtitle">Завантажені епізоди з\'являться тут</string>
+    <string name="downloads_cd_anime_details">Деталі аніме</string>
+    <string name="downloads_cd_episode_list">Відкрити список епізодів</string>
+
+    <!-- Download card -->
+    <string name="download_card_cd_cancel">Скасувати завантаження</string>
+    <string name="download_card_unknown_error">Невідома помилка</string>
+    <string name="download_card_retry">Повторити</string>
+    <string name="download_card_remove">Видалити</string>
+    <string name="download_card_cd_play">Відтворити</string>
+    <string name="download_card_cd_delete">Видалити</string>
+
+    <!-- Notifications -->
+    <string name="notif_channel_downloads">Завантаження</string>
+    <string name="notif_downloading">Завантаження: %s</string>
+
+    <!-- Player -->
+    <string name="player_cd_exit_fullscreen">Вийти з повного екрану</string>
+    <string name="player_cd_fullscreen">Повний екран</string>
+    <string name="player_cd_prev_episode">Попередній епізод</string>
+    <string name="player_cd_next_episode">Наступний епізод</string>
+    <string name="player_up_next">Далі</string>
+    <string name="player_cd_play_next">Відтворити наступний епізод</string>
+    <string name="player_error_title">Помилка відтворення</string>
+    <string name="player_error_subtitle">Щось пішло не так під час завантаження цього епізоду</string>
+    <string name="player_try_again">Спробувати знову</string>
+    <string name="player_episode_of">Епізод %1$d з %2$d</string>
+    <string name="player_cd_downloaded">Завантажено</string>
+    <string name="player_cd_queued">У черзі завантаження</string>
+    <string name="player_cd_failed">Помилка завантаження</string>
+    <string name="player_cd_download">Завантажити епізод</string>
+
+    <!-- Mood -->
+    <string name="mood_title">Який у вас настрій?</string>
+    <string name="mood_subtitle">Оберіть настрій та знайдіть ідеальне аніме</string>
+    <string name="mood_no_results">Для цього настрою аніме не знайдено</string>
+
+    <!-- Random / Discover -->
+    <string name="tab_by_mood">За настроєм</string>
+    <string name="tab_random">Випадкове</string>
+    <string name="tab_wallpaper">Шпалери</string>
+    <string name="random_your_pick">Ваш випадковий вибір</string>
+    <string name="random_pick_another">Інший варіант</string>
+    <string name="random_cd_wallpaper">Випадкові шпалери аніме</string>
+    <string name="random_download_started">Завантаження почалось</string>
+    <string name="random_cd_download">Завантажити</string>
+    <string name="random_wallpaper_set">Шпалери встановлено!</string>
+    <string name="random_wallpaper_failed">Не вдалось встановити шпалери</string>
+    <string name="random_cd_set_wallpaper">Встановити як шпалери</string>
+    <string name="random_new">Нове</string>
+    <string name="random_wallpaper_dm_title">Шпалери аніме</string>
+    <string name="random_wallpaper_dm_desc">Збереження у Зображення</string>
+
+    <!-- Filters -->
+    <string name="filter_title">Фільтри</string>
+    <string name="filter_clear_all">Очистити все</string>
+    <string name="filter_section_format">Формат</string>
+    <string name="filter_section_genre">Жанр</string>
+
+    <!-- Settings -->
+    <string name="settings_section_appearance">Зовнішній вигляд</string>
+    <string name="settings_theme_dark">Темна тема</string>
+    <string name="settings_theme_light">Світла тема</string>
+    <string name="settings_theme_subtitle">Перемикатись між світлою та темною темою</string>
+    <string name="settings_cover_title">Обкладинка під верхньою панеллю</string>
+    <string name="settings_cover_extends">Зображення виходить за верхню панель</string>
+    <string name="settings_cover_below">Зображення повністю нижче верхньої панелі</string>
+    <string name="settings_accent_color_title">Колір акценту</string>
+    <string name="settings_language_title">Мова</string>
+    <string name="settings_language_system">За замовчуванням системи</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_language_uk">Українська</string>
+    <string name="settings_section_content">Контент</string>
+    <string name="settings_adult_on_title">Режим 18+</string>
+    <string name="settings_adult_off_title">Дорослий контент</string>
+    <string name="settings_adult_on_subtitle">Показуються лише тайтли 18+</string>
+    <string name="settings_adult_off_subtitle">Показувати лише тайтли без 18+</string>
+    <string name="settings_section_downloads">Завантаження</string>
+    <string name="settings_download_folder_title">Папка завантажень</string>
+    <string name="settings_download_folder_default">За замовчуванням (зовнішнє сховище)</string>
+    <string name="settings_section_about">Про додаток</string>
+    <string name="settings_version">Kanata v%s</string>
+    <string name="settings_made_by">Зроблено GreenRou</string>
+    <string name="settings_github">GitHub</string>
+    <string name="settings_github_subtitle">green-rou/Kanata</string>
+    <string name="settings_support">Підтримати на Ko-fi</string>
+    <string name="settings_support_subtitle">ko-fi.com/C0C31ZLH6K</string>
+</resources>

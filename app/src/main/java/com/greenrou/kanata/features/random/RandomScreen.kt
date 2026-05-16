@@ -23,7 +23,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.greenrou.kanata.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.greenrou.kanata.features.mood.MoodScreen
 import com.greenrou.kanata.features.random.content.PillTabRow
@@ -108,9 +110,9 @@ fun RandomScreen(
                 currentPage = pagerState.currentPage,
                 pageOffset = pagerState.currentPageOffsetFraction,
                 tabs = listOf(
-                    Icons.Rounded.Stars to "By Mood",
-                    Icons.Rounded.AutoAwesome to "Random",
-                    Icons.Rounded.Image to "Wallpaper",
+                    Icons.Rounded.Stars to stringResource(R.string.tab_by_mood),
+                    Icons.Rounded.AutoAwesome to stringResource(R.string.tab_random),
+                    Icons.Rounded.Image to stringResource(R.string.tab_wallpaper),
                 ),
                 onTabClick = { scope.launch { pagerState.animateScrollToPage(it) } },
                 modifier = Modifier.fillMaxWidth(),

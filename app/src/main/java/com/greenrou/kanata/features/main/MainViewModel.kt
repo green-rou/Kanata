@@ -82,6 +82,10 @@ class MainViewModel(
         settingsManager.downloadFolder
             .onEach { folder -> _state.update { it.copy(downloadFolder = folder) } }
             .launchIn(viewModelScope)
+
+        settingsManager.accentColor
+            .onEach { color -> _state.update { it.copy(accentColor = color) } }
+            .launchIn(viewModelScope)
     }
 
     private fun toggleFavorite(animeId: Int) {
@@ -152,6 +156,9 @@ class MainViewModel(
             }
             is MainEvent.SetDownloadFolder -> viewModelScope.launch {
                 setDownloadFolder(event.uri)
+            }
+            is MainEvent.SetAccentColor -> viewModelScope.launch {
+                settingsManager.setAccentColor(event.name)
             }
             else -> Unit
         }

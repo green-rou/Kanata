@@ -20,7 +20,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.greenrou.kanata.R
 import com.greenrou.kanata.features.player.model.PlayerState
 
 @Composable
@@ -47,7 +49,7 @@ internal fun BoxScope.EpisodeSideButtons(
         ) {
             Icon(
                 Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                contentDescription = "Previous episode",
+                contentDescription = stringResource(R.string.player_cd_prev_episode),
                 tint = Color.White,
                 modifier = Modifier.size(36.dp),
             )
@@ -87,7 +89,7 @@ internal fun BoxScope.EpisodeSideButtons(
         ) {
             Icon(
                 Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = "Next episode",
+                contentDescription = stringResource(R.string.player_cd_next_episode),
                 tint = Color.White,
                 modifier = Modifier.size(36.dp),
             )

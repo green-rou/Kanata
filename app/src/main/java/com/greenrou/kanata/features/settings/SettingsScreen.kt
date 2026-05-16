@@ -28,7 +28,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.greenrou.kanata.R
+import com.greenrou.kanata.features.settings.content.ColorPickerItem
+import com.greenrou.kanata.features.settings.content.LanguagePickerItem
 import com.greenrou.kanata.features.settings.content.SettingsItem
 import com.greenrou.kanata.features.settings.content.SettingsLinkItem
 import com.greenrou.kanata.features.settings.content.SettingsSection
@@ -46,6 +50,8 @@ fun SettingsScreen(
     onToggleCoverLayout: () -> Unit,
     downloadFolder: String = "",
     onSetDownloadFolder: (String) -> Unit = {},
+    accentColor: String = "Green",
+    onSetAccentColor: (String) -> Unit = {},
     bottomPadding: Dp = 0.dp,
     modifier: Modifier = Modifier,
 ) {
@@ -76,58 +82,67 @@ fun SettingsScreen(
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
-        SettingsSection(title = "Appearance") {
+        SettingsSection(title = stringResource(R.string.settings_section_appearance)) {
             SettingsItem(
                 icon = if (isDarkTheme) Icons.Rounded.DarkMode else Icons.Rounded.LightMode,
-                title = if (isDarkTheme) "Dark Theme" else "Light Theme",
-                subtitle = "Switch between light and dark mode",
+                title = if (isDarkTheme) stringResource(R.string.settings_theme_dark)
+                        else stringResource(R.string.settings_theme_light),
+                subtitle = stringResource(R.string.settings_theme_subtitle),
                 checked = isDarkTheme,
                 onCheckedChange = { onToggleTheme() },
             )
             SettingsItem(
                 icon = if (coverFillsTopBar) Icons.Rounded.Fullscreen else Icons.Rounded.FullscreenExit,
-                title = "Cover under top bar",
-                subtitle = if (coverFillsTopBar) "Image extends behind the top bar" else "Image shown fully below the top bar",
+                title = stringResource(R.string.settings_cover_title),
+                subtitle = if (coverFillsTopBar) stringResource(R.string.settings_cover_extends)
+                           else stringResource(R.string.settings_cover_below),
                 checked = coverFillsTopBar,
                 onCheckedChange = { onToggleCoverLayout() },
             )
+            ColorPickerItem(
+                selectedColor = accentColor,
+                onColorSelected = onSetAccentColor,
+            )
+            LanguagePickerItem()
         }
 
-        SettingsSection(title = "Content") {
+        SettingsSection(title = stringResource(R.string.settings_section_content)) {
             SettingsItem(
                 icon = if (showAdultContent) Icons.Rounded.LockOpen else Icons.Rounded.Lock,
-                title = if (showAdultContent) "18+ Mode" else "Adult Content",
-                subtitle = if (showAdultContent) "Showing only 18+ titles" else "Show only non-adult titles",
+                title = if (showAdultContent) stringResource(R.string.settings_adult_on_title)
+                        else stringResource(R.string.settings_adult_off_title),
+                subtitle = if (showAdultContent) stringResource(R.string.settings_adult_on_subtitle)
+                           else stringResource(R.string.settings_adult_off_subtitle),
                 checked = showAdultContent,
                 onCheckedChange = { onToggleAdultContent() },
             )
         }
 
-        SettingsSection(title = "Downloads") {
+        SettingsSection(title = stringResource(R.string.settings_section_downloads)) {
             SettingsLinkItem(
                 icon = Icons.Rounded.Folder,
-                title = "Download folder",
-                subtitle = downloadFolder.ifBlank { "Default (app external storage)" },
+                title = stringResource(R.string.settings_download_folder_title),
+                subtitle = downloadFolder.ifBlank { stringResource(R.string.settings_download_folder_default) },
                 onClick = { folderPickerLauncher.launch(null) },
             )
         }
 
-        SettingsSection(title = "About") {
+        SettingsSection(title = stringResource(R.string.settings_section_about)) {
             SettingsLinkItem(
                 icon = Icons.Rounded.Info,
-                title = "Kanata v$appVersion",
-                subtitle = "Made by GreenRou",
+                title = stringResource(R.string.settings_version, appVersion ?: "—"),
+                subtitle = stringResource(R.string.settings_made_by),
             )
             SettingsLinkItem(
                 icon = Icons.Rounded.Code,
-                title = "GitHub",
-                subtitle = "green-rou/Kanata",
+                title = stringResource(R.string.settings_github),
+                subtitle = stringResource(R.string.settings_github_subtitle),
                 onClick = { uriHandler.openUri(GITHUB_URL) },
             )
             SettingsLinkItem(
                 icon = Icons.Rounded.VolunteerActivism,
-                title = "Support me on Ko-fi",
-                subtitle = "ko-fi.com/C0C31ZLH6K",
+                title = stringResource(R.string.settings_support),
+                subtitle = stringResource(R.string.settings_support_subtitle),
                 onClick = { uriHandler.openUri(DONATE_URL) },
             )
         }

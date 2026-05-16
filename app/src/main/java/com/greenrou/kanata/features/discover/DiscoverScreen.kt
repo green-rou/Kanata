@@ -21,6 +21,8 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.greenrou.kanata.R
 import com.greenrou.kanata.features.mood.MoodScreen
 import com.greenrou.kanata.features.random.RandomScreen
 
@@ -40,13 +42,13 @@ fun DiscoverScreen(
             Tab(
                 selected = selectedTab == 0,
                 onClick = { selectedTab = 0 },
-                text = { Text("By Mood") },
+                text = { Text(stringResource(R.string.tab_by_mood)) },
                 icon = { Icon(Icons.Rounded.AutoAwesome, contentDescription = null) },
             )
             Tab(
                 selected = selectedTab == 1,
                 onClick = { selectedTab = 1 },
-                text = { Text("Random") },
+                text = { Text(stringResource(R.string.tab_random)) },
                 icon = { Icon(Icons.Rounded.Shuffle, contentDescription = null) },
             )
         }

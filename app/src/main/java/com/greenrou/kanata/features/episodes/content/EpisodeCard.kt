@@ -26,9 +26,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.greenrou.kanata.R
 import com.greenrou.kanata.domain.model.DownloadStatus
 
 @Composable
@@ -79,7 +81,7 @@ internal fun EpisodeCard(
                 when (downloadStatus) {
                     DownloadStatus.COMPLETED -> Icon(
                         imageVector = Icons.Rounded.DownloadDone,
-                        contentDescription = "Downloaded",
+                        contentDescription = stringResource(R.string.episode_cd_downloaded),
                         tint = MaterialTheme.colorScheme.primary,
                     )
                     DownloadStatus.DOWNLOADING -> CircularProgressIndicator(
@@ -88,24 +90,24 @@ internal fun EpisodeCard(
                     )
                     DownloadStatus.QUEUED -> Icon(
                         imageVector = Icons.Rounded.HourglassTop,
-                        contentDescription = "Queued for download",
+                        contentDescription = stringResource(R.string.episode_cd_queued),
                         tint = MaterialTheme.colorScheme.secondary,
                     )
                     DownloadStatus.FAILED -> Icon(
                         imageVector = Icons.Rounded.ErrorOutline,
-                        contentDescription = "Download failed",
+                        contentDescription = stringResource(R.string.episode_cd_failed),
                         tint = MaterialTheme.colorScheme.error,
                     )
                     else -> Icon(
                         imageVector = Icons.Rounded.Download,
-                        contentDescription = "Download episode $number",
+                        contentDescription = stringResource(R.string.episode_cd_download, number),
                     )
                 }
             }
             FilledIconButton(onClick = onClick) {
                 Icon(
                     imageVector = Icons.Filled.PlayArrow,
-                    contentDescription = "Play episode $number",
+                    contentDescription = stringResource(R.string.episode_cd_play, number),
                 )
             }
         }

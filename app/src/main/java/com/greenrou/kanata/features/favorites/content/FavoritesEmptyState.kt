@@ -26,9 +26,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.greenrou.kanata.R
 
 @Composable
 internal fun FavoritesEmptyState(
@@ -64,21 +66,21 @@ internal fun FavoritesEmptyState(
             )
             Spacer(Modifier.height(20.dp))
             Text(
-                text = "No favorites yet",
+                text = stringResource(R.string.favorites_empty_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                text = "Anime you bookmark will appear here",
+                text = stringResource(R.string.favorites_empty_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
             Spacer(Modifier.height(24.dp))
             FilledTonalButton(onClick = onExploreClick) {
-                Text("Explore anime")
+                Text(stringResource(R.string.favorites_explore))
             }
         }
     }
