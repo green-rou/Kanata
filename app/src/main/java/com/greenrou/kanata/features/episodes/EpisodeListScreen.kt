@@ -1,20 +1,19 @@
 package com.greenrou.kanata.features.episodes
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -24,7 +23,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.greenrou.kanata.features.episodes.content.EpisodeCard
+import com.greenrou.kanata.features.episodes.content.EpisodeEmptyState
 import com.greenrou.kanata.features.episodes.model.EpisodeListEvent
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -53,7 +55,23 @@ fun EpisodeListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("$label — Episodes") },
+                title = {
+                    if (state.episodes.isNotEmpty()) {
+                        Column {
+                            Text(
+                                text = label,
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+                            Text(
+                                text = "${state.episodes.size} episodes",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    } else {
+                        Text(text = label)
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = { viewModel.handleEvent(EpisodeListEvent.BackClicked) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -72,33 +90,26 @@ fun EpisodeListScreen(
                 state.error != null -> Text(
                     text = "Error: ${state.error}",
                     color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.align(Alignment.Center),
+                    modifier = Modifier.align(Alignment.Center).padding(horizontal = 24.dp),
                 )
-                state.episodes.isEmpty() -> Text(
-                    text = "No episodes found",
-                    modifier = Modifier.align(Alignment.Center),
-                )
+                state.episodes.isEmpty() -> EpisodeEmptyState()
                 else -> {
                     val urls = state.episodes.map { it.url }
                     val titles = state.episodes.map { it.title }
-                    LazyColumn {
+                    LazyColumn(
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
                         itemsIndexed(state.episodes) { index, episode ->
-                            ListItem(
-                                headlineContent = { Text(episode.title) },
-                                trailingContent = {
-                                    Icon(
-                                        Icons.Filled.PlayArrow,
-                                        contentDescription = "Play",
-                                        tint = MaterialTheme.colorScheme.primary,
-                                    )
-                                },
-                                modifier = Modifier.clickable {
+                            EpisodeCard(
+                                number = index + 1,
+                                title = episode.title,
+                                onClick = {
                                     viewModel.handleEvent(
                                         EpisodeListEvent.EpisodeClicked(urls, titles, index)
                                     )
                                 },
                             )
-                            HorizontalDivider()
                         }
                     }
                 }

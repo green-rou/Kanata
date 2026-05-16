@@ -47,15 +47,19 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import com.greenrou.kanata.features.player.content.EpisodeSideButtons
+import com.greenrou.kanata.features.player.content.NextEpisodeCard
 import com.greenrou.kanata.features.player.content.PlayerErrorContent
+import com.greenrou.kanata.features.player.content.PlayerInfoSection
 import com.greenrou.kanata.features.player.content.PlayerStatusOverlay
 import com.greenrou.kanata.features.player.model.PlayerEvent
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
+@androidx.annotation.OptIn(UnstableApi::class)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlayerScreen(
@@ -101,6 +105,7 @@ fun PlayerScreen(
                     ctrl.systemBarsBehavior =
                         WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
                 } else {
+                    ctrl.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
                     ctrl.show(WindowInsetsCompat.Type.systemBars())
                 }
             }
@@ -111,8 +116,10 @@ fun PlayerScreen(
         onDispose {
             activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
             activity?.window?.let { w ->
-                WindowCompat.getInsetsController(w, w.decorView)
-                    .show(WindowInsetsCompat.Type.systemBars())
+                WindowCompat.getInsetsController(w, w.decorView).apply {
+                    systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
+                    show(WindowInsetsCompat.Type.systemBars())
+                }
             }
         }
     }
@@ -267,6 +274,17 @@ fun PlayerScreen(
                             onNext = { viewModel.handleEvent(PlayerEvent.NextEpisode) },
                         )
                         PlayerStatusOverlay(isLoading = state.isLoading, error = null)
+                    }
+                    PlayerInfoSection(
+                        title = state.title,
+                        currentIndex = state.currentIndex,
+                        episodeCount = state.episodeCount,
+                    )
+                    state.nextEpisodeTitle?.let { nextTitle ->
+                        NextEpisodeCard(
+                            title = nextTitle,
+                            onPlayNext = { viewModel.handleEvent(PlayerEvent.NextEpisode) },
+                        )
                     }
                 }
             }

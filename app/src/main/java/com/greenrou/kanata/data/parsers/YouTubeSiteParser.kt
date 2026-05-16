@@ -1,6 +1,7 @@
 package com.greenrou.kanata.data.parsers
 
 import com.greenrou.kanata.domain.model.Episode
+import com.greenrou.kanata.domain.model.VideoSourceType
 import com.greenrou.kanata.domain.parser.SiteParser
 import org.schabi.newpipe.extractor.ServiceList
 import org.schabi.newpipe.extractor.playlist.PlaylistInfo
@@ -14,6 +15,7 @@ class YouTubeSiteParser : SiteParser {
     private val service = ServiceList.YouTube
 
     override val label = "YouTube"
+    override val sourceType = VideoSourceType.YOUTUBE
 
     override fun supports(host: String) = "youtube" in host || "youtu.be" in host
 
