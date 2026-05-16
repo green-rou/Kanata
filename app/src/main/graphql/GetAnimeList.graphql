@@ -1,10 +1,10 @@
-query GetAnimeList($page: Int!, $perPage: Int!, $isAdult: Boolean) {
+query GetAnimeList($page: Int!, $perPage: Int!, $isAdult: Boolean, $search: String, $genres: [String], $formats: [MediaFormat]) {
   Page(page: $page, perPage: $perPage) {
     pageInfo {
       hasNextPage
       currentPage
     }
-    media(type: ANIME, isAdult: $isAdult, sort: [POPULARITY_DESC]) {
+    media(type: ANIME, isAdult: $isAdult, search: $search, genre_in: $genres, format_in: $formats, sort: [POPULARITY_DESC]) {
       id
       title {
         userPreferred

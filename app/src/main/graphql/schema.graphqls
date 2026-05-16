@@ -17,6 +17,7 @@ type Page {
     search: String
     genre_in: [String]
     tag_in: [String]
+    format_in: [MediaFormat]
   ): [Media]
 }
 
