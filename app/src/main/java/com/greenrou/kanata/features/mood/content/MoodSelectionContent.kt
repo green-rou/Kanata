@@ -27,6 +27,7 @@ import com.greenrou.kanata.features.mood.model.Mood
 internal fun MoodSelectionContent(
     onMoodSelected: (Mood) -> Unit,
     bottomPadding: Dp,
+    topPadding: Dp = 0.dp,
 ) {
     val gradientBrush = Brush.linearGradient(
         colors = listOf(
@@ -50,7 +51,7 @@ internal fun MoodSelectionContent(
             Column(
                 modifier = Modifier
                     .statusBarsPadding()
-                    .padding(vertical = 20.dp),
+                    .padding(top = topPadding + 20.dp, bottom = 20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {

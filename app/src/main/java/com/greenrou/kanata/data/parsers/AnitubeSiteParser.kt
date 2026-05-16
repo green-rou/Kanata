@@ -1,6 +1,7 @@
 package com.greenrou.kanata.data.parsers
 
 import com.greenrou.kanata.domain.model.Episode
+import com.greenrou.kanata.domain.model.VideoSourceType
 import com.greenrou.kanata.domain.parser.SiteParser
 import org.json.JSONObject
 import org.jsoup.Jsoup
@@ -13,6 +14,7 @@ class AnitubeSiteParser : SiteParser {
     private val animeUrlPattern = Regex("""/\d+-[^/]+\.html$""")
 
     override val label = "AniTube"
+    override val sourceType = VideoSourceType.ANITUBE
 
     override fun supports(host: String) = "anitube" in host
 

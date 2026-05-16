@@ -12,7 +12,7 @@ class RandomRepositoryImpl(
 ) : RandomRepository {
 
     override suspend fun getRandomAnime(): Result<Anime> = runCatching {
-        val randomPage = Random.nextInt(1, 51) // Random page from first 50
+        val randomPage = Random.nextInt(1, 51)
         val result = aniListRepository.getAnimeList(page = randomPage, perPage = 20)
         val list = result.getOrThrow().items
         if (list.isEmpty()) error("No anime found")

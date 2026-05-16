@@ -3,6 +3,7 @@ package com.greenrou.kanata.data.repository
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.greenrou.kanata.domain.repository.SettingsManager
 import kotlinx.coroutines.flow.Flow
@@ -16,6 +17,7 @@ class SettingsManagerImpl(private val context: Context) : SettingsManager {
         val SHOW_ADULT_CONTENT = booleanPreferencesKey("show_adult_content")
         val IS_DARK_THEME = booleanPreferencesKey("is_dark_theme")
         val COVER_FILLS_TOP_BAR = booleanPreferencesKey("cover_fills_top_bar")
+        val DOWNLOAD_FOLDER = stringPreferencesKey("download_folder")
     }
 
     override val showAdultContent: Flow<Boolean> = context.dataStore.data
@@ -33,6 +35,11 @@ class SettingsManagerImpl(private val context: Context) : SettingsManager {
             preferences[PreferencesKeys.COVER_FILLS_TOP_BAR] ?: true
         }
 
+    override val downloadFolder: Flow<String> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.DOWNLOAD_FOLDER] ?: ""
+        }
+
     override suspend fun setShowAdultContent(show: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.SHOW_ADULT_CONTENT] = show
@@ -48,6 +55,12 @@ class SettingsManagerImpl(private val context: Context) : SettingsManager {
     override suspend fun setCoverFillsTopBar(enabled: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.COVER_FILLS_TOP_BAR] = enabled
+        }
+    }
+
+    override suspend fun setDownloadFolder(path: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.DOWNLOAD_FOLDER] = path
         }
     }
 }

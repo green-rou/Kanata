@@ -2,15 +2,20 @@ package com.greenrou.kanata.features.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.greenrou.kanata.domain.model.AnimeFilter
+import com.greenrou.kanata.domain.model.AnimeFormat
 import com.greenrou.kanata.domain.usecase.AddFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.GetAnimeListUseCase
 import com.greenrou.kanata.domain.usecase.GetFavoritesUseCase
 import com.greenrou.kanata.domain.usecase.IsFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.RemoveFavoriteUseCase
+import com.greenrou.kanata.domain.usecase.SetDownloadFolderUseCase
 import com.greenrou.kanata.domain.repository.SettingsManager
 import com.greenrou.kanata.features.main.model.MainEvent
 import com.greenrou.kanata.features.main.model.MainState
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -30,10 +35,13 @@ class MainViewModel(
     private val isFavorite: IsFavoriteUseCase,
     private val getFavorites: GetFavoritesUseCase,
     private val settingsManager: SettingsManager,
+    private val setDownloadFolder: SetDownloadFolderUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(MainState())
     val state = _state.asStateFlow()
+
+    private var searchDebounceJob: Job? = null
 
     val favoriteIds: StateFlow<List<Int>> = getFavorites.observeIds()
         .stateIn(
@@ -70,6 +78,10 @@ class MainViewModel(
             }
             _state.update { it.copy(isDarkTheme = isDark, coverFillsTopBar = coverFills) }
         }.launchIn(viewModelScope)
+
+        settingsManager.downloadFolder
+            .onEach { folder -> _state.update { it.copy(downloadFolder = folder) } }
+            .launchIn(viewModelScope)
     }
 
     private fun toggleFavorite(animeId: Int) {
@@ -108,14 +120,70 @@ class MainViewModel(
             is MainEvent.AnimeClicked -> viewModelScope.launch {
                 _events.send(MainEvent.NavigateToDetail(event.animeId))
             }
+            MainEvent.ToggleSearch -> {
+                val wasActive = _state.value.isSearchActive
+                _state.update { it.copy(isSearchActive = !wasActive, searchQuery = "") }
+                if (wasActive) reloadWithCurrentFilters()
+            }
+            is MainEvent.SearchQueryChanged -> {
+                _state.update { it.copy(searchQuery = event.query) }
+                searchDebounceJob?.cancel()
+                searchDebounceJob = viewModelScope.launch {
+                    delay(400)
+                    reloadWithCurrentFilters()
+                }
+            }
+            MainEvent.ToggleFilterSheet -> _state.update { it.copy(isFilterSheetVisible = !it.isFilterSheetVisible) }
+            is MainEvent.GenreToggled -> {
+                val updated = _state.value.selectedGenres.toMutableSet()
+                if (!updated.add(event.genre)) updated.remove(event.genre)
+                _state.update { it.copy(selectedGenres = updated) }
+                reloadWithCurrentFilters()
+            }
+            is MainEvent.FormatToggled -> {
+                val updated = _state.value.selectedFormats.toMutableSet()
+                if (!updated.add(event.format)) updated.remove(event.format)
+                _state.update { it.copy(selectedFormats = updated) }
+                reloadWithCurrentFilters()
+            }
+            MainEvent.ClearFilters -> {
+                _state.update { it.copy(selectedGenres = emptySet(), selectedFormats = emptySet()) }
+                reloadWithCurrentFilters()
+            }
+            is MainEvent.SetDownloadFolder -> viewModelScope.launch {
+                setDownloadFolder(event.uri)
+            }
             else -> Unit
         }
     }
 
-    private fun loadAnime(showAdultContent: Boolean = _state.value.showAdultContent) {
+    private fun reloadWithCurrentFilters() {
+        val s = _state.value
+        loadAnime(
+            showAdultContent = s.showAdultContent,
+            filter = AnimeFilter(
+                search = s.searchQuery,
+                genres = s.selectedGenres.toList(),
+                formats = s.selectedFormats.toList(),
+            ),
+        )
+    }
+
+    private fun currentFilter() = with(_state.value) {
+        AnimeFilter(
+            search = searchQuery,
+            genres = selectedGenres.toList(),
+            formats = selectedFormats.toList(),
+        )
+    }
+
+    private fun loadAnime(
+        showAdultContent: Boolean = _state.value.showAdultContent,
+        filter: AnimeFilter = currentFilter(),
+    ) {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
-            getAnimeList(page = 1, showAdultContent = showAdultContent)
+            getAnimeList(page = 1, showAdultContent = showAdultContent, filter = filter)
                 .onSuccess { page ->
                     _state.update {
                         it.copy(
@@ -136,7 +204,7 @@ class MainViewModel(
     private fun refreshAnime() {
         viewModelScope.launch {
             _state.update { it.copy(isRefreshing = true, error = null) }
-            getAnimeList(page = 1, showAdultContent = _state.value.showAdultContent)
+            getAnimeList(page = 1, showAdultContent = _state.value.showAdultContent, filter = currentFilter())
                 .onSuccess { page ->
                     _state.update {
                         it.copy(
@@ -161,7 +229,8 @@ class MainViewModel(
             _state.update { it.copy(isLoadingMore = true) }
             getAnimeList(
                 page = current.currentPage + 1,
-                showAdultContent = current.showAdultContent
+                showAdultContent = current.showAdultContent,
+                filter = currentFilter(),
             )
                 .onSuccess { page ->
                     _state.update {

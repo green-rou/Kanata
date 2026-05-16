@@ -13,18 +13,21 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Image
+import androidx.compose.material.icons.rounded.Stars
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.greenrou.kanata.features.mood.MoodScreen
 import com.greenrou.kanata.features.random.content.PillTabRow
+import com.greenrou.kanata.features.random.content.PillTabTotalHeight
 import com.greenrou.kanata.features.random.content.RandomAnimePage
 import com.greenrou.kanata.features.random.content.RandomImagePage
 import com.greenrou.kanata.features.random.model.RandomEvent
@@ -39,9 +42,13 @@ fun RandomScreen(
     viewModel: RandomImageViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val pagerState = rememberPagerState(pageCount = { 2 })
+    val pagerState = rememberPagerState(pageCount = { 3 })
     val scope = rememberCoroutineScope()
     var isImmersive by remember { mutableStateOf(false) }
+
+    LaunchedEffect(pagerState.currentPage) {
+        if (pagerState.currentPage != 2) isImmersive = false
+    }
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
@@ -58,7 +65,15 @@ fun RandomScreen(
             modifier = Modifier.fillMaxSize(),
         ) { page ->
             when (page) {
-                0 -> RandomAnimePage(
+                0 -> MoodScreen(
+                    onNavigateToDetails = onNavigateToDetails,
+                    contentPadding = PaddingValues(
+                        top = PillTabTotalHeight,
+                        bottom = contentPadding.calculateBottomPadding(),
+                    ),
+                    modifier = Modifier.fillMaxSize(),
+                )
+                1 -> RandomAnimePage(
                     anime = state.randomAnime,
                     isFavorite = state.isAnimeFavorite,
                     isLoading = state.isAnimeLoading,
@@ -68,7 +83,7 @@ fun RandomScreen(
                     onAnimeClick = { viewModel.handleEvent(RandomEvent.AnimeClicked(it)) },
                     bottomPadding = contentPadding.calculateBottomPadding(),
                 )
-                1 -> RandomImagePage(
+                else -> RandomImagePage(
                     imageUrl = state.imageUrl,
                     isLoading = state.isImageLoading,
                     error = state.imageError,
@@ -93,7 +108,8 @@ fun RandomScreen(
                 currentPage = pagerState.currentPage,
                 pageOffset = pagerState.currentPageOffsetFraction,
                 tabs = listOf(
-                    Icons.Rounded.AutoAwesome to "Random Anime",
+                    Icons.Rounded.Stars to "By Mood",
+                    Icons.Rounded.AutoAwesome to "Random",
                     Icons.Rounded.Image to "Wallpaper",
                 ),
                 onTabClick = { scope.launch { pagerState.animateScrollToPage(it) } },

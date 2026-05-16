@@ -20,7 +20,7 @@ class SearchRepositoryImpl(
             .filter { parser -> !parser.isAdultOnly || showAdult }
             .forEach { parser ->
                 parser.search(query).onSuccess { url ->
-                    sources.add(VideoSource(parser.label, url))
+                    sources.add(VideoSource(parser.label, url, parser.sourceType))
                 }
             }
         sources

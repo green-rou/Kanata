@@ -32,26 +32,56 @@ fun NavGraph(backStack: SnapshotStateList<Any>) {
             selectedTabName = selectedTabName,
             onTabSelected = { selectedTabName = it },
             onNavigateToDetails = { id -> backStack.add(AnimeDetailsRoute(id)) },
+            onNavigateToPlayer = { path, title ->
+                backStack.add(PlayerRoute(listOf(path), listOf(title), 0))
+            },
+            onOpenEpisodeList = { animePageUrl, sourceName, animeTitle ->
+                backStack.add(EpisodeListRoute(animePageUrl, sourceName, animeTitle))
+            },
+            onNavigateToAnimeDetails = { animeId ->
+                backStack.add(AnimeDetailsRoute(animeId))
+            },
         )
         is AnimeDetailsRoute -> AnimeDetailsScreen(
             animeId = current.animeId,
             onNavigateBack = { backStack.removeAt(backStack.size - 1) },
-            onNavigateToEpisodeList = { source ->
-                backStack.add(EpisodeListRoute(source.animePageUrl, source.label))
+            onNavigateToEpisodeList = { source, animeTitle ->
+                backStack.add(EpisodeListRoute(source.animePageUrl, source.label, animeTitle, current.animeId))
+            },
+            onNavigateToOfflinePlayer = { localFilePaths, titles ->
+                backStack.add(
+                    PlayerRoute(
+                        episodeUrls = localFilePaths,
+                        episodeTitles = titles,
+                        startIndex = 0,
+                    )
+                )
             },
         )
         is EpisodeListRoute -> EpisodeListScreen(
             animePageUrl = current.animePageUrl,
             label = current.label,
+            animeTitle = current.animeTitle,
+            animeId = current.animeId,
             onNavigateBack = { backStack.removeAt(backStack.size - 1) },
             onEpisodeClick = { urls, titles, index ->
-                backStack.add(PlayerRoute(urls, titles, index))
+                backStack.add(
+                    PlayerRoute(
+                        episodeUrls = urls,
+                        episodeTitles = titles,
+                        startIndex = index,
+                        animeTitle = current.animeTitle,
+                        sourceName = current.label,
+                    )
+                )
             },
         )
         is PlayerRoute -> PlayerScreen(
             episodeUrls = current.episodeUrls,
             episodeTitles = current.episodeTitles,
             startIndex = current.startIndex,
+            animeTitle = current.animeTitle,
+            sourceName = current.sourceName,
             onNavigateBack = { backStack.removeAt(backStack.size - 1) },
         )
     }

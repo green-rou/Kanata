@@ -1,6 +1,7 @@
 package com.greenrou.kanata.data.parsers
 
 import com.greenrou.kanata.domain.model.Episode
+import com.greenrou.kanata.domain.model.VideoSourceType
 import com.greenrou.kanata.domain.parser.SiteParser
 import org.jsoup.Jsoup
 import java.net.URLEncoder
@@ -10,6 +11,7 @@ class AniwaveSiteParser : SiteParser {
     private val userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
 
     override val label = "Aniwave"
+    override val sourceType = VideoSourceType.ANIWAVE
 
     override fun supports(host: String) = "aniwave" in host
 

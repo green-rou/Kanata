@@ -31,11 +31,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -47,30 +49,38 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import com.greenrou.kanata.features.player.content.EpisodeSideButtons
+import com.greenrou.kanata.features.player.content.NextEpisodeCard
 import com.greenrou.kanata.features.player.content.PlayerErrorContent
+import com.greenrou.kanata.features.player.content.PlayerInfoSection
 import com.greenrou.kanata.features.player.content.PlayerStatusOverlay
 import com.greenrou.kanata.features.player.model.PlayerEvent
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
+@androidx.annotation.OptIn(UnstableApi::class)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlayerScreen(
     episodeUrls: List<String>,
     episodeTitles: List<String>,
     startIndex: Int,
+    animeTitle: String = "",
+    sourceName: String = "",
     onNavigateBack: () -> Unit,
     viewModel: PlayerViewModel = koinViewModel(
         key = episodeUrls.firstOrNull() ?: "player",
-        parameters = { parametersOf(episodeUrls, episodeTitles, startIndex) },
+        parameters = { parametersOf(episodeUrls, episodeTitles, startIndex, animeTitle, sourceName) },
     ),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val activity = context as? Activity
+
+    val isDarkTheme by rememberUpdatedState(MaterialTheme.colorScheme.background.luminance() < 0.5f)
 
     var isFullscreen by remember { mutableStateOf(false) }
     var controlsVisible by remember { mutableStateOf(true) }
@@ -101,7 +111,9 @@ fun PlayerScreen(
                     ctrl.systemBarsBehavior =
                         WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
                 } else {
+                    ctrl.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
                     ctrl.show(WindowInsetsCompat.Type.systemBars())
+                    ctrl.isAppearanceLightNavigationBars = !isDarkTheme
                 }
             }
         }
@@ -111,8 +123,11 @@ fun PlayerScreen(
         onDispose {
             activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
             activity?.window?.let { w ->
-                WindowCompat.getInsetsController(w, w.decorView)
-                    .show(WindowInsetsCompat.Type.systemBars())
+                WindowCompat.getInsetsController(w, w.decorView).apply {
+                    systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
+                    show(WindowInsetsCompat.Type.systemBars())
+                    isAppearanceLightNavigationBars = !isDarkTheme
+                }
             }
         }
     }
@@ -267,6 +282,28 @@ fun PlayerScreen(
                             onNext = { viewModel.handleEvent(PlayerEvent.NextEpisode) },
                         )
                         PlayerStatusOverlay(isLoading = state.isLoading, error = null)
+                    }
+                    PlayerInfoSection(
+                        title = state.title,
+                        currentIndex = state.currentIndex,
+                        episodeCount = state.episodeCount,
+                        downloadStatus = state.currentEpisodeDownloadStatus,
+                        onDownloadClick = {
+                            viewModel.handleEvent(
+                                PlayerEvent.DownloadCurrentEpisode(
+                                    episodePageUrl = viewModel.currentEpisodePageUrl(),
+                                    episodeTitle = viewModel.currentEpisodeTitle(),
+                                    animeTitle = viewModel.animeTitle(),
+                                    sourceName = viewModel.sourceName(),
+                                )
+                            )
+                        },
+                    )
+                    state.nextEpisodeTitle?.let { nextTitle ->
+                        NextEpisodeCard(
+                            title = nextTitle,
+                            onPlayNext = { viewModel.handleEvent(PlayerEvent.NextEpisode) },
+                        )
                     }
                 }
             }

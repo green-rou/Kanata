@@ -5,8 +5,10 @@ import com.apollographql.apollo.api.Optional
 import com.greenrou.kanata.data.remote.anilist.GetAnimeByMoodQuery
 import com.greenrou.kanata.data.remote.anilist.GetAnimeDetailQuery
 import com.greenrou.kanata.data.remote.anilist.GetAnimeListQuery
+import com.greenrou.kanata.data.remote.anilist.type.MediaFormat
 import com.greenrou.kanata.data.remote.dto.stripHtml
 import com.greenrou.kanata.domain.model.Anime
+import com.greenrou.kanata.domain.model.AnimeFilter
 import com.greenrou.kanata.domain.model.AnimeListPage
 import com.greenrou.kanata.domain.repository.AniListRepository
 
@@ -14,10 +16,18 @@ class AniListRepositoryImpl(
     private val apolloClient: ApolloClient,
 ) : AniListRepository {
 
-    override suspend fun getAnimeList(page: Int, perPage: Int, showAdultContent: Boolean): Result<AnimeListPage> = runCatching {
+    override suspend fun getAnimeList(page: Int, perPage: Int, showAdultContent: Boolean, filter: AnimeFilter): Result<AnimeListPage> = runCatching {
         val isAdult = if (showAdultContent) Optional.Present(true) else Optional.Present(false)
+        val apolloFormats = filter.formats.map { MediaFormat.valueOf(it.name) }
         val response = apolloClient
-            .query(GetAnimeListQuery(page = page, perPage = perPage, isAdult = isAdult))
+            .query(GetAnimeListQuery(
+                page = page,
+                perPage = perPage,
+                isAdult = isAdult,
+                search = Optional.presentIfNotNull(filter.search.takeIf { it.isNotBlank() }),
+                genres = Optional.presentIfNotNull(filter.genres.ifEmpty { null }),
+                formats = Optional.presentIfNotNull(apolloFormats.ifEmpty { null }),
+            ))
             .execute()
         if (!response.errors.isNullOrEmpty()) {
             error(response.errors!!.first().message ?: "GraphQL error")
@@ -54,8 +64,8 @@ class AniListRepositoryImpl(
             .query(GetAnimeByMoodQuery(
                 page = page,
                 perPage = perPage,
-                genres = Optional.presentIfNotNull(genres),
-                tags = Optional.presentIfNotNull(tags),
+                genres = Optional.presentIfNotNull(genres?.ifEmpty { null }),
+                tags = Optional.presentIfNotNull(tags?.ifEmpty { null }),
                 isAdult = isAdult
             ))
             .execute()

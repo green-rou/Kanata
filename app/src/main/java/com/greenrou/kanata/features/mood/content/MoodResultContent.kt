@@ -37,13 +37,14 @@ internal fun MoodResultContent(
     onBack: () -> Unit,
     onAnimeClick: (Int) -> Unit,
     bottomPadding: Dp,
+    topPadding: Dp = 0.dp,
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .statusBarsPadding()
-                .padding(horizontal = 8.dp, vertical = 4.dp),
+                .padding(top = topPadding + 4.dp, start = 8.dp, end = 8.dp, bottom = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = onBack) {
