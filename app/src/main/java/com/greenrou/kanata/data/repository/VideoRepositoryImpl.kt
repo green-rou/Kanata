@@ -107,26 +107,27 @@ class VideoRepositoryImpl(
                 return@runCatching extractKodikStream(yref, siteUrl.substringBefore("?"))
             }
 
-            val cleanPageUrl = siteUrl.substringBefore("?")
-            val document = Jsoup.connect(cleanPageUrl).userAgent(userAgent).get()
+            val document = Jsoup.connect(siteUrl.substringBefore("?")).userAgent(userAgent).get()
 
             val standardIframe = document
                 .select("iframe[src*=/serial/], iframe[src*=/video/], iframe[src*=kodik]")
                 .firstOrNull()?.attr("src")
-            if (standardIframe != null) {
+            if (standardIframe != null)
                 return@runCatching tryExtractStream(siteUrl, resolveUrl(siteUrl, standardIframe))
-            }
 
             val litespeedIframe = document.select("iframe[data-litespeed-src]").firstOrNull()
-            if (litespeedIframe != null) {
+            if (litespeedIframe != null)
                 return@runCatching tryExtractStream(siteUrl, litespeedIframe.attr("data-litespeed-src"))
-            }
 
             val videoSrc = document.select("video source, video").firstOrNull()?.attr("src")
             if (videoSrc != null) return@runCatching videoSrc
 
             val inlineStream = Regex("""https?://[^\s"']+\.(m3u8|mp4)[^\s"']*""").find(document.html())?.value
             if (inlineStream != null) return@runCatching inlineStream
+
+            val genericIframe = document.select("iframe[src^=http]").firstOrNull()?.attr("src")
+            if (genericIframe != null)
+                return@runCatching tryExtractStream(siteUrl, genericIframe)
 
             val xfplayer = document
                 .select(".tabs-block__content:not(.d-none):not(.hidden) .xfplayer[data-params]")
@@ -150,6 +151,8 @@ class VideoRepositoryImpl(
     }
 
     private fun tryExtractStream(referer: String, playerUrl: String): String {
+        if ("dramavideo.se" in playerUrl) return extractDramaVideoStream(referer, playerUrl)
+
         if (isKodikUrl(playerUrl)) {
             runCatching { extractKodikStream(referer, playerUrl) }
                 .onSuccess { return it }
@@ -437,6 +440,35 @@ class VideoRepositoryImpl(
     private fun isDirectStreamUrl(url: String): Boolean {
         val path = url.substringBefore("?").substringBefore("#").lowercase()
         return path.endsWith(".m3u8") || path.endsWith(".mp4") || path.endsWith(".mpd") || path.endsWith(".mkv")
+    }
+
+    private fun extractDramaVideoStream(referer: String, pageUrl: String): String {
+        val doc = Jsoup.connect(pageUrl)
+            .userAgent(userAgent)
+            .header("Referer", referer)
+            .get()
+
+        val server = doc.select("li.linkserver[data-video][data-provider]").firstOrNull()
+            ?: error("dramavideo.se: no server element found on $pageUrl")
+
+        val code = server.attr("data-video")
+        val sv = server.attr("data-provider")
+        val playerUrl = "https://player.dramavideo.se/?id=${java.net.URLEncoder.encode(code, "UTF-8")}&sv=${java.net.URLEncoder.encode(sv, "UTF-8")}"
+
+        val playerDoc = Jsoup.connect(playerUrl)
+            .userAgent(userAgent)
+            .header("Referer", pageUrl)
+            .header("Origin", "https://dramavideo.se")
+            .get()
+
+        val html = playerDoc.html()
+        Regex("""https?://[^\s"']+\.m3u8[^\s"']*""").find(html)?.value?.let { return it }
+        Regex("""https?://[^\s"']+\.mp4[^\s"']*""").find(html)?.value?.let { return it }
+
+        val nestedIframe = playerDoc.select("iframe[src^=http]").firstOrNull()?.attr("src")
+        if (nestedIframe != null) return tryExtractStream(playerUrl, nestedIframe)
+
+        error("dramavideo.se: no stream found in player page")
     }
 
     private fun extractKodikStream(referer: String, playerUrl: String): String {
