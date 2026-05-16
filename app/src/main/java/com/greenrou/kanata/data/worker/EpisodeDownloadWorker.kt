@@ -3,6 +3,7 @@ package com.greenrou.kanata.data.worker
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.pm.ServiceInfo
 import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
@@ -223,7 +224,7 @@ class EpisodeDownloadWorker(
             .setSmallIcon(android.R.drawable.stat_sys_download)
             .setOngoing(true)
             .build()
-        return ForegroundInfo(FOREGROUND_NOTIFICATION_ID, notification)
+        return ForegroundInfo(FOREGROUND_NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
     }
 
 }
