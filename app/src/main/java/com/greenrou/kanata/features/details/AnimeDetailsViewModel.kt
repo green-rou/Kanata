@@ -2,6 +2,7 @@ package com.greenrou.kanata.features.details
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.greenrou.kanata.domain.model.Anime
 import com.greenrou.kanata.domain.repository.SettingsManager
 import com.greenrou.kanata.domain.usecase.AddFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.GetAnimeByIdUseCase
@@ -95,7 +96,7 @@ class AnimeDetailsViewModel(
             getAnimeById(animeId)
                 .onSuccess { anime ->
                     _state.update { it.copy(isLoading = false, anime = anime) }
-                    searchOnExternal(anime.title)
+                    searchOnExternal(anime)
                     observeDownloadedCount(anime.title)
                 }
                 .onFailure { e ->
@@ -114,10 +115,15 @@ class AnimeDetailsViewModel(
             .launchIn(viewModelScope)
     }
 
-    private fun searchOnExternal(title: String) {
+    private fun searchOnExternal(anime: Anime) {
         viewModelScope.launch {
             _state.update { it.copy(isSearching = true) }
-            val sources = searchExternalAnime(title)
+            val titles = listOfNotNull(
+                anime.titleRomaji.takeIf { it.isNotBlank() },
+                anime.titleEnglish.takeIf { it.isNotBlank() },
+                anime.title.takeIf { it.isNotBlank() },
+            )
+            val sources = searchExternalAnime(titles)
             _state.update { it.copy(isSearching = false, videoSources = sources) }
         }
     }

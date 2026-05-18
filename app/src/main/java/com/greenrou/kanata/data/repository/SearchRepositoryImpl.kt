@@ -13,14 +13,18 @@ class SearchRepositoryImpl(
     private val settingsManager: SettingsManager,
 ) : SearchRepository {
 
-    override suspend fun searchAll(query: String): List<VideoSource> = withContext(Dispatchers.IO) {
+    override suspend fun searchAll(titles: List<String>): List<VideoSource> = withContext(Dispatchers.IO) {
         val showAdult = settingsManager.showAdultContent.first()
         val sources = mutableListOf<VideoSource>()
         parsers
             .filter { parser -> !parser.isAdultOnly || showAdult }
             .forEach { parser ->
-                parser.search(query).onSuccess { url ->
-                    sources.add(VideoSource(parser.label, url, parser.sourceType))
+                for (title in titles) {
+                    val result = parser.search(title)
+                    if (result.isSuccess) {
+                        result.onSuccess { url -> sources.add(VideoSource(parser.label, url, parser.sourceType)) }
+                        break
+                    }
                 }
             }
         sources
