@@ -74,7 +74,7 @@ fun PlayerScreen(
     sourceName: String = "",
     onNavigateBack: () -> Unit,
     viewModel: PlayerViewModel = koinViewModel(
-        key = episodeUrls.firstOrNull() ?: "player",
+        key = "${episodeUrls.firstOrNull() ?: "player"}_$startIndex",
         parameters = { parametersOf(episodeUrls, episodeTitles, startIndex, animeTitle, sourceName) },
     ),
 ) {

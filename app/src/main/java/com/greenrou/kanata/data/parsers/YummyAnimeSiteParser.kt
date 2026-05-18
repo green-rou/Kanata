@@ -61,7 +61,8 @@ class YummyAnimeSiteParser : SiteParser {
                             season.keys().forEach { epKey ->
                                 val epLabel = if (playlist.length() > 1)
                                     "S${seasonKey}E${epKey}" else "Episode $epKey"
-                                episodes.add(Episode(epLabel, pageUrl))
+                                val epUrl = "$pageUrl?kodikSeason=$seasonKey&kodikEpisode=$epKey"
+                                episodes.add(Episode(epLabel, epUrl))
                             }
                         }
                         if (episodes.isNotEmpty()) return episodes

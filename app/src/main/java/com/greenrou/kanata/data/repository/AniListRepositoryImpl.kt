@@ -106,6 +106,8 @@ class AniListRepositoryImpl(
     private fun GetAnimeDetailQuery.Media.toDetailDomain() = Anime(
         id = id,
         title = title?.userPreferred ?: "",
+        titleRomaji = title?.romaji ?: "",
+        titleEnglish = title?.english ?: "",
         type = format?.rawValue ?: "",
         imageUrl = coverImage?.large ?: "",
         score = (averageScore ?: 0) / 10.0,
