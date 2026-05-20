@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -45,8 +46,8 @@ fun NavGraph(backStack: SnapshotStateList<Any>) {
         is AnimeDetailsRoute -> AnimeDetailsScreen(
             animeId = current.animeId,
             onNavigateBack = { backStack.removeAt(backStack.size - 1) },
-            onNavigateToEpisodeList = { source, animeTitle ->
-                backStack.add(EpisodeListRoute(source.animePageUrl, source.label, animeTitle, current.animeId))
+            onNavigateToEpisodeList = { source, animeTitle, episodeCount ->
+                backStack.add(EpisodeListRoute(source.animePageUrl, source.label, animeTitle, current.animeId, episodeCount))
             },
             onNavigateToOfflinePlayer = { localFilePaths, titles ->
                 backStack.add(
@@ -58,31 +59,36 @@ fun NavGraph(backStack: SnapshotStateList<Any>) {
                 )
             },
         )
-        is EpisodeListRoute -> EpisodeListScreen(
-            animePageUrl = current.animePageUrl,
-            label = current.label,
-            animeTitle = current.animeTitle,
-            animeId = current.animeId,
-            onNavigateBack = { backStack.removeAt(backStack.size - 1) },
-            onEpisodeClick = { urls, titles, index ->
-                backStack.add(
-                    PlayerRoute(
-                        episodeUrls = urls,
-                        episodeTitles = titles,
-                        startIndex = index,
-                        animeTitle = current.animeTitle,
-                        sourceName = current.label,
+        is EpisodeListRoute -> key(current) {
+            EpisodeListScreen(
+                animePageUrl = current.animePageUrl,
+                label = current.label,
+                animeTitle = current.animeTitle,
+                animeId = current.animeId,
+                episodeCount = current.episodeCount,
+                onNavigateBack = { backStack.removeAt(backStack.size - 1) },
+                onEpisodeClick = { urls, titles, index ->
+                    backStack.add(
+                        PlayerRoute(
+                            episodeUrls = urls,
+                            episodeTitles = titles,
+                            startIndex = index,
+                            animeTitle = current.animeTitle,
+                            sourceName = current.label,
+                        )
                     )
-                )
-            },
-        )
-        is PlayerRoute -> PlayerScreen(
-            episodeUrls = current.episodeUrls,
-            episodeTitles = current.episodeTitles,
-            startIndex = current.startIndex,
-            animeTitle = current.animeTitle,
-            sourceName = current.sourceName,
-            onNavigateBack = { backStack.removeAt(backStack.size - 1) },
-        )
+                },
+            )
+        }
+        is PlayerRoute -> key(current) {
+            PlayerScreen(
+                episodeUrls = current.episodeUrls,
+                episodeTitles = current.episodeTitles,
+                startIndex = current.startIndex,
+                animeTitle = current.animeTitle,
+                sourceName = current.sourceName,
+                onNavigateBack = { backStack.removeAt(backStack.size - 1) },
+            )
+        }
     }
 }

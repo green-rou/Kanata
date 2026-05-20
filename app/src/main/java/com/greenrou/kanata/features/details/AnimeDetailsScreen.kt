@@ -41,7 +41,7 @@ import org.koin.androidx.compose.koinViewModel
 fun AnimeDetailsScreen(
     animeId: Int,
     onNavigateBack: () -> Unit,
-    onNavigateToEpisodeList: (VideoSource, animeTitle: String) -> Unit,
+    onNavigateToEpisodeList: (VideoSource, animeTitle: String, episodeCount: Int) -> Unit,
     onNavigateToOfflinePlayer: (localFilePaths: List<String>, titles: List<String>) -> Unit,
     viewModel: AnimeDetailsViewModel = koinViewModel(key = animeId.toString()),
 ) {
@@ -58,7 +58,7 @@ fun AnimeDetailsScreen(
                 AnimeDetailsEvent.NavigateBack -> onNavigateBack()
                 is AnimeDetailsEvent.ShowError -> snackbarHostState.showSnackbar(event.message)
                 is AnimeDetailsEvent.NavigateToEpisodeList ->
-                    onNavigateToEpisodeList(event.source, event.animeTitle)
+                    onNavigateToEpisodeList(event.source, event.animeTitle, event.episodeCount)
                 is AnimeDetailsEvent.NavigateToOfflinePlayer -> {
                     val paths = event.items.mapNotNull { it.localFilePath }.map { "file://$it" }
                     val titles = event.items.map { it.episodeTitle }

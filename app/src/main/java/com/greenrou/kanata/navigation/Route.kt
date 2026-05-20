@@ -14,6 +14,7 @@ data class EpisodeListRoute(
     val label: String,
     val animeTitle: String = "",
     val animeId: Int = 0,
+    val episodeCount: Int = 0,
 )
 
 @Serializable

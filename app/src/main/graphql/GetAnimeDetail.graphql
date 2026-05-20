@@ -4,6 +4,7 @@ query GetAnimeDetail($id: Int!) {
     title {
       userPreferred
       english
+      romaji
     }
     description(asHtml: false)
     coverImage {

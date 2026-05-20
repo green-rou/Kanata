@@ -30,15 +30,19 @@ class AniListRepositoryImpl(
             ))
             .execute()
         if (!response.errors.isNullOrEmpty()) {
-            error(response.errors!!.first().message ?: "GraphQL error")
+            val errorMsg = response.errors!!.first().message ?: "GraphQL error"
+            error(errorMsg)
         }
         val pageData = response.data?.Page
         val media = pageData?.media?.filterNotNull() ?: emptyList()
+        if (media.isEmpty()) {
+        }
         AnimeListPage(
             items = media.map { it.toListItemDomain() },
             hasNextPage = pageData?.pageInfo?.hasNextPage ?: false,
             currentPage = pageData?.pageInfo?.currentPage ?: page,
         )
+    }.onFailure { e ->
     }
 
     override suspend fun getAnimeById(id: Int): Result<Anime> = runCatching {
@@ -106,6 +110,8 @@ class AniListRepositoryImpl(
     private fun GetAnimeDetailQuery.Media.toDetailDomain() = Anime(
         id = id,
         title = title?.userPreferred ?: "",
+        titleRomaji = title?.romaji ?: "",
+        titleEnglish = title?.english ?: "",
         type = format?.rawValue ?: "",
         imageUrl = coverImage?.large ?: "",
         score = (averageScore ?: 0) / 10.0,

@@ -6,6 +6,8 @@ import kotlinx.serialization.Serializable
 data class Anime(
     val id: Int,
     val title: String,
+    val titleRomaji: String = "",
+    val titleEnglish: String = "",
     val type: String,
     val imageUrl: String,
     val score: Double,

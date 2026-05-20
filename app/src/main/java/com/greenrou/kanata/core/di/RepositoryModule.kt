@@ -1,6 +1,9 @@
 package com.greenrou.kanata.core.di
 
 import com.greenrou.kanata.data.parsers.ArchiveOrgSiteParser
+import com.greenrou.kanata.data.parsers.AstarSiteParser
+import com.greenrou.kanata.data.parsers.HentasisSiteParser
+import com.greenrou.kanata.data.parsers.HentaizSiteParser
 import com.greenrou.kanata.data.parsers.MikaiSiteParser
 import com.greenrou.kanata.data.parsers.YummyAnimeSiteParser
 import com.greenrou.kanata.data.parsers.YouTubeSiteParser
@@ -26,8 +29,11 @@ val repositoryModule = module {
         listOf(
             YummyAnimeSiteParser(),
             MikaiSiteParser(),
+            AstarSiteParser(),
             YouTubeSiteParser(),
             ArchiveOrgSiteParser(),
+            HentasisSiteParser(),
+            HentaizSiteParser(),
         )
     }
     single<AnimeRepository> { AnimeRepositoryImpl(get()) }

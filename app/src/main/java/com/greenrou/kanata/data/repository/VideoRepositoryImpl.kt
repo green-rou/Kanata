@@ -7,6 +7,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import com.greenrou.kanata.domain.model.VideoStream
 import com.greenrou.kanata.domain.repository.VideoRepository
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
@@ -21,7 +22,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.schabi.newpipe.extractor.ServiceList
 import org.schabi.newpipe.extractor.stream.StreamInfo
-import org.schabi.newpipe.extractor.stream.VideoStream
+import org.schabi.newpipe.extractor.stream.VideoStream as NewPipeVideoStream
 import java.net.InetAddress
 import java.net.URL
 import java.net.URLDecoder
@@ -86,51 +87,79 @@ class VideoRepositoryImpl(
                 }
                 null
             }.getOrNull()
-            if (ip != null) return ip
+            if (ip != null) {
+                return ip
+            }
         }
         return null
     }
 
-    override suspend fun getVideoStream(siteUrl: String): Result<String> = withContext(Dispatchers.IO) {
+    override suspend fun getVideoStream(siteUrl: String): Result<VideoStream> = withContext(Dispatchers.IO) {
         runCatching {
-            if (isDirectStreamUrl(siteUrl)) return@runCatching siteUrl
 
-            if (isYouTubeUrl(siteUrl)) return@runCatching extractYouTubeStream(siteUrl)
+            if (isDirectStreamUrl(siteUrl)) {
+                return@runCatching VideoStream(siteUrl)
+            }
 
-            if (isHanimeUrl(siteUrl)) return@runCatching extractHanimeStream(siteUrl)
+            if (isYouTubeUrl(siteUrl)) {
+                return@runCatching VideoStream(extractYouTubeStream(siteUrl))
+            }
 
-            if (isArchiveOrgDetailsUrl(siteUrl)) return@runCatching extractArchiveOrgStream(siteUrl)
+            if (isHanimeUrl(siteUrl)) {
+                return@runCatching VideoStream(extractHanimeStream(siteUrl))
+            }
+
+            if (isArchiveOrgDetailsUrl(siteUrl)) {
+                return@runCatching VideoStream(extractArchiveOrgStream(siteUrl))
+            }
 
             if (isKodikUrl(siteUrl)) {
                 val params = parseQueryParams(siteUrl)
                 val yref = params["yref"] ?: siteUrl
-                return@runCatching extractKodikStream(yref, siteUrl.substringBefore("?"))
+                return@runCatching VideoStream(extractKodikStream(yref, siteUrl.substringBefore("?")))
             }
 
             val document = Jsoup.connect(siteUrl.substringBefore("?")).userAgent(userAgent).get()
 
-            val standardIframe = document
+            val standardIframeUrl = document
                 .select("iframe[src*=/serial/], iframe[src*=/video/], iframe[src*=kodik]")
-                .firstOrNull()?.attr("src")
-            if (standardIframe != null)
-                return@runCatching tryExtractStream(siteUrl, resolveUrl(siteUrl, standardIframe))
+                .firstOrNull()?.attr("src")?.let { resolveUrl(siteUrl, it) }
+            if (standardIframeUrl != null) {
+                return@runCatching VideoStream(tryExtractStream(siteUrl, standardIframeUrl), mapOf("Referer" to standardIframeUrl))
+            }
 
-            val litespeedIframe = document.select("iframe[data-litespeed-src]").firstOrNull()
-            if (litespeedIframe != null)
-                return@runCatching tryExtractStream(siteUrl, litespeedIframe.attr("data-litespeed-src"))
+            val litespeedSrc = document.select("iframe[data-litespeed-src]").firstOrNull()?.attr("data-litespeed-src")
+            if (litespeedSrc != null) {
+                return@runCatching VideoStream(tryExtractStream(siteUrl, litespeedSrc), mapOf("Referer" to litespeedSrc))
+            }
 
             val videoSrc = document.select("video source, video").firstOrNull()?.attr("src")
-            if (videoSrc != null) return@runCatching videoSrc
+            if (videoSrc != null) {
+                return@runCatching VideoStream(videoSrc, mapOf("Referer" to siteUrl))
+            }
 
             val inlineStream = Regex("""https?://[^\s"']+\.(m3u8|mp4)[^\s"']*""").find(document.html())?.value
-            if (inlineStream != null) return@runCatching inlineStream
+            if (inlineStream != null) {
+                return@runCatching VideoStream(inlineStream, mapOf("Referer" to siteUrl))
+            }
 
-            val genericIframe = document.select("iframe[src^=http]").firstOrNull()?.attr("src")
-            if (genericIframe != null)
-                return@runCatching tryExtractStream(siteUrl, genericIframe)
+            val astarEpisode = parseQueryParams(siteUrl)["astarEpisode"]
+            val genericIframe = document.select("iframe[src]")
+                .map { it.attr("src").trim() }
+                .filter { src -> src.isNotBlank() && !src.startsWith("about:") && "adblock" !in src && "banner" !in src }
+                .map { src -> resolveUrl(siteUrl, src) }
+                .firstOrNull()
+            if (genericIframe != null) {
+                val iframeWithEpisode = if (astarEpisode != null && ("/player" in genericIframe || "videoas" in genericIframe)) {
+                    "$genericIframe&episode=$astarEpisode"
+                } else {
+                    genericIframe
+                }
+                return@runCatching VideoStream(tryExtractStream(siteUrl, iframeWithEpisode), mapOf("Referer" to iframeWithEpisode))
+            }
 
             val xfplayer = document
-                .select(".tabs-block__content:not(.d-none):not(.hidden) .xfplayer[data-params]")
+                .select(".tabs-block__content:not(.d-none):not(.hidden) .xfplayer[data-params], .xfplayer[data-params]")
                 .firstOrNull() ?: error("No video player found on page")
 
             val base = URL(siteUrl)
@@ -146,16 +175,40 @@ class VideoRepositoryImpl(
             val playerUrl = JSONObject(json).optString("data")
             if (playerUrl.isBlank()) error("Player returned empty URL")
 
-            tryExtractStream(siteUrl, playerUrl)
+            VideoStream(tryExtractStream(siteUrl, playerUrl), mapOf("Referer" to playerUrl))
+        }.onFailure { e ->
         }
     }
 
     private fun tryExtractStream(referer: String, playerUrl: String): String {
-        if ("dramavideo.se" in playerUrl) return extractDramaVideoStream(referer, playerUrl)
+
+        if ("dramavideo.se" in playerUrl) {
+            return extractDramaVideoStream(referer, playerUrl)
+        }
+
+        if (isYouTubeUrl(playerUrl)) {
+            val watchUrl = Regex("""youtube\.com/embed/([a-zA-Z0-9_-]+)""")
+                .find(playerUrl)
+                ?.let { "https://www.youtube.com/watch?v=${it.groupValues[1]}" }
+                ?: playerUrl
+            return extractYouTubeStream(watchUrl)
+        }
+
+        if ("videoas_p2p" in playerUrl || ("videoas" in playerUrl && "astar.bz" in playerUrl)) {
+            val episodeNum = parseQueryParams(playerUrl)["episode"] ?: "1"
+            return extractAstarEpisodeStream(playerUrl, referer, episodeNum)
+        }
+
+        val hasExplicitEpisode = parseQueryParams(referer).containsKey("kodikEpisode")
 
         if (isKodikUrl(playerUrl)) {
-            runCatching { extractKodikStream(referer, playerUrl) }
-                .onSuccess { return it }
+            val result = runCatching { extractKodikStream(referer, playerUrl) }
+            result.onSuccess { stream ->
+                return stream
+            }
+            result.onFailure { e ->
+                if (hasExplicitEpisode) throw e
+            }
         }
 
         val playerDoc = runCatching {
@@ -167,16 +220,29 @@ class VideoRepositoryImpl(
             error("Failed to fetch player page $playerUrl: ${it.message}")
         }
 
-        val pageDecoders: List<(Document) -> String?> = listOf(
-            ::decodeFromDataConfig,
-            ::decodeFromPageRegex,
-            { doc -> decodeFromNestedIframe(referer, playerUrl, doc) },
-        )
+        val pageDecoders: List<(Document) -> String?> = if (hasExplicitEpisode) {
+            listOf(
+                { doc -> decodeFromDataConfigForEpisode(referer, doc) },
+                { doc -> decodeFromInputData(referer, doc) },
+                { doc -> decodeFromNestedIframe(referer, playerUrl, doc) },
+                ::decodeFromDataConfig,
+            )
+        } else {
+            listOf(
+                ::decodeFromDataConfig,
+                ::decodeFromPageRegex,
+                { doc -> decodeFromNestedIframe(referer, playerUrl, doc) },
+            )
+        }
 
         val errors = mutableListOf<String>()
         for (decoder in pageDecoders) {
             runCatching { decoder(playerDoc) }
-                .onSuccess { result -> if (result != null) return result }
+                .onSuccess { result ->
+                    if (result != null) {
+                        return result
+                    }
+                }
                 .onFailure { errors += it.message ?: "?" }
         }
 
@@ -189,12 +255,84 @@ class VideoRepositoryImpl(
         return if (hls.isNotBlank()) hls else null
     }
 
+    private fun decodeFromDataConfigForEpisode(referer: String, doc: Document): String? {
+        val kodikMatch = Regex("""//(?:kodik|kodikplayer)\.[a-z]+/(serial|seria|video|film)/(\d+)/([0-9a-zA-Z]+)/\d+p""")
+            .find(doc.html())
+        if (kodikMatch != null) {
+            val kodikUrl = "https:${kodikMatch.value}"
+            return runCatching { extractKodikStream(referer, kodikUrl) }.getOrNull()
+        }
+
+        val dataConfig = doc.select("[data-config]").firstOrNull()?.attr("data-config") ?: return null
+        val json = runCatching { JSONObject(dataConfig) }.getOrNull() ?: return null
+
+        val type = json.optString("type").ifBlank { null }
+        val id = json.optString("id").ifBlank { null }
+        val hash = json.optString("hash").ifBlank { null }
+        if (type == null || id == null || hash == null) return null
+
+        val kodikUrl = "https://kodik.info/$type/$id/$hash/720p"
+        return runCatching { extractKodikStream(referer, kodikUrl) }.getOrNull()
+    }
+
     private fun decodeFromPageRegex(doc: Document): String? =
         Regex("""https?://[^\s"']+\.(m3u8|mp4)[^\s"']*""").find(doc.html())?.value
 
     private fun decodeFromNestedIframe(referer: String, playerUrl: String, doc: Document): String? {
         val nested = doc.select("iframe[src]").firstOrNull()?.attr("src") ?: return null
-        return tryExtractStream(playerUrl, resolveUrl(playerUrl, nested))
+        return tryExtractStream(referer, resolveUrl(playerUrl, nested))
+    }
+
+    private fun decodeFromInputData(referer: String, doc: Document): String? {
+        val inputData = doc.getElementById("inputData") ?: return null
+        val urlQueryParams = parseQueryParams(referer)
+        val season = urlQueryParams["kodikSeason"] ?: "1"
+        val episode = urlQueryParams["kodikEpisode"] ?: return null
+
+        return runCatching {
+            val playlist = JSONObject(inputData.text())
+            val seasonObj = playlist.optJSONObject(season) ?: return null
+            val epRaw = seasonObj.opt(episode)
+
+            val epUrl: String? = when {
+                epRaw is String && (epRaw.startsWith("//") || epRaw.startsWith("http")) -> epRaw
+                epRaw is JSONObject -> {
+                    val id = epRaw.optString("id")
+                    val hash = epRaw.optString("hash")
+                    val type = epRaw.optString("type", "seria")
+                    if (id.isNotBlank() && hash.isNotBlank()) "//kodik.info/$type/$id/$hash/720p"
+                    else null
+                }
+                epRaw is org.json.JSONArray && epRaw.length() > 0 -> {
+                    val videoId = epRaw.optJSONObject(0)?.optLong("video_id", -1L) ?: -1L
+                    if (videoId <= 0) return null
+                    getOpravarStream(videoId.toString(), doc.baseUri(), referer)
+                }
+                else -> null
+            }
+
+            if (epUrl == null) return null
+            val fullUrl = if (epUrl.startsWith("//")) "https:$epUrl" else epUrl
+            if (isKodikUrl(fullUrl)) extractKodikStream(referer, fullUrl) else fullUrl
+        }.getOrNull()
+    }
+
+    private fun getOpravarStream(videoId: String, playerPageUrl: String, referer: String): String? {
+        val host = runCatching { URL(playerPageUrl).let { "${it.protocol}://${it.host}" } }
+            .getOrElse { "https://gencit.info" }
+
+        val apiUrl = "$host/player/responce.php?video_id=$videoId"
+        return runCatching {
+            val body = Jsoup.connect(apiUrl)
+                .userAgent(userAgent)
+                .header("Referer", playerPageUrl)
+                .ignoreContentType(true)
+                .execute().body()
+            val json = JSONObject(body)
+            json.optString("hls").ifBlank { null }
+                ?: json.optString("src").ifBlank { null }
+                ?: Regex("""https?://[^\s"']+\.m3u8[^\s"']*""").find(body)?.value
+        }.getOrNull()
     }
 
     private fun isKodikUrl(url: String): Boolean {
@@ -211,7 +349,7 @@ class VideoRepositoryImpl(
         val info = runCatching { StreamInfo.getInfo(ServiceList.YouTube, videoUrl) }
             .getOrThrow()
 
-        val best: VideoStream? =
+        val best: NewPipeVideoStream? =
             info.videoStreams
                 .filter { it.content?.isNotBlank() == true }
                 .maxByOrNull { parseYouTubeResolution(it.resolution) }
@@ -219,7 +357,8 @@ class VideoRepositoryImpl(
                     .filter { it.content?.isNotBlank() == true }
                     .maxByOrNull { parseYouTubeResolution(it.resolution) }
 
-        return best?.content ?: error("No video streams found for: $videoUrl")
+        val result = best?.content ?: error("No video streams found for: $videoUrl")
+        return result
     }
 
     private fun parseYouTubeResolution(resolution: String?): Int =
@@ -280,8 +419,11 @@ class VideoRepositoryImpl(
                     .header("Referer", "https://hanime.tv/")
                     .ignoreContentType(true).execute()
                 if (r.statusCode() == 200) {
-                    hanimeManifestStream(JSONObject(r.body()), slug)?.let { return it }
+                    hanimeManifestStream(JSONObject(r.body()), slug)?.let {
+                        return it
+                    }
                 }
+            }.onFailure { e ->
             }
         }
 
@@ -417,6 +559,9 @@ class VideoRepositoryImpl(
             webViewRef?.destroy()
         }
 
+        if (stream != null) {
+        } else {
+        }
         return stream ?: error("WebView timeout: no stream URL intercepted for $pageUrl")
     }
 
@@ -440,6 +585,37 @@ class VideoRepositoryImpl(
     private fun isDirectStreamUrl(url: String): Boolean {
         val path = url.substringBefore("?").substringBefore("#").lowercase()
         return path.endsWith(".m3u8") || path.endsWith(".mp4") || path.endsWith(".mpd") || path.endsWith(".mkv")
+    }
+
+    private fun extractAstarEpisodeStream(playerUrl: String, referer: String, episodeNum: String): String {
+        val params = parseQueryParams(playerUrl)
+        val id = params["id"] ?: error("No id in astar player URL")
+        val hash = params["hash"] ?: error("No hash in astar player URL")
+        val basePlayerUrl = "${playerUrl.substringBefore("?")}?id=$id&hash=$hash"
+
+        val playerDoc = Jsoup.connect(basePlayerUrl)
+            .userAgent(userAgent)
+            .header("Referer", referer)
+            .get()
+        val ep = (episodeNum.toIntOrNull() ?: 1).coerceAtLeast(1)
+        val scriptContent = playerDoc.select("script:not([src])").joinToString("\n") { it.data() }
+
+        val episodeHashes = Regex("""an-media\.org/video/([a-f0-9]{32})/poster""")
+            .findAll(scriptContent).map { it.groupValues[1] }.toList()
+        if (episodeHashes.isNotEmpty()) {
+            val videoHash = episodeHashes.getOrNull(ep - 1)
+                ?: error("Episode $ep not available on astar (playlist has ${episodeHashes.size} episodes)")
+            return "https://sf2.an-media.org/video/$videoHash/360.mp4/index.m3u8"
+        }
+
+        val html = playerDoc.html()
+        val hlsUrl = Regex("""https?://[^\s"'\\]+an-media[^\s"'\\]+\.m3u8[^\s"'\\]*""")
+            .findAll(html).map { it.value }
+            .firstOrNull { "key=" !in it && "media=hls" !in it }
+        if (hlsUrl != null) return hlsUrl
+
+        return Regex("""https?://[^\s"'\\]+\.m3u8[^\s"'\\]*""").find(html)?.value
+            ?: error("No stream found in astar videoas player for episode $episodeNum")
     }
 
     private fun extractDramaVideoStream(referer: String, pageUrl: String): String {
@@ -472,7 +648,7 @@ class VideoRepositoryImpl(
     }
 
     private fun extractKodikStream(referer: String, playerUrl: String): String {
-        val match = Regex("""/(serial|seria|video|film)/(\d+)/([a-f0-9]+)/\d+p""")
+        val match = Regex("""/(serial|seria|video|film)/(\d+)/([0-9a-zA-Z]+)/\d+p""")
             .find(playerUrl) ?: error("Cannot parse Kodik URL: $playerUrl")
         val (typeFromUrl, idFromUrl, hashFromUrl) = match.destructured
 
@@ -482,7 +658,18 @@ class VideoRepositoryImpl(
             .get()
         val pageHtml = playerPage.html()
 
-        Regex("""https?://[^\s"']+\.(m3u8|mp4)[^\s"']*""").find(pageHtml)?.value?.let { return it }
+        val urlQueryParams = parseQueryParams(referer)
+        val season = urlQueryParams["kodikSeason"]
+            ?: Regex("""var\s+(?:current)?[Ss]eason\s*=\s*(\d+)""").find(pageHtml)?.groupValues?.get(1)
+            ?: "1"
+        val episode = urlQueryParams["kodikEpisode"]
+            ?: Regex("""var\s+(?:current)?[Ee]pisode\s*=\s*(\d+)""").find(pageHtml)?.groupValues?.get(1)
+            ?: "1"
+
+        val hasExplicitEpisode = urlQueryParams.containsKey("kodikEpisode")
+        if (!hasExplicitEpisode) {
+            Regex("""https?://[^\s"']+\.(m3u8|mp4)[^\s"']*""").find(pageHtml)?.value?.let { return it }
+        }
 
         val urlParamsRaw = Regex("""var\s+urlParams\s*=\s*'(\{[^']+\})'""")
             .find(pageHtml)?.groupValues?.get(1)
@@ -492,15 +679,7 @@ class VideoRepositoryImpl(
         val id   = Regex("""vInfo\.id\s*=\s*'([^']+)'""").find(pageHtml)?.groupValues?.get(1) ?: idFromUrl
         val hash = Regex("""vInfo\.hash\s*=\s*'([^']+)'""").find(pageHtml)?.groupValues?.get(1) ?: hashFromUrl
 
-        val urlQueryParams = parseQueryParams(referer)
-        val season = urlQueryParams["kodikSeason"]
-            ?: Regex("""var\s+(?:current)?[Ss]eason\s*=\s*(\d+)""").find(pageHtml)?.groupValues?.get(1)
-            ?: "1"
-        val episode = urlQueryParams["kodikEpisode"]
-            ?: Regex("""var\s+(?:current)?[Ee]pisode\s*=\s*(\d+)""").find(pageHtml)?.groupValues?.get(1)
-            ?: "1"
-
-        if (urlParams != null) {
+        if (urlParams != null && !hasExplicitEpisode) {
             val paramsUrl = buildString {
                 append(playerUrl)
                 append("?")
@@ -541,7 +720,8 @@ class VideoRepositoryImpl(
         val streamUrl = parseKodikResponse(responseBody)
             ?: error("Kodik: no playable URL in response: $responseBody")
 
-        return if (streamUrl.startsWith("//")) "https:$streamUrl" else streamUrl
+        val finalUrl = if (streamUrl.startsWith("//")) "https:$streamUrl" else streamUrl
+        return finalUrl
     }
 
     private fun parseKodikResponse(body: String): String? {

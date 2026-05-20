@@ -10,4 +10,5 @@ interface SiteParser {
     fun supports(host: String): Boolean
     suspend fun search(query: String): Result<String>
     suspend fun getEpisodes(pageUrl: String): List<Episode>
+    suspend fun getEpisodes(pageUrl: String, expectedEpisodes: Int): List<Episode> = getEpisodes(pageUrl)
 }

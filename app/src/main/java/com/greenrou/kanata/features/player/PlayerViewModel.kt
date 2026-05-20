@@ -104,6 +104,7 @@ class PlayerViewModel(
                 title = episodeTitles.getOrElse(currentIndex) { "" },
                 nextEpisodeTitle = episodeTitles.getOrNull(currentIndex + 1),
                 streamUrl = null,
+                streamHeaders = emptyMap(),
                 currentEpisodeDownloadStatus = null,
             )
         }
@@ -119,8 +120,8 @@ class PlayerViewModel(
         loadJob = viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
             getVideoStream(url)
-                .onSuccess { streamUrl ->
-                    _state.update { it.copy(isLoading = false, streamUrl = streamUrl) }
+                .onSuccess { stream ->
+                    _state.update { it.copy(isLoading = false, streamUrl = stream.url, streamHeaders = stream.headers) }
                 }
                 .onFailure { e ->
                     _state.update { it.copy(isLoading = false, error = e.message) }
