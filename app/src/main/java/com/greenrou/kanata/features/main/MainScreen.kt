@@ -41,6 +41,8 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -305,10 +307,21 @@ fun MainScreen(
             ) { tab ->
                 when (tab) {
                     BottomNavItem.AnimeList -> {
+                        val pullToRefreshState = rememberPullToRefreshState()
                         PullToRefreshBox(
                             isRefreshing = state.isRefreshing,
                             onRefresh = { viewModel.handleEvent(MainEvent.Refresh) },
+                            state = pullToRefreshState,
                             modifier = Modifier.fillMaxSize(),
+                            indicator = {
+                                PullToRefreshDefaults.Indicator(
+                                    state = pullToRefreshState,
+                                    isRefreshing = state.isRefreshing,
+                                    modifier = Modifier
+                                        .align(Alignment.TopCenter)
+                                        .padding(top = contentPadding.calculateTopPadding()),
+                                )
+                            },
                         ) {
                             Box(modifier = Modifier.fillMaxSize()) {
                                 when {

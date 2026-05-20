@@ -102,6 +102,13 @@
 -keep class * extends androidx.work.ListenableWorker { *; }
 -dontwarn androidx.work.**
 
+# ── Firebase / Crashlytics ────────────────────────────────────────────────────
+# Crashlytics needs line numbers and source files to show readable stack traces
+-keepattributes SourceFile,LineNumberTable
+-keep public class * extends java.lang.Exception
+-dontwarn com.google.firebase.**
+-keep class com.google.firebase.** { *; }
+
 # ── App domain / data models ──────────────────────────────────────────────────
 -keep class com.greenrou.kanata.domain.model.** { *; }
 -keep class com.greenrou.kanata.data.local.** { *; }

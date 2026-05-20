@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.greenrou.kanata.domain.model.AnimeFilter
 import com.greenrou.kanata.domain.model.AnimeFormat
+import com.greenrou.kanata.core.analytics.AnalyticsManager
+import com.greenrou.kanata.core.analytics.reportToCrashlytics
 import com.greenrou.kanata.domain.usecase.AddFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.GetAnimeListUseCase
 import com.greenrou.kanata.domain.usecase.GetFavoritesUseCase
@@ -36,6 +38,7 @@ class MainViewModel(
     private val getFavorites: GetFavoritesUseCase,
     private val settingsManager: SettingsManager,
     private val setDownloadFolder: SetDownloadFolderUseCase,
+    private val analytics: AnalyticsManager,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(MainState())
@@ -91,11 +94,14 @@ class MainViewModel(
     private fun toggleFavorite(animeId: Int) {
         viewModelScope.launch {
             val isCurrentFavorite = favoriteIds.value.contains(animeId)
+            val anime = _state.value.animeList.find { it.id == animeId }
             if (isCurrentFavorite) {
                 removeFavorite(animeId)
+                anime?.let { analytics.logFavoriteToggled(animeId, it.title, added = false) }
             } else {
-                val anime = _state.value.animeList.find { it.id == animeId } ?: return@launch
+                anime ?: return@launch
                 addFavorite(anime)
+                analytics.logFavoriteToggled(animeId, anime.title, added = true)
             }
         }
     }
@@ -122,6 +128,9 @@ class MainViewModel(
             }
             is MainEvent.ToggleFavorite -> toggleFavorite(event.animeId)
             is MainEvent.AnimeClicked -> viewModelScope.launch {
+                _state.value.animeList.find { it.id == event.animeId }?.let {
+                    analytics.logAnimeOpened(event.animeId, it.title)
+                }
                 _events.send(MainEvent.NavigateToDetail(event.animeId))
             }
             MainEvent.ToggleSearch -> {
@@ -134,6 +143,7 @@ class MainViewModel(
                 searchDebounceJob?.cancel()
                 searchDebounceJob = viewModelScope.launch {
                     delay(400)
+                    if (event.query.isNotBlank()) analytics.logSearch(event.query)
                     reloadWithCurrentFilters()
                 }
             }
@@ -204,6 +214,7 @@ class MainViewModel(
                     }
                 }
                 .onFailure { e ->
+                    e.reportToCrashlytics("main_load_anime")
                     _state.update { it.copy(isLoading = false, error = e.message) }
                     _events.send(MainEvent.ShowError(e.message ?: "Unknown error"))
                 }
@@ -225,6 +236,7 @@ class MainViewModel(
                     }
                 }
                 .onFailure { e ->
+                    e.reportToCrashlytics("main_refresh_anime")
                     _state.update { it.copy(isRefreshing = false) }
                     _events.send(MainEvent.ShowError(e.message ?: "Unknown error"))
                 }
@@ -252,6 +264,7 @@ class MainViewModel(
                     }
                 }
                 .onFailure { e ->
+                    e.reportToCrashlytics("main_load_more")
                     _state.update { it.copy(isLoadingMore = false) }
                     _events.send(MainEvent.ShowError(e.message ?: "Unknown error"))
                 }

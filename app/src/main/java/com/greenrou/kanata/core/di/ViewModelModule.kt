@@ -12,7 +12,7 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val viewModelModule = module {
-    viewModel { MainViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { MainViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
     viewModel { AnimeDetailsViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
     viewModel { FavoritesViewModel(get(), get()) }
     viewModel { MoodViewModel(get(), get()) }

@@ -1,6 +1,7 @@
 package com.greenrou.kanata.features.mood
 
 import androidx.lifecycle.ViewModel
+import com.greenrou.kanata.core.analytics.reportToCrashlytics
 import androidx.lifecycle.viewModelScope
 import com.greenrou.kanata.domain.repository.SettingsManager
 import com.greenrou.kanata.domain.usecase.GetAnimeByMoodUseCase
@@ -56,6 +57,7 @@ class MoodViewModel(
             ).onSuccess { page ->
                 _state.update { it.copy(isLoading = false, animeList = page.items) }
             }.onFailure { e ->
+                e.reportToCrashlytics("mood_load_anime")
                 _state.update { it.copy(isLoading = false, error = e.message) }
             }
         }
