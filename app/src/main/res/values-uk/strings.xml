@@ -5,6 +5,11 @@
     <!-- Common -->
     <string name="action_retry">Повторити</string>
     <string name="action_back">Назад</string>
+    <string name="error_service_title">Технічні неполадки</string>
+    <string name="error_service_subtitle">Сервіс тимчасово недоступний.\nСпробуйте пізніше.</string>
+    <string name="error_offline_title">Немає інтернет-з\'єднання</string>
+    <string name="error_offline_subtitle">Перевірте підключення та спробуйте знову.\nКонтент завантажиться автоматично.</string>
+    <string name="error_offline_banner">Немає інтернет-з\'єднання</string>
     <string name="error_something_wrong">Щось пішло не так</string>
 
     <!-- Bottom nav -->

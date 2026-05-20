@@ -3,6 +3,7 @@ package com.greenrou.kanata.features.details
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.greenrou.kanata.domain.model.Anime
+import com.greenrou.kanata.core.network.NetworkMonitor
 import com.greenrou.kanata.domain.repository.SettingsManager
 import com.greenrou.kanata.domain.usecase.AddFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.GetAnimeByIdUseCase
@@ -33,6 +34,7 @@ class AnimeDetailsViewModel(
     private val getVideoStreamUseCase: GetVideoStreamUseCase,
     private val settingsManager: SettingsManager,
     private val getCompletedDownloads: GetCompletedDownloadsUseCase,
+    private val networkMonitor: NetworkMonitor,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AnimeDetailsState())
@@ -102,9 +104,14 @@ class AnimeDetailsViewModel(
                     observeDownloadedCount(anime.title)
                 }
                 .onFailure { e ->
+
                     e.reportToCrashlytics("details_load_anime")
-                    _state.update { it.copy(isLoading = false, error = e.message) }
-                    _events.send(AnimeDetailsEvent.ShowError(e.message ?: "Unknown error"))
+                    loadedAnimeId = -1
+                    val isOffline = !networkMonitor.isConnectedNow()
+                    _state.update { it.copy(isLoading = false, error = e.message, isOffline = isOffline) }
+                    if (!isOffline) {
+                        _events.send(AnimeDetailsEvent.ShowError(e.message ?: "Unknown error"))
+                    }
                 }
         }
     }

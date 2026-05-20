@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.material3.CircularProgressIndicator
+import com.greenrou.kanata.core.composable.KanataLoader
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -40,8 +40,8 @@ fun FavoritesScreen(
 
     Box(modifier = modifier.fillMaxSize()) {
         when {
-            state.isLoading -> CircularProgressIndicator(
-                Modifier.align(Alignment.Center).padding(contentPadding)
+            state.isLoading -> KanataLoader(
+                modifier = Modifier.align(Alignment.Center).padding(contentPadding)
             )
             state.favorites.isEmpty() -> FavoritesEmptyState(
                 onExploreClick = onExploreClick,

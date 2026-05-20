@@ -27,7 +27,8 @@ import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Wallpaper
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
+import com.greenrou.kanata.core.composable.KanataLoader
+import com.greenrou.kanata.core.composable.KanataSmallLoader
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
@@ -77,7 +78,7 @@ internal fun RandomImagePage(
 
     Box(modifier = Modifier.fillMaxSize()) {
         when {
-            isLoading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            isLoading -> KanataLoader(modifier = Modifier.align(Alignment.Center))
 
             error != null -> PageError(message = error, onRetry = onRefresh, modifier = Modifier.align(Alignment.Center))
 
@@ -192,8 +193,8 @@ internal fun RandomImagePage(
                             enabled = !isSettingWallpaper,
                         ) {
                             if (isSettingWallpaper) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(22.dp),
+                                KanataSmallLoader(
+                                    size = 22.dp,
                                     strokeWidth = 2.5.dp,
                                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                                 )

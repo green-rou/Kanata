@@ -10,7 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.CircularProgressIndicator
+import com.greenrou.kanata.core.composable.KanataLoader
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -94,7 +94,7 @@ fun EpisodeListScreen(
                 .padding(padding),
         ) {
             when {
-                state.isLoading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                state.isLoading -> KanataLoader(modifier = Modifier.align(Alignment.Center))
                 state.error != null -> Text(
                     text = stringResource(R.string.detail_error, state.error ?: ""),
                     color = MaterialTheme.colorScheme.error,

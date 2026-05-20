@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.CloudOff
+import androidx.compose.material.icons.rounded.WifiOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import com.greenrou.kanata.R
 
 @Composable
-internal fun ErrorState(
+internal fun OfflineState(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -35,15 +35,15 @@ internal fun ErrorState(
             modifier = Modifier
                 .size(80.dp)
                 .background(
-                    color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.35f),
+                    color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
                     shape = CircleShape,
                 ),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
-                imageVector = Icons.Rounded.CloudOff,
+                imageVector = Icons.Rounded.WifiOff,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.error,
+                tint = MaterialTheme.colorScheme.secondary,
                 modifier = Modifier.size(40.dp),
             )
         }
@@ -53,13 +53,13 @@ internal fun ErrorState(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(
-                text = stringResource(R.string.error_service_title),
+                text = stringResource(R.string.error_offline_title),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
             )
             Text(
-                text = stringResource(R.string.error_service_subtitle),
+                text = stringResource(R.string.error_offline_subtitle),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,

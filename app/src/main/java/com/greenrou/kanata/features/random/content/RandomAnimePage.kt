@@ -13,7 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
+import com.greenrou.kanata.core.composable.KanataLoader
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -41,7 +41,7 @@ internal fun RandomAnimePage(
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         when {
-            isLoading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            isLoading -> KanataLoader(modifier = Modifier.align(Alignment.Center))
             error != null -> PageError(message = error, onRetry = onRefresh, modifier = Modifier.align(Alignment.Center))
             else -> Unit
         }

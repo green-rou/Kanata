@@ -1,8 +1,11 @@
 package com.greenrou.kanata.features.main
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -26,7 +29,7 @@ import androidx.compose.material.icons.rounded.FilterList
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.CircularProgressIndicator
+import com.greenrou.kanata.core.composable.KanataLoader
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -64,6 +67,8 @@ import com.greenrou.kanata.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.greenrou.kanata.features.favorites.FavoritesScreen
 import com.greenrou.kanata.features.main.content.AnimeGrid
+import com.greenrou.kanata.core.composable.OfflineBanner
+import com.greenrou.kanata.core.composable.OfflineState
 import com.greenrou.kanata.features.main.content.ErrorState
 import com.greenrou.kanata.features.main.content.FilterBottomSheet
 import com.greenrou.kanata.features.main.model.MainEvent
@@ -325,26 +330,39 @@ fun MainScreen(
                         ) {
                             Box(modifier = Modifier.fillMaxSize()) {
                                 when {
-                                    state.isLoading -> CircularProgressIndicator(
+                                    state.isLoading -> KanataLoader(
                                         modifier = Modifier
                                             .align(Alignment.Center)
                                             .padding(contentPadding),
                                     )
 
-                                    state.error != null -> ErrorState(
-                                        message = state.error!!,
+                                    state.isOffline && state.animeList.isEmpty() -> OfflineState(
                                         onRetry = { viewModel.handleEvent(MainEvent.LoadAnime) },
                                         modifier = Modifier
                                             .align(Alignment.Center)
                                             .padding(contentPadding),
                                     )
 
-                                    state.animeList.isEmpty() -> Text(
+                                    !state.isOffline && state.error != null -> ErrorState(
+                                        onRetry = { viewModel.handleEvent(MainEvent.LoadAnime) },
+                                        modifier = Modifier
+                                            .align(Alignment.Center)
+                                            .padding(contentPadding),
+                                    )
+
+                                    !state.isOffline && state.animeList.isEmpty() && (state.hasActiveFilters || state.searchQuery.isNotEmpty()) -> Text(
                                         stringResource(R.string.main_no_anime_found),
                                         modifier = Modifier
                                             .align(Alignment.Center)
                                             .padding(contentPadding),
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+
+                                    !state.isOffline && state.animeList.isEmpty() -> ErrorState(
+                                        onRetry = { viewModel.handleEvent(MainEvent.LoadAnime) },
+                                        modifier = Modifier
+                                            .align(Alignment.Center)
+                                            .padding(contentPadding),
                                     )
 
                                     else -> AnimeGrid(
@@ -369,6 +387,19 @@ fun MainScreen(
                                         gridState = gridState,
                                         contentPadding = contentPadding,
                                     )
+                                }
+
+                                AnimatedVisibility(
+                                    visible = state.isOffline && state.animeList.isNotEmpty(),
+                                    modifier = Modifier
+                                        .align(Alignment.TopCenter)
+                                        .padding(
+                                            top = contentPadding.calculateTopPadding() + 8.dp,
+                                        ),
+                                    enter = slideInVertically { -it } + fadeIn(),
+                                    exit = slideOutVertically { -it } + fadeOut(),
+                                ) {
+                                    OfflineBanner()
                                 }
                             }
                         }

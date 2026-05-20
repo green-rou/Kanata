@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
+import com.greenrou.kanata.core.composable.KanataLoader
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -34,6 +34,7 @@ import com.greenrou.kanata.domain.model.VideoSource
 import com.greenrou.kanata.features.details.content.AnimeDetailContent
 import com.greenrou.kanata.features.details.model.AnimeDetailsEvent
 import com.greenrou.kanata.core.composable.FavoriteIconTopBar
+import com.greenrou.kanata.core.composable.OfflineState
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -100,7 +101,7 @@ fun AnimeDetailsScreen(
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
             when {
-                state.isLoading -> CircularProgressIndicator(
+                state.isLoading -> KanataLoader(
                     modifier = Modifier
                         .align(Alignment.Center)
                         .padding(padding),
@@ -116,6 +117,13 @@ fun AnimeDetailsScreen(
                     downloadedEpisodeCount = state.downloadedEpisodeCount,
                     onWatchOffline = { viewModel.handleEvent(AnimeDetailsEvent.WatchOffline) },
                 )
+                state.isOffline -> OfflineState(
+                    onRetry = { viewModel.handleEvent(AnimeDetailsEvent.LoadAnime(animeId)) },
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(padding),
+                )
+
                 state.error != null -> Column(
                     modifier = Modifier
                         .align(Alignment.Center)
