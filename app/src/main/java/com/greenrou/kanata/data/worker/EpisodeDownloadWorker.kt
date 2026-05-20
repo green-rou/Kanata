@@ -10,6 +10,7 @@ import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.greenrou.kanata.domain.model.DownloadStatus
+import com.greenrou.kanata.domain.model.VideoStream
 import com.greenrou.kanata.domain.repository.DownloadRepository
 import com.greenrou.kanata.domain.usecase.GetVideoStreamUseCase
 import okhttp3.OkHttpClient
@@ -71,7 +72,9 @@ class EpisodeDownloadWorker(
             )
             return Result.failure()
         }
-        val streamUrl = streamResult.getOrThrow()
+        val stream = streamResult.getOrThrow()
+        val streamUrl = stream.url
+        val streamHeaders = stream.headers
 
         val destFolder = downloadRepo.getDownloadFolder()
         val isHls = streamUrl.contains(".m3u8", ignoreCase = true)
@@ -86,9 +89,9 @@ class EpisodeDownloadWorker(
 
         try {
             if (isHls) {
-                downloadHls(streamUrl, tempFile, downloadId, episodeTitle)
+                downloadHls(streamUrl, tempFile, downloadId, episodeTitle, streamHeaders)
             } else {
-                downloadDirect(streamUrl, tempFile, downloadId, episodeTitle)
+                downloadDirect(streamUrl, tempFile, downloadId, episodeTitle, streamHeaders)
             }
 
             if (isStopped) {
@@ -114,8 +117,9 @@ class EpisodeDownloadWorker(
         destFile: File,
         downloadId: Long,
         title: String,
+        headers: Map<String, String> = emptyMap(),
     ) {
-        val request = Request.Builder().url(url).build()
+        val request = Request.Builder().url(url).apply { headers.forEach { (k, v) -> header(k, v) } }.build()
         val response = downloadClient.newCall(request).execute()
 
         if (!response.isSuccessful) error("HTTP ${response.code} for $url")
@@ -155,9 +159,10 @@ class EpisodeDownloadWorker(
         destFile: File,
         downloadId: Long,
         title: String,
+        headers: Map<String, String> = emptyMap(),
     ) {
         val baseUrl = m3u8Url.substringBeforeLast("/")
-        val playlistText = fetchText(m3u8Url)
+        val playlistText = fetchText(m3u8Url, headers)
 
         val segmentPlaylistUrl = if (playlistText.contains("#EXT-X-STREAM-INF")) {
             val streamLine = playlistText.lines()
@@ -171,7 +176,7 @@ class EpisodeDownloadWorker(
         }
 
         val segmentBaseUrl = segmentPlaylistUrl.substringBeforeLast("/")
-        val segmentPlaylistText = if (segmentPlaylistUrl == m3u8Url) playlistText else fetchText(segmentPlaylistUrl)
+        val segmentPlaylistText = if (segmentPlaylistUrl == m3u8Url) playlistText else fetchText(segmentPlaylistUrl, headers)
 
         val segmentUrls = segmentPlaylistText.lines()
             .filter { it.isNotBlank() && !it.startsWith("#") }
@@ -183,7 +188,7 @@ class EpisodeDownloadWorker(
         FileOutputStream(destFile).use { out ->
             for (segUrl in segmentUrls) {
                 if (isStopped) break
-                val request = Request.Builder().url(segUrl).build()
+                val request = Request.Builder().url(segUrl).apply { headers.forEach { (k, v) -> header(k, v) } }.build()
                 val response = downloadClient.newCall(request).execute()
                 if (!response.isSuccessful) continue
                 response.body?.bytes()?.let { out.write(it) }
@@ -197,8 +202,8 @@ class EpisodeDownloadWorker(
         if (isStopped) destFile.delete()
     }
 
-    private fun fetchText(url: String): String {
-        val request = Request.Builder().url(url).build()
+    private fun fetchText(url: String, headers: Map<String, String> = emptyMap()): String {
+        val request = Request.Builder().url(url).apply { headers.forEach { (k, v) -> header(k, v) } }.build()
         return downloadClient.newCall(request).execute().body?.string() ?: error("Empty playlist at $url")
     }
 

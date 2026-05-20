@@ -12,6 +12,6 @@ sealed interface AnimeDetailsEvent {
 
     data object NavigateBack : AnimeDetailsEvent
     data class ShowError(val message: String) : AnimeDetailsEvent
-    data class NavigateToEpisodeList(val source: VideoSource, val animeTitle: String) : AnimeDetailsEvent
+    data class NavigateToEpisodeList(val source: VideoSource, val animeTitle: String, val episodeCount: Int = 0) : AnimeDetailsEvent
     data class NavigateToOfflinePlayer(val items: List<DownloadItem>) : AnimeDetailsEvent
 }

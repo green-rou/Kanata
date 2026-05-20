@@ -24,12 +24,14 @@ class ArchiveOrgSiteParser : SiteParser {
             Jsoup.connect(checkUrl).userAgent(userAgent).ignoreContentType(true).execute().body()
         ).optJSONObject("response")?.optJSONArray("docs")
         if (docs == null || docs.length() == 0) error("No results on Archive.org for: $query")
-        "https://archive.org/search?query=${URLEncoder.encode(query, "UTF-8")}"
+        val result = "https://archive.org/search?query=${URLEncoder.encode(query, "UTF-8")}"
+        result
     }
 
-    override suspend fun getEpisodes(pageUrl: String): List<Episode> =
-        if ("archive.org/search" in pageUrl) getEpisodesFromSearch(pageUrl)
+    override suspend fun getEpisodes(pageUrl: String): List<Episode> {
+        return if ("archive.org/search" in pageUrl) getEpisodesFromSearch(pageUrl)
         else getEpisodesFromItem(pageUrl)
+    }
 
     private fun getEpisodesFromSearch(searchUrl: String): List<Episode> {
         val query = URLDecoder.decode(searchUrl.substringAfter("query=").substringBefore("&"), "UTF-8")
@@ -41,13 +43,14 @@ class ArchiveOrgSiteParser : SiteParser {
             ).optJSONObject("response")?.optJSONArray("docs")
         }.getOrNull() ?: return emptyList()
 
-        return (0 until docs.length()).map { i ->
+        val episodes = (0 until docs.length()).map { i ->
             val doc = docs.getJSONObject(i)
             Episode(
                 doc.optString("title", doc.optString("identifier")),
                 "https://archive.org/details/${doc.optString("identifier")}",
             )
         }.sortedBy { it.title }
+        return episodes
     }
 
     private fun getEpisodesFromItem(pageUrl: String): List<Episode> {
@@ -72,7 +75,7 @@ class ArchiveOrgSiteParser : SiteParser {
             .filter { file -> DERIVATIVE_SUFFIXES.none { file.optString("name").lowercase().contains(it) } }
             .ifEmpty { allVideos }
 
-        return primaryVideos
+        val episodes = primaryVideos
             .sortedWith(compareBy(
                 { if (it.optString("name").lowercase().endsWith(".mp4")) 0 else 1 },
                 { it.optString("name") },
@@ -86,6 +89,7 @@ class ArchiveOrgSiteParser : SiteParser {
                     "https://archive.org/download/$identifier/$name",
                 )
             }
+        return episodes
     }
 
     companion object {

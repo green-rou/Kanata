@@ -8,6 +8,10 @@ enum class VideoSourceType {
     ANIWAVE,
     MIKAI,
     YUMMY_ANIME,
+    HENTAI_HUB,
+    HENTASIS,
+    HENTAIZ,
+    ASTAR,
     UNKNOWN,
 }
 

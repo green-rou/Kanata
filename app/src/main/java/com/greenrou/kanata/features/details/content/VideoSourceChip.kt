@@ -43,5 +43,9 @@ private fun VideoSourceType.toIcon(): ImageVector = when (this) {
     VideoSourceType.ANIWAVE -> Icons.Outlined.Tv
     VideoSourceType.MIKAI -> Icons.Outlined.Tv
     VideoSourceType.YUMMY_ANIME -> Icons.Outlined.Tv
+    VideoSourceType.ASTAR -> Icons.Outlined.Tv
+    VideoSourceType.HENTAI_HUB -> Icons.Outlined.PlayCircle
+    VideoSourceType.HENTASIS -> Icons.Outlined.PlayCircle
+    VideoSourceType.HENTAIZ -> Icons.Outlined.PlayCircle
     VideoSourceType.UNKNOWN -> Icons.Outlined.Language
 }

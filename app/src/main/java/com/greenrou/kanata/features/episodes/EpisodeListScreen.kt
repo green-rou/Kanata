@@ -40,11 +40,12 @@ fun EpisodeListScreen(
     label: String,
     animeTitle: String = "",
     animeId: Int = 0,
+    episodeCount: Int = 0,
     onNavigateBack: () -> Unit,
     onEpisodeClick: (urls: List<String>, titles: List<String>, index: Int) -> Unit,
     viewModel: EpisodeListViewModel = koinViewModel(
         key = animePageUrl,
-        parameters = { parametersOf(animePageUrl, label, animeTitle, animeId) }
+        parameters = { parametersOf(animePageUrl, label, animeTitle, animeId, episodeCount) }
     ),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()

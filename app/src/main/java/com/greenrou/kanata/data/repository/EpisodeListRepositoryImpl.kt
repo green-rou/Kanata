@@ -11,12 +11,14 @@ class EpisodeListRepositoryImpl(
     private val parsers: List<SiteParser>
 ) : EpisodeListRepository {
 
-    override suspend fun getEpisodes(animePageUrl: String): Result<List<Episode>> = withContext(Dispatchers.IO) {
+    override suspend fun getEpisodes(animePageUrl: String, expectedEpisodes: Int): Result<List<Episode>> = withContext(Dispatchers.IO) {
         runCatching {
             val host = URL(animePageUrl).host
             val parser = parsers.find { it.supports(host) }
                 ?: error("Unsupported site: $host")
-            parser.getEpisodes(animePageUrl)
+            val episodes = parser.getEpisodes(animePageUrl, expectedEpisodes)
+            episodes
+        }.onFailure { e ->
         }
     }
 }

@@ -60,7 +60,8 @@ class AnimeDetailsViewModel(
             }
             is AnimeDetailsEvent.OpenEpisodeList -> viewModelScope.launch {
                 val animeTitle = _state.value.anime?.title.orEmpty()
-                _events.send(AnimeDetailsEvent.NavigateToEpisodeList(event.source, animeTitle))
+                val episodeCount = _state.value.anime?.episodes ?: 0
+                _events.send(AnimeDetailsEvent.NavigateToEpisodeList(event.source, animeTitle, episodeCount))
             }
             AnimeDetailsEvent.WatchOffline -> viewModelScope.launch {
                 val animeTitle = _state.value.anime?.title.orEmpty()

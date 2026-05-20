@@ -5,6 +5,7 @@ import com.greenrou.kanata.domain.model.DownloadStatus
 data class PlayerState(
     val isLoading: Boolean = true,
     val streamUrl: String? = null,
+    val streamHeaders: Map<String, String> = emptyMap(),
     val title: String = "",
     val error: String? = null,
     val currentIndex: Int = 0,

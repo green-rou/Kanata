@@ -43,7 +43,8 @@ class HanimeSiteParser : SiteParser {
         val hits = JSONArray(hitsRaw)
         if (hits.length() == 0) error("No results on Hanime for: $query")
 
-        "https://hanime.tv/videos/hentai/${hits.getJSONObject(0).getString("slug")}"
+        val result = "https://hanime.tv/videos/hentai/${hits.getJSONObject(0).getString("slug")}"
+        result
     }
 
     override suspend fun getEpisodes(pageUrl: String): List<Episode> {
@@ -74,17 +75,22 @@ class HanimeSiteParser : SiteParser {
                         .execute().body()
                 ).optString("hits", "[]")
             )
-        }.getOrElse { return listOf(Episode("Watch", cleanUrl)) }
+        }.getOrElse { e ->
+            return listOf(Episode("Watch", cleanUrl))
+        }
 
-        if (hits.length() == 0) return listOf(Episode("Watch", cleanUrl))
+        if (hits.length() == 0) {
+            return listOf(Episode("Watch", cleanUrl))
+        }
 
-        return (0 until hits.length()).map { i ->
+        val episodes = (0 until hits.length()).map { i ->
             val hit = hits.getJSONObject(i)
             Episode(
                 hit.optString("name", "Episode ${i + 1}"),
                 "https://hanime.tv/videos/hentai/${hit.optString("slug")}?hid=${hit.optInt("id", -1)}",
             )
         }.sortedBy { it.title }
+        return episodes
     }
 
     companion object {

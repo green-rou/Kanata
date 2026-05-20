@@ -8,22 +8,24 @@ import org.jsoup.Jsoup
 import java.net.URL
 import java.net.URLEncoder
 
-class YummyAnimeSiteParser : SiteParser {
+class HentaizSiteParser : SiteParser {
 
     private val userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
 
-    override val label = "YummyAnime"
-    override val sourceType = VideoSourceType.YUMMY_ANIME
+    override val label = "Hentaiz"
+    override val sourceType = VideoSourceType.HENTAIZ
+    override val isAdultOnly = true
 
-    override fun supports(host: String) = "yummyanime" in host
+    override fun supports(host: String) = "hentaiz" in host
 
     override suspend fun search(query: String): Result<String> = runCatching {
-        val encodedQuery = URLEncoder.encode(query, "UTF-8")
-        val url = "https://yummyanime.tv/index.php?do=search&subaction=search&search_start=0&full_search=0&story=$encodedQuery"
-        val document = Jsoup.connect(url).userAgent(userAgent).get()
-        val result = document.select(".movie-item__link").firstOrNull()?.attr("abs:href")
-            ?: error("No results found on YummyAnime for query: $query")
-        result
+        val encoded = URLEncoder.encode(query, "UTF-8")
+        val searchUrl = "https://hentaiz.org/index.php?do=search&subaction=search&search_start=0&full_search=0&story=$encoded"
+        val document = Jsoup.connect(searchUrl).userAgent(userAgent).get()
+        val result = document.select("a[href]")
+            .map { it.attr("abs:href") }
+            .firstOrNull { Regex("hentaiz\\.org/\\d+[^/]*\\.html").containsMatchIn(it) }
+        result ?: error("No results on Hentaiz for: $query")
     }
 
     override suspend fun getEpisodes(pageUrl: String): List<Episode> {
