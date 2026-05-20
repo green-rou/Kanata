@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.greenrou.kanata.domain.model.AnimeFilter
 import com.greenrou.kanata.domain.model.AnimeFormat
+import com.greenrou.kanata.core.network.NetworkMonitor
 import com.greenrou.kanata.domain.usecase.AddFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.GetAnimeListUseCase
 import com.greenrou.kanata.domain.usecase.GetFavoritesUseCase
@@ -36,6 +37,7 @@ class MainViewModel(
     private val getFavorites: GetFavoritesUseCase,
     private val settingsManager: SettingsManager,
     private val setDownloadFolder: SetDownloadFolderUseCase,
+    private val networkMonitor: NetworkMonitor,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(MainState())
@@ -63,6 +65,7 @@ class MainViewModel(
 
     init {
         observeSettings()
+        observeNetwork()
         loadAnime()
     }
 
@@ -85,6 +88,21 @@ class MainViewModel(
 
         settingsManager.accentColor
             .onEach { color -> _state.update { it.copy(accentColor = color) } }
+            .launchIn(viewModelScope)
+    }
+
+    private fun observeNetwork() {
+        networkMonitor.isConnected
+            .onEach { isConnected ->
+                val wasOffline = _state.value.isOffline
+                _state.update { it.copy(isOffline = !isConnected) }
+                if (!isConnected && _state.value.isRefreshing) {
+                    _state.update { it.copy(isRefreshing = false) }
+                }
+                if (isConnected && wasOffline && _state.value.animeList.isEmpty()) {
+                    loadAnime()
+                }
+            }
             .launchIn(viewModelScope)
     }
 
@@ -205,7 +223,9 @@ class MainViewModel(
                 }
                 .onFailure { e ->
                     _state.update { it.copy(isLoading = false, error = e.message) }
-                    _events.send(MainEvent.ShowError(e.message ?: "Unknown error"))
+                    if (!_state.value.isOffline) {
+                        _events.send(MainEvent.ShowError(e.message ?: "Unknown error"))
+                    }
                 }
         }
     }
@@ -226,7 +246,9 @@ class MainViewModel(
                 }
                 .onFailure { e ->
                     _state.update { it.copy(isRefreshing = false) }
-                    _events.send(MainEvent.ShowError(e.message ?: "Unknown error"))
+                    if (!_state.value.isOffline) {
+                        _events.send(MainEvent.ShowError(e.message ?: "Unknown error"))
+                    }
                 }
         }
     }

@@ -2,6 +2,7 @@ package com.greenrou.kanata.core.network
 
 import com.greenrou.kanata.data.remote.AnnApi
 import com.greenrou.kanata.data.remote.NekosiaApi
+import org.koin.android.ext.koin.androidContext
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -50,4 +51,5 @@ val networkModule = module {
 
     single { get<Retrofit>(named("ann_retrofit")).create(AnnApi::class.java) }
     single { get<Retrofit>(named("nekosia_retrofit")).create(NekosiaApi::class.java) }
+    single { NetworkMonitor(androidContext()) }
 }

@@ -6,6 +6,11 @@
     <string name="action_retry">Retry</string>
     <string name="action_back">Back</string>
     <string name="error_something_wrong">Something went wrong</string>
+    <string name="error_service_title">Technical issues</string>
+    <string name="error_service_subtitle">The service is temporarily unavailable.\nPlease try again later.</string>
+    <string name="error_offline_title">No internet connection</string>
+    <string name="error_offline_subtitle">Check your network and try again.\nContent will reload automatically when online.</string>
+    <string name="error_offline_banner">No internet connection</string>
 
     <!-- Bottom nav -->
     <string name="tab_anime">Anime</string>

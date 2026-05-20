@@ -12,4 +12,5 @@ data class AnimeDetailsState(
     val error: String? = null,
     val coverFillsTopBar: Boolean = true,
     val downloadedEpisodeCount: Int = 0,
+    val isOffline: Boolean = false,
 )
