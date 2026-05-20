@@ -15,7 +15,7 @@ import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.DownloadDone
 import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.HourglassTop
-import androidx.compose.material3.CircularProgressIndicator
+import com.greenrou.kanata.core.composable.KanataSmallLoader
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
@@ -84,8 +84,8 @@ internal fun EpisodeCard(
                         contentDescription = stringResource(R.string.episode_cd_downloaded),
                         tint = MaterialTheme.colorScheme.primary,
                     )
-                    DownloadStatus.DOWNLOADING -> CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
+                    DownloadStatus.DOWNLOADING -> KanataSmallLoader(
+                        size = 20.dp,
                         strokeWidth = 2.dp,
                     )
                     DownloadStatus.QUEUED -> Icon(

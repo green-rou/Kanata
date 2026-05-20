@@ -21,6 +21,7 @@ data class MainState(
     val isFilterSheetVisible: Boolean = false,
     val downloadFolder: String = "",
     val accentColor: String = "Green",
+    val isOffline: Boolean = false,
 ) {
     val hasActiveFilters: Boolean get() = selectedGenres.isNotEmpty() || selectedFormats.isNotEmpty()
 }
