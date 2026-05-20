@@ -192,6 +192,8 @@ class MainViewModel(
             _state.update { it.copy(isLoading = true, error = null) }
             getAnimeList(page = 1, showAdultContent = showAdultContent, filter = filter)
                 .onSuccess { page ->
+                    if (page.items.isEmpty()) {
+                    }
                     _state.update {
                         it.copy(
                             isLoading = false,

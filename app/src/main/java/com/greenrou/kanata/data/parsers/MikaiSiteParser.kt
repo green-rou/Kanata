@@ -19,7 +19,8 @@ class MikaiSiteParser : SiteParser {
 
     override suspend fun search(query: String): Result<String> = runCatching {
         val encoded = URLEncoder.encode(query, "UTF-8")
-        val json = Jsoup.connect("$apiBase/anime/search?name=$encoded&limit=1")
+        val searchUrl = "$apiBase/anime/search?name=$encoded&limit=1"
+        val json = Jsoup.connect(searchUrl)
             .userAgent(userAgent)
             .ignoreContentType(true)
             .execute().body()
@@ -33,7 +34,8 @@ class MikaiSiteParser : SiteParser {
         val first = items.getJSONObject(0)
         val id = first.getInt("id")
         val slug = first.getString("slug")
-        "https://mikai.me/anime/$id-$slug"
+        val url = "https://mikai.me/anime/$id-$slug"
+        url
     }
 
     override suspend fun getEpisodes(pageUrl: String): List<Episode> {

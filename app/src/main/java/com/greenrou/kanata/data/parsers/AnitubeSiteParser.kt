@@ -20,16 +20,17 @@ class AnitubeSiteParser : SiteParser {
 
     override suspend fun search(query: String): Result<String> = runCatching {
         val encoded = URLEncoder.encode(query, "UTF-8")
-        val document = Jsoup.connect("https://anitube.in.ua/index.php?do=search&subaction=search&story=$encoded")
-            .userAgent(userAgent).get()
+        val searchUrl = "https://anitube.in.ua/index.php?do=search&subaction=search&story=$encoded"
+        val document = Jsoup.connect(searchUrl).userAgent(userAgent).get()
 
         val searchArea = document.selectFirst("#dle-content, #content, .content, .search-results") ?: document
 
-        searchArea.select("a[href]")
+        val result = searchArea.select("a[href]")
             .map { it.attr("abs:href") }
             .filter { href -> "anitube.in.ua" in href && animeUrlPattern.containsMatchIn(href) }
             .distinct()
             .firstOrNull() ?: error("No results found on AniTube for: $query")
+        result
     }
 
     override suspend fun getEpisodes(pageUrl: String): List<Episode> {
@@ -70,13 +71,18 @@ class AnitubeSiteParser : SiteParser {
                             }
                         }
                         if (episodes.isNotEmpty()) return episodes
+                    } else {
                     }
                 }
+            }.onFailure { e ->
             }
+        } else {
         }
 
         val iframe = document.select("iframe[src], iframe[data-src], iframe[data-litespeed-src]").firstOrNull()
-        if (iframe != null) return listOf(Episode("Watch", pageUrl))
+        if (iframe != null) {
+            return listOf(Episode("Watch", pageUrl))
+        }
 
         val slug = pageUrl.trimEnd('/').substringAfterLast("/").removeSuffix(".html")
         val linkedEpisodes = document
@@ -92,7 +98,9 @@ class AnitubeSiteParser : SiteParser {
             .distinctBy { it.url }
             .sortedBy { it.title }
 
-        if (linkedEpisodes.isNotEmpty()) return linkedEpisodes
+        if (linkedEpisodes.isNotEmpty()) {
+            return linkedEpisodes
+        }
 
         val title = document.selectFirst("h1.story__title, h1.fz28, h1")?.text() ?: "Watch"
         return listOf(Episode(title, pageUrl))

@@ -28,6 +28,7 @@ class EpisodeListViewModel(
     val label: String,
     val animeTitle: String,
     val animeId: Int = 0,
+    val expectedEpisodes: Int = 0,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(EpisodeListState(isLoading = true))
@@ -66,7 +67,7 @@ class EpisodeListViewModel(
     private fun loadEpisodes() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
-            getEpisodeList(animePageUrl)
+            getEpisodeList(animePageUrl, expectedEpisodes)
                 .onSuccess { episodes ->
                     _state.update { it.copy(isLoading = false, episodes = episodes) }
                 }

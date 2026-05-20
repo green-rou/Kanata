@@ -45,7 +45,9 @@ class YouTubeSiteParser : SiteParser {
 
         val items = info.relatedItems.filterIsInstance<StreamInfoItem>()
 
-        if (items.isEmpty()) return listOf(Episode("Watch", pageUrl))
+        if (items.isEmpty()) {
+            return listOf(Episode("Watch", pageUrl))
+        }
 
         return items.mapIndexed { index, item ->
             Episode("Серія ${index + 1}: ${item.name}", item.url)

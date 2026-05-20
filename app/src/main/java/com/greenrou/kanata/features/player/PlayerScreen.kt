@@ -52,7 +52,10 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.hls.HlsMediaSource
+import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.ui.PlayerView
 import com.greenrou.kanata.features.player.content.EpisodeSideButtons
 import com.greenrou.kanata.features.player.content.NextEpisodeCard
@@ -150,11 +153,20 @@ fun PlayerScreen(
         }
     }
 
-    LaunchedEffect(state.streamUrl) {
+    LaunchedEffect(state.streamUrl, state.streamHeaders) {
         state.streamUrl?.let { url ->
             exoPlayer.stop()
             exoPlayer.clearMediaItems()
-            exoPlayer.setMediaItem(MediaItem.fromUri(url))
+            val dataSourceFactory = DefaultHttpDataSource.Factory().apply {
+                if (state.streamHeaders.isNotEmpty()) setDefaultRequestProperties(state.streamHeaders)
+            }
+            val mediaItem = MediaItem.fromUri(url)
+            val mediaSource = if (".m3u8" in url) {
+                HlsMediaSource.Factory(dataSourceFactory).createMediaSource(mediaItem)
+            } else {
+                ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(mediaItem)
+            }
+            exoPlayer.setMediaSource(mediaSource)
             exoPlayer.prepare()
             exoPlayer.play()
         }

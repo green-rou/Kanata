@@ -19,8 +19,9 @@ class AniwaveSiteParser : SiteParser {
         val encodedQuery = URLEncoder.encode(query, "UTF-8")
         val url = "https://aniwave.dk/?s=$encodedQuery"
         val document = Jsoup.connect(url).userAgent(userAgent).get()
-        document.select(".listupd a").firstOrNull()?.attr("abs:href")
+        val result = document.select(".listupd a").firstOrNull()?.attr("abs:href")
             ?: error("No results found on Aniwave for query: $query")
+        result
     }
 
     override suspend fun getEpisodes(pageUrl: String): List<Episode> {
@@ -37,7 +38,9 @@ class AniwaveSiteParser : SiteParser {
             .distinctBy { it.url }
             .reversed()
 
-        if (episodes.isNotEmpty()) return episodes
+        if (episodes.isNotEmpty()) {
+            return episodes
+        }
 
         val title = document.selectFirst("h1.entry-title, h1")?.text() ?: "Watch"
         return listOf(Episode(title, pageUrl))

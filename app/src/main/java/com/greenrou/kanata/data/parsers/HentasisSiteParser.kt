@@ -4,26 +4,38 @@ import com.greenrou.kanata.domain.model.Episode
 import com.greenrou.kanata.domain.model.VideoSourceType
 import com.greenrou.kanata.domain.parser.SiteParser
 import org.json.JSONObject
+import org.jsoup.Connection
 import org.jsoup.Jsoup
 import java.net.URL
 import java.net.URLEncoder
 
-class YummyAnimeSiteParser : SiteParser {
+class HentasisSiteParser : SiteParser {
 
     private val userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
 
-    override val label = "YummyAnime"
-    override val sourceType = VideoSourceType.YUMMY_ANIME
+    override val label = "Hentasis"
+    override val sourceType = VideoSourceType.HENTASIS
+    override val isAdultOnly = true
 
-    override fun supports(host: String) = "yummyanime" in host
+    override fun supports(host: String) = "hentasis" in host
 
     override suspend fun search(query: String): Result<String> = runCatching {
-        val encodedQuery = URLEncoder.encode(query, "UTF-8")
-        val url = "https://yummyanime.tv/index.php?do=search&subaction=search&search_start=0&full_search=0&story=$encodedQuery"
-        val document = Jsoup.connect(url).userAgent(userAgent).get()
-        val result = document.select(".movie-item__link").firstOrNull()?.attr("abs:href")
-            ?: error("No results found on YummyAnime for query: $query")
-        result
+        val document = Jsoup.connect("http://hentasis1.top/index.php")
+            .userAgent(userAgent)
+            .header("Referer", "http://hentasis1.top/")
+            .data("do", "search")
+            .data("subaction", "search")
+            .data("search_start", "0")
+            .data("full_search", "0")
+            .data("story", query)
+            .method(Connection.Method.POST)
+            .execute()
+            .parse()
+        val links = document.select("a[href]")
+            .map { it.attr("abs:href") }
+            .filter { Regex("hentasis\\d*\\.top/\\d+[^/]*\\.html").containsMatchIn(it) }
+            .distinct()
+        links.firstOrNull() ?: error("No results on Hentasis for: $query")
     }
 
     override suspend fun getEpisodes(pageUrl: String): List<Episode> {
