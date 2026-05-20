@@ -1,6 +1,7 @@
 package com.greenrou.kanata.features.player
 
 import androidx.lifecycle.ViewModel
+import com.greenrou.kanata.core.analytics.reportToCrashlytics
 import androidx.lifecycle.viewModelScope
 import com.greenrou.kanata.domain.usecase.GetEpisodeDownloadStatusUseCase
 import com.greenrou.kanata.domain.usecase.GetVideoStreamUseCase
@@ -124,6 +125,7 @@ class PlayerViewModel(
                     _state.update { it.copy(isLoading = false, streamUrl = stream.url, streamHeaders = stream.headers) }
                 }
                 .onFailure { e ->
+                    e.reportToCrashlytics("player_load_stream")
                     _state.update { it.copy(isLoading = false, error = e.message) }
                 }
         }

@@ -1,6 +1,7 @@
 package com.greenrou.kanata.features.random
 
 import androidx.lifecycle.ViewModel
+import com.greenrou.kanata.core.analytics.reportToCrashlytics
 import androidx.lifecycle.viewModelScope
 import com.greenrou.kanata.domain.usecase.AddFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.GetRandomAnimeUseCase
@@ -60,6 +61,7 @@ class RandomImageViewModel(
                     favoriteObserverJob = launch { observeFavoriteStatus(anime.id) }
                 }
                 .onFailure { e ->
+                    e.reportToCrashlytics("random_load_anime")
                     _state.update { it.copy(isAnimeLoading = false, animeError = e.message) }
                 }
         }
@@ -84,6 +86,7 @@ class RandomImageViewModel(
                     _state.update { it.copy(isImageLoading = false, imageUrl = url) }
                 }
                 .onFailure { e ->
+                    e.reportToCrashlytics("random_load_image")
                     _state.update { it.copy(isImageLoading = false, imageError = e.message) }
                 }
         }

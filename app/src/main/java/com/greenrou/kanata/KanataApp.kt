@@ -1,6 +1,9 @@
 package com.greenrou.kanata
 
 import android.app.Application
+import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.greenrou.kanata.BuildConfig
+import com.greenrou.kanata.core.di.analyticsModule
 import com.greenrou.kanata.core.di.aniListModule
 import com.greenrou.kanata.core.di.databaseModule
 import com.greenrou.kanata.core.di.repositoryModule
@@ -20,6 +23,7 @@ import org.schabi.newpipe.extractor.localization.Localization
 class KanataApp : Application() {
     override fun onCreate() {
         super.onCreate()
+        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG)
         NewPipe.init(
             NewPipeDownloader(OkHttpClient()),
             Localization.DEFAULT,
@@ -28,7 +32,7 @@ class KanataApp : Application() {
         startKoin {
             androidLogger()
             androidContext(this@KanataApp)
-            modules(networkModule, databaseModule, repositoryModule, useCaseModule, viewModelModule, aniListModule, workManagerModule)
+            modules(networkModule, databaseModule, repositoryModule, useCaseModule, viewModelModule, aniListModule, workManagerModule, analyticsModule)
         }
     }
 }

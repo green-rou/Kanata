@@ -12,6 +12,7 @@ import com.greenrou.kanata.domain.usecase.GetVideoStreamUseCase
 import com.greenrou.kanata.domain.usecase.IsFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.RemoveFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.SearchExternalAnimeUseCase
+import com.greenrou.kanata.core.analytics.reportToCrashlytics
 import com.greenrou.kanata.features.details.model.AnimeDetailsEvent
 import com.greenrou.kanata.features.details.model.AnimeDetailsState
 import kotlinx.coroutines.channels.Channel
@@ -103,6 +104,8 @@ class AnimeDetailsViewModel(
                     observeDownloadedCount(anime.title)
                 }
                 .onFailure { e ->
+
+                    e.reportToCrashlytics("details_load_anime")
                     loadedAnimeId = -1
                     val isOffline = !networkMonitor.isConnectedNow()
                     _state.update { it.copy(isLoading = false, error = e.message, isOffline = isOffline) }

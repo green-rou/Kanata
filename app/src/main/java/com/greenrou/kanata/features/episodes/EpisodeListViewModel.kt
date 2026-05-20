@@ -1,6 +1,7 @@
 package com.greenrou.kanata.features.episodes
 
 import androidx.lifecycle.ViewModel
+import com.greenrou.kanata.core.analytics.reportToCrashlytics
 import androidx.lifecycle.viewModelScope
 import com.greenrou.kanata.domain.model.DownloadItem
 import com.greenrou.kanata.domain.usecase.GetCompletedDownloadsUseCase
@@ -72,6 +73,7 @@ class EpisodeListViewModel(
                     _state.update { it.copy(isLoading = false, episodes = episodes) }
                 }
                 .onFailure { e ->
+                    e.reportToCrashlytics("episode_list_load")
                     _state.update { it.copy(isLoading = false, error = e.message) }
                 }
         }
