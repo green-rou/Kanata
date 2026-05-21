@@ -12,6 +12,7 @@ An Android app for browsing anime information and streaming or downloading episo
 ![Architecture](https://img.shields.io/badge/Architecture-MVVM%20%2B%20Clean%20Arch-orange)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 [![Contributing](https://img.shields.io/badge/PRs-welcome-brightgreen)](CONTRIBUTING.md)
+[![Screenshots](https://img.shields.io/badge/Screenshots-view-lightgrey)](screenshots/SCREENSHOTS.md)
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/C0C31ZLH6K)
 
 ---
@@ -24,14 +25,14 @@ An Android app for browsing anime information and streaming or downloading episo
 - **Detail screen** — title, score, genres, synopsis, episode count, cover image
 - **Favourites** — persist liked anime locally with Room
 - **External search** — automatically finds the anime on multiple sources after you open it
-- **Available streams** — clickable source chips (YummyAnime / Aniwave / Mikai / YouTube / Archive.org) appear when found
+- **Available streams** — clickable source chips (YummyAnime / Mikai / AniStar / AnimeGO / KissKH / YouTube / Archive.org) appear when found
 - **Episode list** — browse all episodes from the selected source; download any episode from the list
 - **Video player** — built-in HLS player via Media3 / ExoPlayer, auto-locks to landscape
 - **Episode downloading** — background download (HLS + direct video) via WorkManager with progress notifications
 - **Offline playback** — play downloaded episodes without an internet connection
 - **Download Manager** — dedicated screen with two tabs: active queue (drag-to-reorder, cancel) and completed downloads (open / delete)
-- **Discover** — mood-based anime recommendations and random anime picker in one section
-- **Settings** — theme toggle (light/dark), adult content toggle, cover layout style, download folder picker
+- **Discover** — mood-based anime recommendations, random anime picker, and anime wallpaper browser in one section
+- **Settings** — theme toggle (light/dark), accent color, language, adult content toggle, active sources selector, download folder picker
 
 ---
 
@@ -57,7 +58,7 @@ app/
 │   └── usecase/        # Single-responsibility use cases
 ├── features/
 │   ├── details/        # Anime detail screen
-│   ├── discover/       # Discover section (Mood + Random tabs)
+│   ├── discover/       # Discover section (Mood + Random + Wallpaper tabs)
 │   ├── downloads/      # Download Manager screen
 │   ├── episodes/       # Episode list screen
 │   ├── favorites/      # Favourites screen
@@ -99,10 +100,13 @@ Each feature has its own `State` / `Event` model pair. ViewModels expose `StateF
 | [AniList](https://anilist.co) | — | GraphQL API — anime list, metadata, mood search | ✅ Active |
 | [Mikai](https://mikai.me) | Ukrainian dub | REST API | ✅ Active |
 | [YummyAnime](https://yummyanime.tv) | Russian dub | HTML scraping | ✅ Active |
-| [Aniwave](https://aniwave.dk) | English sub | HTML scraping | ✅ Active |
+| [AniStar](https://astar.bz) | Ukrainian dub | HTML scraping | ✅ Active |
+| [AnimeGO](https://animego.ngo) | Russian dub | HTML scraping | ✅ Active |
+| [KissKH](https://kisskh.co) | English sub | HTML scraping | ✅ Active |
 | [YouTube](https://youtube.com) | Various | NewPipe extractor — playlist search | ✅ Active |
 | [Archive.org](https://archive.org) | Various | Public metadata API — direct MP4/MKV | ✅ Active |
 | Kodik | — | Embedded player format resolved by VideoRepository | ✅ Active |
+| ~~[Aniwave](https://aniwave.dk)~~ | ~~English sub~~ | ~~HTML scraping~~ | ❌ Disabled |
 | ~~[AniTube](https://anitube.in.ua)~~ | ~~Ukrainian dub/sub~~ | ~~HTML scraping~~ | ❌ Disabled (DLE player detection) |
 | ~~[Hanime.tv](https://hanime.tv)~~ | ~~Japanese~~ | ~~WebView + API~~ | ❌ Disabled (WebView detection blocks stream) |
 
