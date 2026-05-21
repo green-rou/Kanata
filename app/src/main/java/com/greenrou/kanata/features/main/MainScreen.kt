@@ -77,6 +77,8 @@ import com.greenrou.kanata.features.downloads.DownloadManagerViewModel
 import com.greenrou.kanata.features.downloads.model.DownloadManagerEvent
 import com.greenrou.kanata.features.random.RandomScreen
 import com.greenrou.kanata.features.settings.SettingsScreen
+import com.greenrou.kanata.features.update.UpdateViewModel
+import com.greenrou.kanata.features.update.model.UpdateEvent
 import org.koin.androidx.compose.koinViewModel
 
 private val NavBarHeight = 82.dp
@@ -97,6 +99,16 @@ fun MainScreen(
     val favoriteIds by viewModel.favoriteIds.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val downloadsViewModel: DownloadManagerViewModel = koinViewModel()
+    val updateViewModel: UpdateViewModel = koinViewModel()
+    val updateState by updateViewModel.state.collectAsStateWithLifecycle()
+    val noUpdatesMessage = stringResource(R.string.update_no_updates)
+
+    LaunchedEffect(updateState.noUpdatesAvailable) {
+        if (updateState.noUpdatesAvailable) {
+            snackbarHostState.showSnackbar(noUpdatesMessage)
+            updateViewModel.handleEvent(UpdateEvent.ConsumeNoUpdatesMessage)
+        }
+    }
 
     val selectedTab = remember(selectedTabName) { BottomNavItem.valueOf(selectedTabName) }
     var isDownloadSearchActive by rememberSaveable { mutableStateOf(false) }
@@ -440,6 +452,12 @@ fun MainScreen(
                         onSetDownloadFolder = { viewModel.handleEvent(MainEvent.SetDownloadFolder(it)) },
                         accentColor = state.accentColor,
                         onSetAccentColor = { viewModel.handleEvent(MainEvent.SetAccentColor(it)) },
+                        disabledSources = state.disabledSources,
+                        regularSources = viewModel.regularSources,
+                        adultSources = viewModel.adultSources,
+                        onToggleSource = { viewModel.handleEvent(MainEvent.ToggleSource(it)) },
+                        isCheckingUpdate = updateState.isChecking,
+                        onCheckUpdate = { updateViewModel.handleEvent(UpdateEvent.CheckUpdate) },
                         bottomPadding = contentPadding.calculateBottomPadding(),
                         modifier = Modifier
                             .fillMaxSize()

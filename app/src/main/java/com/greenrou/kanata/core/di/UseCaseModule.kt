@@ -1,5 +1,6 @@
 package com.greenrou.kanata.core.di
 
+import com.greenrou.kanata.domain.usecase.GetAnimegongoTranslationsUseCase
 import com.greenrou.kanata.domain.usecase.AddFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.CancelDownloadUseCase
 import com.greenrou.kanata.domain.usecase.DeleteCompletedDownloadUseCase
@@ -38,6 +39,7 @@ val useCaseModule = module {
     factory { GetVideoStreamUseCase(get()) }
     factory { SearchExternalAnimeUseCase(get()) }
     factory { GetEpisodeListUseCase(get()) }
+    factory { GetAnimegongoTranslationsUseCase(get()) }
     factory { EnqueueDownloadUseCase(get()) }
     factory { CancelDownloadUseCase(get(), get()) }
     factory { GetDownloadQueueUseCase(get()) }

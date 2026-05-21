@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.greenrou.kanata.domain.model.AnimeFilter
 import com.greenrou.kanata.domain.model.AnimeFormat
+import com.greenrou.kanata.domain.model.VideoSourceType
+import com.greenrou.kanata.domain.parser.SiteParser
 import com.greenrou.kanata.core.network.NetworkMonitor
 import com.greenrou.kanata.core.analytics.AnalyticsManager
 import com.greenrou.kanata.core.analytics.reportToCrashlytics
@@ -41,7 +43,16 @@ class MainViewModel(
     private val setDownloadFolder: SetDownloadFolderUseCase,
     private val networkMonitor: NetworkMonitor,
     private val analytics: AnalyticsManager,
+    parsers: List<SiteParser>,
 ) : ViewModel() {
+
+    val regularSources: List<Pair<VideoSourceType, String>> = parsers
+        .filter { !it.isAdultOnly }
+        .map { it.sourceType to it.label }
+
+    val adultSources: List<Pair<VideoSourceType, String>> = parsers
+        .filter { it.isAdultOnly }
+        .map { it.sourceType to it.label }
 
     private val _state = MutableStateFlow(MainState())
     val state = _state.asStateFlow()
@@ -91,6 +102,10 @@ class MainViewModel(
 
         settingsManager.accentColor
             .onEach { color -> _state.update { it.copy(accentColor = color) } }
+            .launchIn(viewModelScope)
+
+        settingsManager.disabledSources
+            .onEach { sources -> _state.update { it.copy(disabledSources = sources) } }
             .launchIn(viewModelScope)
     }
 
@@ -187,6 +202,11 @@ class MainViewModel(
             }
             is MainEvent.SetAccentColor -> viewModelScope.launch {
                 settingsManager.setAccentColor(event.name)
+            }
+            is MainEvent.ToggleSource -> viewModelScope.launch {
+                val updated = _state.value.disabledSources.toMutableSet()
+                if (!updated.add(event.type)) updated.remove(event.type)
+                settingsManager.setDisabledSources(updated)
             }
             else -> Unit
         }

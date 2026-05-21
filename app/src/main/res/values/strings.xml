@@ -56,6 +56,9 @@
     <string name="episode_cd_failed">Download failed</string>
     <string name="episode_cd_download">Download episode %d</string>
     <string name="episode_cd_play">Play episode %d</string>
+    <string name="translation_sheet_title">Select dubbing</string>
+    <string name="translation_type_voice">Voice acting</string>
+    <string name="translation_type_subtitles">Subtitles</string>
 
     <!-- Favorites -->
     <string name="favorites_empty_title">No favorites yet</string>
@@ -146,6 +149,8 @@
     <string name="settings_adult_off_title">Adult Content</string>
     <string name="settings_adult_on_subtitle">Showing only 18+ titles</string>
     <string name="settings_adult_off_subtitle">Show only non-adult titles</string>
+    <string name="settings_section_sources">Sources</string>
+    <string name="settings_sources_select">Select active sources</string>
     <string name="settings_section_downloads">Downloads</string>
     <string name="settings_download_folder_title">Download folder</string>
     <string name="settings_download_folder_default">Default (app external storage)</string>
@@ -156,4 +161,14 @@
     <string name="settings_github_subtitle">green-rou/Kanata</string>
     <string name="settings_support">Support me on Ko-fi</string>
     <string name="settings_support_subtitle">ko-fi.com/C0C31ZLH6K</string>
+    <string name="settings_check_update">Check for updates</string>
+    <string name="settings_check_update_checking">Checking…</string>
+    <string name="settings_check_update_subtitle">Check for a new version</string>
+    <string name="update_available_title">Update Available</string>
+    <string name="update_button">Update</string>
+    <string name="update_skip_button">Skip</string>
+    <string name="update_github_link">View on GitHub</string>
+    <string name="update_skip_hint">If you skip, this dialog won\'t appear again for version %s</string>
+    <string name="update_downloading">Downloading…</string>
+    <string name="update_no_updates">Already up to date</string>
 </resources>

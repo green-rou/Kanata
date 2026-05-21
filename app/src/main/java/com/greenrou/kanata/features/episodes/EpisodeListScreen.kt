@@ -29,6 +29,7 @@ import com.greenrou.kanata.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.greenrou.kanata.features.episodes.content.EpisodeCard
 import com.greenrou.kanata.features.episodes.content.EpisodeEmptyState
+import com.greenrou.kanata.features.episodes.content.TranslationBottomSheet
 import com.greenrou.kanata.features.episodes.model.EpisodeListEvent
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -136,5 +137,14 @@ fun EpisodeListScreen(
                 }
             }
         }
+    }
+
+    if (state.isTranslationSheetVisible) {
+        TranslationBottomSheet(
+            isLoading = state.isTranslationsLoading,
+            translations = state.translations,
+            onTranslationSelected = { viewModel.handleEvent(EpisodeListEvent.TranslationSelected(it)) },
+            onDismiss = { viewModel.handleEvent(EpisodeListEvent.DismissTranslationSheet) },
+        )
     }
 }

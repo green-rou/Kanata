@@ -1,5 +1,7 @@
 package com.greenrou.kanata.features.episodes.model
 
+import com.greenrou.kanata.domain.model.Translation
+
 sealed interface EpisodeListEvent {
     data object BackClicked : EpisodeListEvent
     data class EpisodeClicked(
@@ -15,6 +17,9 @@ sealed interface EpisodeListEvent {
         val sourceName: String,
         val animeId: Int,
     ) : EpisodeListEvent
+
+    data object DismissTranslationSheet : EpisodeListEvent
+    data class TranslationSelected(val translation: Translation) : EpisodeListEvent
 
     data object NavigateBack : EpisodeListEvent
     data class NavigateToPlayer(

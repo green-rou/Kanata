@@ -4,10 +4,13 @@ import androidx.lifecycle.ViewModel
 import com.greenrou.kanata.core.analytics.reportToCrashlytics
 import androidx.lifecycle.viewModelScope
 import com.greenrou.kanata.domain.model.DownloadItem
+import com.greenrou.kanata.domain.model.Translation
+import com.greenrou.kanata.domain.usecase.GetAnimegongoTranslationsUseCase
 import com.greenrou.kanata.domain.usecase.GetCompletedDownloadsUseCase
 import com.greenrou.kanata.domain.usecase.GetDownloadQueueUseCase
 import com.greenrou.kanata.domain.usecase.GetEpisodeListUseCase
 import com.greenrou.kanata.domain.usecase.StartEpisodeDownloadUseCase
+import java.net.URLEncoder
 import com.greenrou.kanata.features.episodes.model.EpisodeListEvent
 import com.greenrou.kanata.features.episodes.model.EpisodeListState
 import kotlinx.coroutines.channels.Channel
@@ -25,6 +28,7 @@ class EpisodeListViewModel(
     private val startEpisodeDownload: StartEpisodeDownloadUseCase,
     private val getDownloadQueue: GetDownloadQueueUseCase,
     private val getCompletedDownloads: GetCompletedDownloadsUseCase,
+    private val getAnimegongoTranslations: GetAnimegongoTranslationsUseCase,
     val animePageUrl: String,
     val label: String,
     val animeTitle: String,
@@ -48,9 +52,27 @@ class EpisodeListViewModel(
             EpisodeListEvent.BackClicked -> viewModelScope.launch {
                 _events.send(EpisodeListEvent.NavigateBack)
             }
-            is EpisodeListEvent.EpisodeClicked -> viewModelScope.launch {
-                _events.send(EpisodeListEvent.NavigateToPlayer(event.urls, event.titles, event.index))
+            is EpisodeListEvent.EpisodeClicked -> {
+                val clickedUrl = event.urls.getOrNull(event.index) ?: return
+                if ("animego.ngo" in clickedUrl) {
+                    val title = event.titles.getOrNull(event.index) ?: ""
+                    showTranslationSheet(clickedUrl, title)
+                } else {
+                    viewModelScope.launch {
+                        _events.send(EpisodeListEvent.NavigateToPlayer(event.urls, event.titles, event.index))
+                    }
+                }
             }
+            EpisodeListEvent.DismissTranslationSheet -> {
+                _state.update { it.copy(
+                    isTranslationSheetVisible = false,
+                    isTranslationsLoading = false,
+                    translations = emptyList(),
+                    pendingEpisodeUrl = "",
+                    pendingEpisodeTitle = "",
+                )}
+            }
+            is EpisodeListEvent.TranslationSelected -> playWithTranslation(event.translation)
             is EpisodeListEvent.DownloadEpisode -> viewModelScope.launch {
                 startEpisodeDownload(
                     animeTitle = event.animeTitle,
@@ -63,6 +85,53 @@ class EpisodeListViewModel(
             }
             else -> Unit
         }
+    }
+
+    private fun showTranslationSheet(episodeUrl: String, episodeTitle: String) {
+        _state.update { it.copy(
+            isTranslationSheetVisible = true,
+            isTranslationsLoading = true,
+            translations = emptyList(),
+            pendingEpisodeUrl = episodeUrl,
+            pendingEpisodeTitle = episodeTitle,
+        )}
+        viewModelScope.launch {
+            getAnimegongoTranslations(episodeUrl)
+                .onSuccess { list ->
+                    if (list.size == 1) {
+                        playWithTranslation(list.first())
+                    } else {
+                        _state.update { it.copy(isTranslationsLoading = false, translations = list) }
+                    }
+                }
+                .onFailure {
+                    _state.update { it.copy(isTranslationSheetVisible = false, isTranslationsLoading = false) }
+                    val url = _state.value.pendingEpisodeUrl
+                    val title = _state.value.pendingEpisodeTitle
+                    _events.send(EpisodeListEvent.NavigateToPlayer(listOf(url), listOf(title), 0))
+                }
+        }
+    }
+
+    private fun playWithTranslation(translation: Translation) {
+        viewModelScope.launch {
+            val episodeUrl = _state.value.pendingEpisodeUrl.ifBlank { return@launch }
+            val episodeTitle = _state.value.pendingEpisodeTitle
+            val kodikUrl = buildKodikUrl(translation, episodeUrl)
+            _state.update { it.copy(
+                isTranslationSheetVisible = false,
+                isTranslationsLoading = false,
+                translations = emptyList(),
+                pendingEpisodeUrl = "",
+                pendingEpisodeTitle = "",
+            )}
+            _events.send(EpisodeListEvent.NavigateToPlayer(listOf(kodikUrl), listOf(episodeTitle), 0))
+        }
+    }
+
+    private fun buildKodikUrl(translation: Translation, referer: String): String {
+        val encoded = URLEncoder.encode(referer, "UTF-8")
+        return "https://kodikplayer.com/${translation.mediaType}/${translation.mediaId}/${translation.mediaHash}/720p?yref=$encoded"
     }
 
     private fun loadEpisodes() {

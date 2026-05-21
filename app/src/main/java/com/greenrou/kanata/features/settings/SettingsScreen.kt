@@ -22,6 +22,7 @@ import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.LightMode
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.LockOpen
+import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material.icons.rounded.VolunteerActivism
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -31,11 +32,13 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.greenrou.kanata.R
+import com.greenrou.kanata.domain.model.VideoSourceType
 import com.greenrou.kanata.features.settings.content.ColorPickerItem
 import com.greenrou.kanata.features.settings.content.LanguagePickerItem
 import com.greenrou.kanata.features.settings.content.SettingsItem
 import com.greenrou.kanata.features.settings.content.SettingsLinkItem
 import com.greenrou.kanata.features.settings.content.SettingsSection
+import com.greenrou.kanata.features.settings.content.SourcesSection
 
 private const val GITHUB_URL = "https://github.com/green-rou/Kanata"
 private const val DONATE_URL = "https://ko-fi.com/C0C31ZLH6K"
@@ -52,6 +55,12 @@ fun SettingsScreen(
     onSetDownloadFolder: (String) -> Unit = {},
     accentColor: String = "Green",
     onSetAccentColor: (String) -> Unit = {},
+    disabledSources: Set<VideoSourceType> = emptySet(),
+    regularSources: List<Pair<VideoSourceType, String>> = emptyList(),
+    adultSources: List<Pair<VideoSourceType, String>> = emptyList(),
+    onToggleSource: (VideoSourceType) -> Unit = {},
+    isCheckingUpdate: Boolean = false,
+    onCheckUpdate: () -> Unit = {},
     bottomPadding: Dp = 0.dp,
     modifier: Modifier = Modifier,
 ) {
@@ -118,6 +127,14 @@ fun SettingsScreen(
             )
         }
 
+        SourcesSection(
+            showAdultContent = showAdultContent,
+            regularSources = regularSources,
+            adultSources = adultSources,
+            disabledSources = disabledSources,
+            onToggleSource = onToggleSource,
+        )
+
         SettingsSection(title = stringResource(R.string.settings_section_downloads)) {
             SettingsLinkItem(
                 icon = Icons.Rounded.Folder,
@@ -132,6 +149,13 @@ fun SettingsScreen(
                 icon = Icons.Rounded.Info,
                 title = stringResource(R.string.settings_version, appVersion ?: "—"),
                 subtitle = stringResource(R.string.settings_made_by),
+            )
+            SettingsLinkItem(
+                icon = Icons.Rounded.SystemUpdate,
+                title = stringResource(R.string.settings_check_update),
+                subtitle = if (isCheckingUpdate) stringResource(R.string.settings_check_update_checking)
+                           else stringResource(R.string.settings_check_update_subtitle),
+                onClick = if (!isCheckingUpdate) onCheckUpdate else null,
             )
             SettingsLinkItem(
                 icon = Icons.Rounded.Code,
