@@ -58,6 +58,9 @@
     <string name="episode_cd_failed">Помилка завантаження</string>
     <string name="episode_cd_download">Завантажити епізод %d</string>
     <string name="episode_cd_play">Відтворити епізод %d</string>
+    <string name="translation_sheet_title">Оберіть озвучку</string>
+    <string name="translation_type_voice">Озвучка</string>
+    <string name="translation_type_subtitles">Субтитри</string>
 
     <!-- Favorites -->
     <string name="favorites_empty_title">Немає вподобань</string>

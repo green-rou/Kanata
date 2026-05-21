@@ -56,6 +56,9 @@
     <string name="episode_cd_failed">Download failed</string>
     <string name="episode_cd_download">Download episode %d</string>
     <string name="episode_cd_play">Play episode %d</string>
+    <string name="translation_sheet_title">Select dubbing</string>
+    <string name="translation_type_voice">Voice acting</string>
+    <string name="translation_type_subtitles">Subtitles</string>
 
     <!-- Favorites -->
     <string name="favorites_empty_title">No favorites yet</string>

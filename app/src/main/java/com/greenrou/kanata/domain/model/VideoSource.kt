@@ -12,6 +12,8 @@ enum class VideoSourceType {
     HENTASIS,
     HENTAIZ,
     ASTAR,
+    ANIMEGO_NGO,
+    KISSKH,
     UNKNOWN,
 }
 
