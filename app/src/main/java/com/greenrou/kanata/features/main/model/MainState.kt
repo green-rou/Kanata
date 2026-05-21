@@ -2,6 +2,7 @@ package com.greenrou.kanata.features.main.model
 
 import com.greenrou.kanata.domain.model.Anime
 import com.greenrou.kanata.domain.model.AnimeFormat
+import com.greenrou.kanata.domain.model.VideoSourceType
 
 data class MainState(
     val isLoading: Boolean = false,
@@ -21,6 +22,8 @@ data class MainState(
     val isFilterSheetVisible: Boolean = false,
     val downloadFolder: String = "",
     val accentColor: String = "Green",
+    val isOffline: Boolean = false,
+    val disabledSources: Set<VideoSourceType> = emptySet(),
 ) {
     val hasActiveFilters: Boolean get() = selectedGenres.isNotEmpty() || selectedFormats.isNotEmpty()
 }

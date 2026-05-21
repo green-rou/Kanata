@@ -1,6 +1,7 @@
 package com.greenrou.kanata.features.main.model
 
 import com.greenrou.kanata.domain.model.AnimeFormat
+import com.greenrou.kanata.domain.model.VideoSourceType
 
 sealed interface MainEvent {
     data object LoadAnime : MainEvent
@@ -21,6 +22,7 @@ sealed interface MainEvent {
 
     data class SetDownloadFolder(val uri: String) : MainEvent
     data class SetAccentColor(val name: String) : MainEvent
+    data class ToggleSource(val type: VideoSourceType) : MainEvent
 
     data class NavigateToDetail(val animeId: Int) : MainEvent
     data class ShowError(val message: String) : MainEvent

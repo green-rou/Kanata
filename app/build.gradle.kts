@@ -7,6 +7,8 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.apollo)
     alias(libs.plugins.kotlin.ksp)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics)
 }
 
 android {
@@ -21,8 +23,8 @@ android {
         applicationId = "com.greenrou.kanata"
         minSdk = 28
         targetSdk = 36
-        versionCode = 4
-        versionName = System.getenv("VERSION_NAME")?.removePrefix("v") ?: "0.2.2"
+        versionCode = 5
+        versionName = System.getenv("VERSION_NAME")?.removePrefix("v") ?: "0.2.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -77,6 +79,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -120,6 +123,10 @@ dependencies {
     implementation(libs.media3.exoplayer.hls)
     implementation(libs.media3.ui)
     implementation(libs.androidx.work.runtime.ktx)
+
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.analytics)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

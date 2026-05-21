@@ -2,6 +2,7 @@ package com.greenrou.kanata.features.player
 
 import android.app.Activity
 import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.view.View
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -10,6 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -38,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -251,29 +255,52 @@ fun PlayerScreen(
             PlayerStatusOverlay(isLoading = state.isLoading, error = null)
         }
     } else {
+        val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+        val topBarIconTint = if (isLandscape) Color.White else Color.Unspecified
         Scaffold(
+            containerColor = if (isLandscape) Color.Black else MaterialTheme.colorScheme.surface,
+            contentWindowInsets = WindowInsets(0, 0, 0, 0),
             topBar = {
                 TopAppBar(
-                    title = { Text(state.title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                    title = {
+                        Text(
+                            state.title,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            color = topBarIconTint,
+                        )
+                    },
                     navigationIcon = {
                         IconButton(onClick = { viewModel.handleEvent(PlayerEvent.BackClicked) }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.action_back),
+                                tint = topBarIconTint,
+                            )
                         }
                     },
                     actions = {
                         if (state.error == null) {
                             IconButton(onClick = { isFullscreen = true }) {
-                                Icon(Icons.Filled.Fullscreen, contentDescription = stringResource(R.string.player_cd_fullscreen))
+                                Icon(
+                                    Icons.Filled.Fullscreen,
+                                    contentDescription = stringResource(R.string.player_cd_fullscreen),
+                                    tint = topBarIconTint,
+                                )
                             }
                         }
                     },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent,
+                        scrolledContainerColor = Color.Transparent,
+                    ),
                 )
             },
         ) { padding ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(padding)
+                    .padding(top = if (isLandscape) 0.dp else padding.calculateTopPadding())
             ) {
                 if (state.error != null) {
                     PlayerErrorContent(

@@ -57,6 +57,8 @@ class VideoRepositoryImpl(
             .build()
     }
 
+    private val kisskhClient: OkHttpClient by lazy { OkHttpClient() }
+
     private fun isKodikApiHost(hostname: String) =
         hostname == "kodik.info" || hostname == "kodik.cc" ||
         hostname == "kodik.biz" || hostname == "kodik.pm" ||
@@ -117,6 +119,14 @@ class VideoRepositoryImpl(
                 val params = parseQueryParams(siteUrl)
                 val yref = params["yref"] ?: siteUrl
                 return@runCatching VideoStream(extractKodikStream(yref, siteUrl.substringBefore("?")))
+            }
+
+            if (isAnimegongoUrl(siteUrl)) {
+                return@runCatching extractAnimegongoStream(siteUrl)
+            }
+
+            if (isKisskhUrl(siteUrl)) {
+                return@runCatching extractKisskhStream(siteUrl)
             }
 
             val document = Jsoup.connect(siteUrl.substringBefore("?")).userAgent(userAgent).get()
@@ -368,6 +378,201 @@ class VideoRepositoryImpl(
         runCatching { URL(url).host }.getOrDefault("").let { "hanime.tv" in it }
 
     private fun isArchiveOrgDetailsUrl(url: String) = "archive.org/details/" in url
+
+    private fun isAnimegongoUrl(url: String) =
+        runCatching { URL(url).host }.getOrDefault("").let { "animego.ngo" in it }
+
+    private fun extractAnimegongoStream(episodePageUrl: String): VideoStream {
+        val doc = Jsoup.connect(episodePageUrl)
+            .userAgent(userAgent)
+            .header("Referer", "https://animego.ngo/")
+            .get()
+
+        val kodikUrl = doc.selectFirst("a#kodik-tab[data-url]")
+            ?.attr("data-url")
+            ?.let { if (it.startsWith("//")) "https:$it" else it }
+            ?: error("No Kodik player tab found on animego.ngo page: $episodePageUrl")
+
+        val stream = extractKodikStream(episodePageUrl, kodikUrl.substringBefore("?"))
+        return VideoStream(stream, mapOf("Referer" to kodikUrl))
+    }
+
+    private fun isKisskhUrl(url: String) = "kisskh.co" in url && "/episode/" in url
+
+    private suspend fun extractKisskhStream(episodeUrl: String): VideoStream {
+        val epId = Regex("""/episode/(\d+)""").find(episodeUrl)?.groupValues?.get(1)
+            ?: error("Cannot extract episode ID from KissKH URL: $episodeUrl")
+
+        val kkey = generateKisskhKey(epId.toInt())
+        val apiUrl = "https://kisskh.co/api/DramaList/Episode/$epId.png?err=false&ts=&time=&kkey=$kkey"
+        val dramaPageUrl = parseQueryParams(episodeUrl)["drama_page"] ?: "https://kisskh.co/"
+
+        val directResult = runCatching {
+            val resp = kisskhClient.newCall(
+                Request.Builder()
+                    .url(apiUrl)
+                    .header("User-Agent", userAgent)
+                    .header("Accept", "application/json, text/plain, */*")
+                    .header("Referer", "https://kisskh.co/")
+                    .header("X-Requested-With", "XMLHttpRequest")
+                    .build()
+            ).execute()
+            if (resp.code == 200) resp.body?.string() else null
+        }.getOrNull()
+
+        if (directResult != null) return parseKisskhVideoStream(directResult, epId)
+
+        return extractKisskhStreamViaWebView(epId, apiUrl, dramaPageUrl)
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    private suspend fun extractKisskhStreamViaWebView(
+        epId: String,
+        apiUrl: String,
+        dramaPageUrl: String,
+    ): VideoStream {
+        val deferred = CompletableDeferred<String>()
+        var webViewRef: WebView? = null
+
+        withContext(Dispatchers.Main) {
+            val webView = WebView(context)
+            webViewRef = webView
+            webView.settings.apply {
+                javaScriptEnabled = true
+                domStorageEnabled = true
+                userAgentString = "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+                mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+            }
+
+            webView.addJavascriptInterface(object : Any() {
+                @android.webkit.JavascriptInterface
+                fun onResult(body: String) {
+                    val videoUrl = parseKisskhVideoUrl(body)
+                    if (videoUrl != null && !deferred.isCompleted) {
+                        deferred.complete(videoUrl)
+                    }
+                }
+                @android.webkit.JavascriptInterface
+                fun onError(error: String) { }
+            }, "KissKHBridge")
+
+            val webViewUA = "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+
+            webView.webViewClient = object : WebViewClient() {
+                override fun shouldInterceptRequest(
+                    view: WebView,
+                    request: WebResourceRequest,
+                ): WebResourceResponse? {
+                    val reqUrl = request.url.toString()
+                    if (!deferred.isCompleted && "/api/DramaList/Episode/" in reqUrl) {
+                        return runCatching {
+                            val cookies = android.webkit.CookieManager.getInstance()
+                                .getCookie("https://kisskh.co") ?: ""
+                            val okResp = kisskhClient.newCall(
+                                Request.Builder()
+                                    .url(reqUrl)
+                                    .header("User-Agent", webViewUA)
+                                    .header("Accept", "application/json, text/plain, */*")
+                                    .header("Referer", dramaPageUrl)
+                                    .header("X-Requested-With", "XMLHttpRequest")
+                                    .header("Cookie", cookies)
+                                    .build()
+                            ).execute()
+                            val body = okResp.body?.string() ?: ""
+                            val videoUrl = parseKisskhVideoUrl(body)
+                            if (videoUrl != null && !deferred.isCompleted) {
+                                deferred.complete(videoUrl)
+                            }
+                            WebResourceResponse(
+                                okResp.header("Content-Type") ?: "application/json",
+                                "UTF-8",
+                                okResp.code,
+                                okResp.message.ifBlank { "OK" },
+                                emptyMap(),
+                                body.byteInputStream(),
+                            )
+                        }.getOrNull()
+                    }
+                    return null
+                }
+
+                override fun onPageFinished(view: WebView, url: String) {
+                    if (deferred.isCompleted || "kisskh.co" !in url) return
+                    view.evaluateJavascript("""
+                        (function() {
+                            setTimeout(function() {
+                                fetch('$apiUrl', {
+                                    headers: {
+                                        'Accept': 'application/json, text/plain, */*',
+                                        'X-Requested-With': 'XMLHttpRequest'
+                                    }
+                                })
+                                .then(function(r) { return r.text(); })
+                                .then(function(b) { if (b && b.length > 2) window.KissKHBridge.onResult(b); })
+                                .catch(function(e) { window.KissKHBridge.onError(e.toString()); });
+                            }, 8000);
+                        })();
+                    """.trimIndent(), null)
+                }
+            }
+
+            webView.loadUrl(dramaPageUrl)
+        }
+
+        val videoUrl = withTimeoutOrNull(60_000) { deferred.await() }
+        withContext(Dispatchers.Main) { webViewRef?.destroy() }
+
+        return VideoStream(
+            videoUrl ?: error("KissKH WebView timeout for episode $epId"),
+            mapOf("Referer" to "https://kisskh.co/")
+        )
+    }
+
+    private fun parseKisskhVideoUrl(body: String): String? {
+        val json = runCatching { JSONObject(body) }.getOrNull() ?: return null
+        if (!json.isNull("id")) return null
+        return json.optString("Video").ifBlank { null }
+            ?: json.optString("ThirdParty").ifBlank { null }
+    }
+
+    private fun parseKisskhVideoStream(body: String, epId: String): VideoStream {
+        val videoUrl = parseKisskhVideoUrl(body)
+            ?: error("No video URL in KissKH response for $epId: ${body.take(200)}")
+        return VideoStream(videoUrl, mapOf("Referer" to "https://kisskh.co/"))
+    }
+
+    private fun generateKisskhKey(episodeId: Int): String {
+        val key = hexToBytes("4f6bdaa39e2f8cb07f5e722d9edef314")
+        val iv  = hexToBytes("01504af356e619cf2e42bba68c3f70f9")
+
+        val arr = mutableListOf(
+            "", episodeId.toString(), "", "mg3c3b04ba", "2.8.10",
+            "62f176f3bb1b5b8e70e39932ad34a0c7", "4830201",
+            "kisskh", "kisskh", "kisskh", "kisskh", "kisskh", "kisskh",
+            "00", ""
+        )
+
+        val joined = arr.joinToString("|")
+        var hash = 0
+        for (c in joined) hash = hash * 31 + c.code
+
+        arr.add(1, hash.toString())
+        val plaintext = arr.joinToString("|")
+        val padLen = 16 - (plaintext.length % 16)
+        val padded = plaintext + padLen.toChar().toString().repeat(padLen)
+
+        val cipher = javax.crypto.Cipher.getInstance("AES/CBC/NoPadding")
+        cipher.init(
+            javax.crypto.Cipher.ENCRYPT_MODE,
+            javax.crypto.spec.SecretKeySpec(key, "AES"),
+            javax.crypto.spec.IvParameterSpec(iv),
+        )
+        return cipher.doFinal(padded.toByteArray(Charsets.ISO_8859_1))
+            .joinToString("") { "%02X".format(it) }
+    }
+
+    private fun hexToBytes(hex: String) =
+        ByteArray(hex.length / 2) { hex.substring(it * 2, it * 2 + 2).toInt(16).toByte() }
 
     private fun extractArchiveOrgStream(detailsUrl: String): String {
         val identifier = detailsUrl.trimEnd('/').substringAfterLast("/")

@@ -15,9 +15,11 @@ class SearchRepositoryImpl(
 
     override suspend fun searchAll(titles: List<String>): List<VideoSource> = withContext(Dispatchers.IO) {
         val showAdult = settingsManager.showAdultContent.first()
+        val disabled = settingsManager.disabledSources.first()
         val sources = mutableListOf<VideoSource>()
         parsers
             .filter { parser -> !parser.isAdultOnly || showAdult }
+            .filter { parser -> parser.sourceType !in disabled }
             .forEach { parser ->
                 for (title in titles) {
                     val result = parser.search(title)

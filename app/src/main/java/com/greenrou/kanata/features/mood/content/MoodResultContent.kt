@@ -15,7 +15,7 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material3.CircularProgressIndicator
+import com.greenrou.kanata.core.composable.KanataLoader
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -79,7 +79,7 @@ internal fun MoodResultContent(
 
         Box(modifier = Modifier.fillMaxSize()) {
             when {
-                state.isLoading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                state.isLoading -> KanataLoader(modifier = Modifier.align(Alignment.Center))
 
                 state.animeList.isEmpty() -> Column(
                     modifier = Modifier.align(Alignment.Center),

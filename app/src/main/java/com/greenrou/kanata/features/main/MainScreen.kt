@@ -1,8 +1,11 @@
 package com.greenrou.kanata.features.main
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -26,7 +29,7 @@ import androidx.compose.material.icons.rounded.FilterList
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.CircularProgressIndicator
+import com.greenrou.kanata.core.composable.KanataLoader
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -41,6 +44,8 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -62,6 +67,8 @@ import com.greenrou.kanata.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.greenrou.kanata.features.favorites.FavoritesScreen
 import com.greenrou.kanata.features.main.content.AnimeGrid
+import com.greenrou.kanata.core.composable.OfflineBanner
+import com.greenrou.kanata.core.composable.OfflineState
 import com.greenrou.kanata.features.main.content.ErrorState
 import com.greenrou.kanata.features.main.content.FilterBottomSheet
 import com.greenrou.kanata.features.main.model.MainEvent
@@ -70,6 +77,8 @@ import com.greenrou.kanata.features.downloads.DownloadManagerViewModel
 import com.greenrou.kanata.features.downloads.model.DownloadManagerEvent
 import com.greenrou.kanata.features.random.RandomScreen
 import com.greenrou.kanata.features.settings.SettingsScreen
+import com.greenrou.kanata.features.update.UpdateViewModel
+import com.greenrou.kanata.features.update.model.UpdateEvent
 import org.koin.androidx.compose.koinViewModel
 
 private val NavBarHeight = 82.dp
@@ -90,6 +99,16 @@ fun MainScreen(
     val favoriteIds by viewModel.favoriteIds.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val downloadsViewModel: DownloadManagerViewModel = koinViewModel()
+    val updateViewModel: UpdateViewModel = koinViewModel()
+    val updateState by updateViewModel.state.collectAsStateWithLifecycle()
+    val noUpdatesMessage = stringResource(R.string.update_no_updates)
+
+    LaunchedEffect(updateState.noUpdatesAvailable) {
+        if (updateState.noUpdatesAvailable) {
+            snackbarHostState.showSnackbar(noUpdatesMessage)
+            updateViewModel.handleEvent(UpdateEvent.ConsumeNoUpdatesMessage)
+        }
+    }
 
     val selectedTab = remember(selectedTabName) { BottomNavItem.valueOf(selectedTabName) }
     var isDownloadSearchActive by rememberSaveable { mutableStateOf(false) }
@@ -305,33 +324,57 @@ fun MainScreen(
             ) { tab ->
                 when (tab) {
                     BottomNavItem.AnimeList -> {
+                        val pullToRefreshState = rememberPullToRefreshState()
                         PullToRefreshBox(
                             isRefreshing = state.isRefreshing,
                             onRefresh = { viewModel.handleEvent(MainEvent.Refresh) },
+                            state = pullToRefreshState,
                             modifier = Modifier.fillMaxSize(),
+                            indicator = {
+                                PullToRefreshDefaults.Indicator(
+                                    state = pullToRefreshState,
+                                    isRefreshing = state.isRefreshing,
+                                    modifier = Modifier
+                                        .align(Alignment.TopCenter)
+                                        .padding(top = contentPadding.calculateTopPadding()),
+                                )
+                            },
                         ) {
                             Box(modifier = Modifier.fillMaxSize()) {
                                 when {
-                                    state.isLoading -> CircularProgressIndicator(
+                                    state.isLoading -> KanataLoader(
                                         modifier = Modifier
                                             .align(Alignment.Center)
                                             .padding(contentPadding),
                                     )
 
-                                    state.error != null -> ErrorState(
-                                        message = state.error!!,
+                                    state.isOffline && state.animeList.isEmpty() -> OfflineState(
                                         onRetry = { viewModel.handleEvent(MainEvent.LoadAnime) },
                                         modifier = Modifier
                                             .align(Alignment.Center)
                                             .padding(contentPadding),
                                     )
 
-                                    state.animeList.isEmpty() -> Text(
+                                    !state.isOffline && state.error != null -> ErrorState(
+                                        onRetry = { viewModel.handleEvent(MainEvent.LoadAnime) },
+                                        modifier = Modifier
+                                            .align(Alignment.Center)
+                                            .padding(contentPadding),
+                                    )
+
+                                    !state.isOffline && state.animeList.isEmpty() && (state.hasActiveFilters || state.searchQuery.isNotEmpty()) -> Text(
                                         stringResource(R.string.main_no_anime_found),
                                         modifier = Modifier
                                             .align(Alignment.Center)
                                             .padding(contentPadding),
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+
+                                    !state.isOffline && state.animeList.isEmpty() -> ErrorState(
+                                        onRetry = { viewModel.handleEvent(MainEvent.LoadAnime) },
+                                        modifier = Modifier
+                                            .align(Alignment.Center)
+                                            .padding(contentPadding),
                                     )
 
                                     else -> AnimeGrid(
@@ -356,6 +399,19 @@ fun MainScreen(
                                         gridState = gridState,
                                         contentPadding = contentPadding,
                                     )
+                                }
+
+                                AnimatedVisibility(
+                                    visible = state.isOffline && state.animeList.isNotEmpty(),
+                                    modifier = Modifier
+                                        .align(Alignment.TopCenter)
+                                        .padding(
+                                            top = contentPadding.calculateTopPadding() + 8.dp,
+                                        ),
+                                    enter = slideInVertically { -it } + fadeIn(),
+                                    exit = slideOutVertically { -it } + fadeOut(),
+                                ) {
+                                    OfflineBanner()
                                 }
                             }
                         }
@@ -396,6 +452,12 @@ fun MainScreen(
                         onSetDownloadFolder = { viewModel.handleEvent(MainEvent.SetDownloadFolder(it)) },
                         accentColor = state.accentColor,
                         onSetAccentColor = { viewModel.handleEvent(MainEvent.SetAccentColor(it)) },
+                        disabledSources = state.disabledSources,
+                        regularSources = viewModel.regularSources,
+                        adultSources = viewModel.adultSources,
+                        onToggleSource = { viewModel.handleEvent(MainEvent.ToggleSource(it)) },
+                        isCheckingUpdate = updateState.isChecking,
+                        onCheckUpdate = { updateViewModel.handleEvent(UpdateEvent.CheckUpdate) },
                         bottomPadding = contentPadding.calculateBottomPadding(),
                         modifier = Modifier
                             .fillMaxSize()

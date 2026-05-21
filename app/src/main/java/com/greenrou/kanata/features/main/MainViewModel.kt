@@ -4,6 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.greenrou.kanata.domain.model.AnimeFilter
 import com.greenrou.kanata.domain.model.AnimeFormat
+import com.greenrou.kanata.domain.model.VideoSourceType
+import com.greenrou.kanata.domain.parser.SiteParser
+import com.greenrou.kanata.core.network.NetworkMonitor
+import com.greenrou.kanata.core.analytics.AnalyticsManager
+import com.greenrou.kanata.core.analytics.reportToCrashlytics
 import com.greenrou.kanata.domain.usecase.AddFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.GetAnimeListUseCase
 import com.greenrou.kanata.domain.usecase.GetFavoritesUseCase
@@ -36,7 +41,18 @@ class MainViewModel(
     private val getFavorites: GetFavoritesUseCase,
     private val settingsManager: SettingsManager,
     private val setDownloadFolder: SetDownloadFolderUseCase,
+    private val networkMonitor: NetworkMonitor,
+    private val analytics: AnalyticsManager,
+    parsers: List<SiteParser>,
 ) : ViewModel() {
+
+    val regularSources: List<Pair<VideoSourceType, String>> = parsers
+        .filter { !it.isAdultOnly }
+        .map { it.sourceType to it.label }
+
+    val adultSources: List<Pair<VideoSourceType, String>> = parsers
+        .filter { it.isAdultOnly }
+        .map { it.sourceType to it.label }
 
     private val _state = MutableStateFlow(MainState())
     val state = _state.asStateFlow()
@@ -63,6 +79,7 @@ class MainViewModel(
 
     init {
         observeSettings()
+        observeNetwork()
         loadAnime()
     }
 
@@ -86,16 +103,38 @@ class MainViewModel(
         settingsManager.accentColor
             .onEach { color -> _state.update { it.copy(accentColor = color) } }
             .launchIn(viewModelScope)
+
+        settingsManager.disabledSources
+            .onEach { sources -> _state.update { it.copy(disabledSources = sources) } }
+            .launchIn(viewModelScope)
+    }
+
+    private fun observeNetwork() {
+        networkMonitor.isConnected
+            .onEach { isConnected ->
+                val wasOffline = _state.value.isOffline
+                _state.update { it.copy(isOffline = !isConnected) }
+                if (!isConnected && _state.value.isRefreshing) {
+                    _state.update { it.copy(isRefreshing = false) }
+                }
+                if (isConnected && wasOffline && _state.value.animeList.isEmpty()) {
+                    loadAnime()
+                }
+            }
+            .launchIn(viewModelScope)
     }
 
     private fun toggleFavorite(animeId: Int) {
         viewModelScope.launch {
             val isCurrentFavorite = favoriteIds.value.contains(animeId)
+            val anime = _state.value.animeList.find { it.id == animeId }
             if (isCurrentFavorite) {
                 removeFavorite(animeId)
+                anime?.let { analytics.logFavoriteToggled(animeId, it.title, added = false) }
             } else {
-                val anime = _state.value.animeList.find { it.id == animeId } ?: return@launch
+                anime ?: return@launch
                 addFavorite(anime)
+                analytics.logFavoriteToggled(animeId, anime.title, added = true)
             }
         }
     }
@@ -122,6 +161,9 @@ class MainViewModel(
             }
             is MainEvent.ToggleFavorite -> toggleFavorite(event.animeId)
             is MainEvent.AnimeClicked -> viewModelScope.launch {
+                _state.value.animeList.find { it.id == event.animeId }?.let {
+                    analytics.logAnimeOpened(event.animeId, it.title)
+                }
                 _events.send(MainEvent.NavigateToDetail(event.animeId))
             }
             MainEvent.ToggleSearch -> {
@@ -134,6 +176,7 @@ class MainViewModel(
                 searchDebounceJob?.cancel()
                 searchDebounceJob = viewModelScope.launch {
                     delay(400)
+                    if (event.query.isNotBlank()) analytics.logSearch(event.query)
                     reloadWithCurrentFilters()
                 }
             }
@@ -159,6 +202,11 @@ class MainViewModel(
             }
             is MainEvent.SetAccentColor -> viewModelScope.launch {
                 settingsManager.setAccentColor(event.name)
+            }
+            is MainEvent.ToggleSource -> viewModelScope.launch {
+                val updated = _state.value.disabledSources.toMutableSet()
+                if (!updated.add(event.type)) updated.remove(event.type)
+                settingsManager.setDisabledSources(updated)
             }
             else -> Unit
         }
@@ -204,8 +252,11 @@ class MainViewModel(
                     }
                 }
                 .onFailure { e ->
+                    e.reportToCrashlytics("main_load_anime")
                     _state.update { it.copy(isLoading = false, error = e.message) }
-                    _events.send(MainEvent.ShowError(e.message ?: "Unknown error"))
+                    if (!_state.value.isOffline) {
+                        _events.send(MainEvent.ShowError(e.message ?: "Unknown error"))
+                    }
                 }
         }
     }
@@ -225,8 +276,11 @@ class MainViewModel(
                     }
                 }
                 .onFailure { e ->
+                    e.reportToCrashlytics("main_refresh_anime")
                     _state.update { it.copy(isRefreshing = false) }
-                    _events.send(MainEvent.ShowError(e.message ?: "Unknown error"))
+                    if (!_state.value.isOffline) {
+                        _events.send(MainEvent.ShowError(e.message ?: "Unknown error"))
+                    }
                 }
         }
     }
@@ -252,6 +306,7 @@ class MainViewModel(
                     }
                 }
                 .onFailure { e ->
+                    e.reportToCrashlytics("main_load_more")
                     _state.update { it.copy(isLoadingMore = false) }
                     _events.send(MainEvent.ShowError(e.message ?: "Unknown error"))
                 }

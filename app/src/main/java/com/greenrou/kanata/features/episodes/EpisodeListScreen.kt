@@ -10,7 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.CircularProgressIndicator
+import com.greenrou.kanata.core.composable.KanataLoader
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,6 +29,7 @@ import com.greenrou.kanata.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.greenrou.kanata.features.episodes.content.EpisodeCard
 import com.greenrou.kanata.features.episodes.content.EpisodeEmptyState
+import com.greenrou.kanata.features.episodes.content.TranslationBottomSheet
 import com.greenrou.kanata.features.episodes.model.EpisodeListEvent
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -94,7 +95,7 @@ fun EpisodeListScreen(
                 .padding(padding),
         ) {
             when {
-                state.isLoading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                state.isLoading -> KanataLoader(modifier = Modifier.align(Alignment.Center))
                 state.error != null -> Text(
                     text = stringResource(R.string.detail_error, state.error ?: ""),
                     color = MaterialTheme.colorScheme.error,
@@ -136,5 +137,14 @@ fun EpisodeListScreen(
                 }
             }
         }
+    }
+
+    if (state.isTranslationSheetVisible) {
+        TranslationBottomSheet(
+            isLoading = state.isTranslationsLoading,
+            translations = state.translations,
+            onTranslationSelected = { viewModel.handleEvent(EpisodeListEvent.TranslationSelected(it)) },
+            onDismiss = { viewModel.handleEvent(EpisodeListEvent.DismissTranslationSheet) },
+        )
     }
 }
