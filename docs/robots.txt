@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://green-rou.github.io/Kanata/sitemap.xml
