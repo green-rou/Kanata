@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Kanata — Android app for browsing anime, streaming and downloading episodes from multiple sources." />
+  <title>Kanata — Anime for Android</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a0a0f;
+      --bg2:       #111118;
+      --bg3:       #16161f;
+      --border:    rgba(255,255,255,0.07);
+      --accent:    #7c5cfc;
+      --accent2:   #a78bfa;
+      --accent3:   #c4b5fd;
+      --text:      #e8e8f0;
+      --muted:     #888899;
+      --radius:    16px;
+      --glow:      0 0 60px rgba(124,92,252,0.25);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 clamp(20px, 5vw, 80px);
+      height: 64px;
+      background: rgba(10,10,15,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-logo img { width: 32px; height: 32px; border-radius: 8px; }
+    .nav-logo span { font-weight: 700; font-size: 1.1rem; color: var(--text); letter-spacing: -0.02em; }
+    .nav-links { display: flex; align-items: center; gap: 8px; }
+    .nav-links a {
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 14px; border-radius: 10px;
+      font-size: 0.875rem; font-weight: 500;
+      text-decoration: none; transition: all 0.2s;
+      color: var(--muted);
+    }
+    .nav-links a:hover { color: var(--text); background: var(--bg3); }
+    .nav-links a.primary {
+      background: var(--accent); color: #fff;
+    }
+    .nav-links a.primary:hover { background: #6d4ef0; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center;
+      padding: 120px clamp(20px, 5vw, 80px) 80px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(124,92,252,0.18) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 80% 80%, rgba(167,139,250,0.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 12px; border-radius: 999px;
+      border: 1px solid rgba(124,92,252,0.4);
+      background: rgba(124,92,252,0.1);
+      font-size: 0.75rem; font-weight: 600;
+      color: var(--accent3); letter-spacing: 0.05em; text-transform: uppercase;
+      margin-bottom: 28px;
+    }
+    .hero-badge::before { content: '●'; font-size: 0.6rem; color: #6effa0; }
+    .hero-icon {
+      width: clamp(80px, 12vw, 120px);
+      height: clamp(80px, 12vw, 120px);
+      border-radius: clamp(18px, 3vw, 28px);
+      margin-bottom: 28px;
+      box-shadow: var(--glow), 0 0 0 1px rgba(255,255,255,0.08);
+    }
+    .hero h1 {
+      font-size: clamp(3rem, 8vw, 6.5rem);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #fff 30%, var(--accent2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p {
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      color: var(--muted);
+      max-width: 560px;
+      margin: 0 auto 40px;
+      font-weight: 400;
+    }
+    .hero-cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 60px; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 13px 24px; border-radius: 12px;
+      font-size: 0.9375rem; font-weight: 600;
+      text-decoration: none; transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .btn-primary { background: var(--accent); color: #fff; box-shadow: 0 4px 24px rgba(124,92,252,0.4); }
+    .btn-primary:hover { background: #6d4ef0; transform: translateY(-1px); box-shadow: 0 6px 32px rgba(124,92,252,0.5); }
+    .btn-secondary {
+      background: var(--bg3); color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { background: #1e1e2a; transform: translateY(-1px); }
+    .hero-tags { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+    .tag {
+      padding: 5px 12px; border-radius: 8px;
+      font-size: 0.75rem; font-weight: 600;
+      border: 1px solid var(--border); color: var(--muted);
+      background: var(--bg2);
+    }
+
+    /* ── SECTIONS ── */
+    section { padding: clamp(60px, 8vw, 100px) clamp(20px, 5vw, 80px); }
+    .section-label {
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--accent2);
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: clamp(1.75rem, 4vw, 2.75rem);
+      font-weight: 800; letter-spacing: -0.03em;
+      color: var(--text); margin-bottom: 16px;
+    }
+    .section-sub {
+      font-size: 1rem; color: var(--muted);
+      max-width: 520px; margin-bottom: 56px;
+    }
+
+    /* ── FEATURES ── */
+    .features { background: var(--bg); }
+    .features-header { text-align: center; }
+    .features-header .section-sub { margin: 0 auto 56px; }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+      max-width: 1100px; margin: 0 auto;
+    }
+    .feat-card {
+      padding: 28px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .feat-card:hover { border-color: rgba(124,92,252,0.4); transform: translateY(-2px); }
+    .feat-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; color: var(--text); }
+    .feat-card p { font-size: 0.875rem; color: var(--muted); line-height: 1.6; }
+    .feat-num {
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em;
+      color: var(--accent2); margin-bottom: 16px; display: block;
+    }
+
+    /* ── SCREENSHOTS ── */
+    .screenshots { background: var(--bg2); overflow: hidden; }
+    .screenshots-header { text-align: center; }
+    .screenshots-header .section-sub { margin: 0 auto 48px; }
+
+    .screenshots-groups { display: flex; flex-direction: column; gap: 60px; }
+    .screenshot-group-label {
+      font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--accent2);
+      margin-bottom: 20px; text-align: center;
+    }
+    .screenshots-row {
+      display: flex; gap: 20px;
+      overflow-x: auto; padding: 16px 24px 24px;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(124,92,252,0.4) transparent;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .screenshots-row::-webkit-scrollbar { height: 4px; }
+    .screenshots-row::-webkit-scrollbar-track { background: transparent; }
+    .screenshots-row::-webkit-scrollbar-thumb { background: rgba(124,92,252,0.4); border-radius: 4px; }
+
+    .phone-frame {
+      flex: 0 0 auto;
+      scroll-snap-align: center;
+      position: relative;
+      width: 180px;
+    }
+    .phone-outer {
+      background: #1a1a28;
+      border-radius: 32px;
+      padding: 10px;
+      border: 2px solid #2a2a3e;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+      position: relative;
+    }
+    .phone-outer::before {
+      content: '';
+      position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+      width: 40px; height: 5px; background: #0a0a0f;
+      border-radius: 999px; z-index: 2;
+    }
+    .phone-screen {
+      border-radius: 24px;
+      overflow: hidden;
+      background: #0a0a0f;
+      aspect-ratio: 9/19.5;
+      position: relative;
+    }
+    .phone-screen img {
+      width: 100%; height: 100%;
+      object-fit: cover; display: block;
+    }
+    .phone-caption {
+      text-align: center; margin-top: 12px;
+      font-size: 0.72rem; color: var(--muted); font-weight: 500;
+    }
+
+    /* ── SOURCES ── */
+    .sources { background: var(--bg); }
+    .sources-header { text-align: center; }
+    .sources-header .section-sub { margin: 0 auto 48px; }
+    .sources-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px; max-width: 900px; margin: 0 auto;
+    }
+    .source-card {
+      display: flex; align-items: center; gap: 14px;
+      padding: 18px 20px;
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 12px;
+      transition: border-color 0.2s;
+    }
+    .source-card:hover { border-color: rgba(124,92,252,0.35); }
+    .source-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .source-dot.active { background: #6effa0; box-shadow: 0 0 8px rgba(110,255,160,0.5); }
+    .source-info h4 { font-size: 0.9rem; font-weight: 600; color: var(--text); }
+    .source-info span { font-size: 0.75rem; color: var(--muted); }
+
+    /* ── TECH ── */
+    .tech { background: var(--bg2); }
+    .tech-header { text-align: center; }
+    .tech-header .section-sub { margin: 0 auto 48px; }
+    .tech-grid {
+      display: flex; flex-wrap: wrap; gap: 10px;
+      justify-content: center; max-width: 800px; margin: 0 auto;
+    }
+    .tech-pill {
+      padding: 8px 18px; border-radius: 999px;
+      background: var(--bg3); border: 1px solid var(--border);
+      font-size: 0.85rem; font-weight: 500; color: var(--text);
+      transition: all 0.2s;
+    }
+    .tech-pill:hover { border-color: rgba(124,92,252,0.5); color: var(--accent3); background: rgba(124,92,252,0.08); }
+    .tech-pill.highlight {
+      background: rgba(124,92,252,0.12);
+      border-color: rgba(124,92,252,0.3);
+      color: var(--accent3);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px clamp(20px, 5vw, 80px);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 16px;
+      background: var(--bg);
+    }
+    .footer-left { display: flex; align-items: center; gap: 10px; }
+    .footer-left img { width: 28px; height: 28px; border-radius: 6px; opacity: 0.8; }
+    .footer-left p { font-size: 0.85rem; color: var(--muted); }
+    .footer-left a { color: var(--muted); }
+    .footer-right { display: flex; gap: 16px; }
+    .footer-right a {
+      font-size: 0.85rem; color: var(--muted); text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer-right a:hover { color: var(--text); }
+
+    /* ── SVG ICONS ── */
+    .icon-gh { display: inline-block; width: 18px; height: 18px; vertical-align: middle; }
+
+    .phone-frame { cursor: zoom-in; }
+    .phone-outer { transition: transform 0.2s, box-shadow 0.2s; }
+    .phone-frame:hover .phone-outer {
+      transform: translateY(-4px);
+      box-shadow: 0 28px 70px rgba(0,0,0,0.6), 0 0 0 1px rgba(124,92,252,0.25);
+    }
+
+    /* ── LIGHTBOX ── */
+    .lb-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      background: rgba(5,5,10,0.92);
+      backdrop-filter: blur(12px);
+      display: flex; align-items: center; justify-content: center; gap: 16px;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.25s;
+    }
+    .lb-overlay.active { opacity: 1; pointer-events: all; }
+
+    .lb-content {
+      display: flex; flex-direction: column; align-items: center; gap: 16px;
+      max-height: 100vh; padding: 20px 0;
+    }
+    .lb-phone {
+      background: #1a1a28;
+      border-radius: clamp(28px, 4vw, 40px);
+      padding: clamp(8px, 1.2vw, 14px);
+      border: 2px solid #2a2a3e;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05);
+      position: relative;
+    }
+    .lb-phone::before {
+      content: '';
+      position: absolute; top: clamp(10px, 1.5vw, 18px); left: 50%; transform: translateX(-50%);
+      width: clamp(32px, 5vw, 50px); height: clamp(4px, 0.6vw, 6px);
+      background: #0a0a0f; border-radius: 999px; z-index: 2;
+    }
+    .lb-screen {
+      border-radius: clamp(20px, 3vw, 30px);
+      overflow: hidden; background: #0a0a0f;
+    }
+    .lb-screen img {
+      display: block;
+      max-height: calc(90vh - 100px);
+      max-width: min(340px, 80vw);
+      width: auto; height: auto;
+      object-fit: contain;
+      transition: opacity 0.15s;
+    }
+    .lb-screen img.loading { opacity: 0; }
+
+    .lb-caption {
+      font-size: 0.85rem; color: var(--muted); font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+
+    .lb-close {
+      position: fixed; top: 20px; right: 24px;
+      width: 40px; height: 40px; border-radius: 50%;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+      color: var(--text); font-size: 1.4rem; line-height: 1;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s;
+    }
+    .lb-close:hover { background: rgba(255,255,255,0.16); }
+
+    .lb-arrow {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
+      color: var(--text); font-size: 1.5rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s, transform 0.15s;
+      flex-shrink: 0;
+    }
+    .lb-arrow:hover { background: rgba(255,255,255,0.14); }
+    .lb-arrow:active { transform: scale(0.92); }
+    .lb-arrow:disabled { opacity: 0.2; cursor: default; }
+
+    @media (max-width: 600px) {
+      .nav-links a:not(.primary) { display: none; }
+      .phone-frame { width: 150px; }
+      .screenshots-row { justify-content: flex-start; }
+      .lb-arrow { display: none; }
+      .lb-screen img { max-width: 90vw; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">
+    <img src="https://raw.githubusercontent.com/green-rou/Kanata/master/AppIcon.png" alt="Kanata" />
+    <span>Kanata</span>
+  </a>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#screenshots">Screenshots</a>
+    <a href="#sources">Sources</a>
+    <a href="https://github.com/green-rou/Kanata" target="_blank" rel="noopener" class="primary">
+      <svg class="icon-gh" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836a9.59 9.59 0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.741 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
+      GitHub
+    </a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">Active Development</div>
+  <img class="hero-icon"
+       src="https://raw.githubusercontent.com/green-rou/Kanata/master/AppIcon.png"
+       alt="Kanata" />
+  <h1>Kanata</h1>
+  <p>Browse anime, stream or download episodes from multiple sources — all in one beautiful Android app.</p>
+  <div class="hero-cta">
+    <a class="btn btn-primary" href="https://github.com/green-rou/Kanata/releases" target="_blank" rel="noopener">
+      ↓ Download APK
+    </a>
+    <a class="btn btn-secondary" href="https://github.com/green-rou/Kanata" target="_blank" rel="noopener">
+      <svg class="icon-gh" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836a9.59 9.59 0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.741 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
+      View Source
+    </a>
+    <a class="btn btn-secondary" href="https://ko-fi.com/C0C31ZLH6K" target="_blank" rel="noopener">
+      ☕ Support
+    </a>
+  </div>
+  <div class="hero-tags">
+    <span class="tag">Android 9+</span>
+    <span class="tag">Kotlin</span>
+    <span class="tag">Jetpack Compose</span>
+    <span class="tag">Material 3</span>
+    <span class="tag">Free &amp; Open Source</span>
+    <span class="tag">MIT License</span>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="features-header">
+    <div class="section-label">Features</div>
+    <h2 class="section-title">One app, many sources</h2>
+    <p class="section-sub">Search once — Kanata checks all active sources and shows what's available to stream or download.</p>
+  </div>
+  <div class="features-grid">
+    <div class="feat-card">
+      <span class="feat-num">01</span>
+      <h3>Anime Catalogue</h3>
+      <p>Paginated grid from the AniList GraphQL API. Filter by genre and format, or search by title.</p>
+    </div>
+    <div class="feat-card">
+      <span class="feat-num">02</span>
+      <h3>Automatic Source Search</h3>
+      <p>Open any anime and Kanata finds it across all active sources simultaneously — no manual switching.</p>
+    </div>
+    <div class="feat-card">
+      <span class="feat-num">03</span>
+      <h3>Built-in Player</h3>
+      <p>HLS playback via Media3 / ExoPlayer. Auto-locks to landscape, full transport controls.</p>
+    </div>
+    <div class="feat-card">
+      <span class="feat-num">04</span>
+      <h3>Episode Downloads</h3>
+      <p>HLS and direct video downloads run in the background via WorkManager with progress notifications.</p>
+    </div>
+    <div class="feat-card">
+      <span class="feat-num">05</span>
+      <h3>Offline Playback</h3>
+      <p>Downloaded episodes play without a connection. Files go wherever you point the folder picker.</p>
+    </div>
+    <div class="feat-card">
+      <span class="feat-num">06</span>
+      <h3>Favourites</h3>
+      <p>Save anime locally with Room. The list is yours — no account, no sync, no cloud.</p>
+    </div>
+    <div class="feat-card">
+      <span class="feat-num">07</span>
+      <h3>Discover</h3>
+      <p>Mood-based search, a random anime picker, and a wallpaper browser — when you don't know what to watch.</p>
+    </div>
+    <div class="feat-card">
+      <span class="feat-num">08</span>
+      <h3>Settings</h3>
+      <p>Light/dark theme, accent color, language, adult content toggle, per-source on/off, download folder.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SCREENSHOTS -->
+<section class="screenshots" id="screenshots">
+  <div class="screenshots-header">
+    <div class="section-label">See it in action</div>
+    <h2 class="section-title">Screenshots</h2>
+    <p class="section-sub">A look at the real app across all its screens.</p>
+  </div>
+
+  <div class="screenshots-groups">
+    <div>
+      <div class="screenshot-group-label">Browse &amp; Discover</div>
+      <div class="screenshots-row">
+        <div class="phone-frame">
+          <div class="phone-outer">
+            <div class="phone-screen">
+              <img src="https://raw.githubusercontent.com/green-rou/Kanata/master/screenshots/01_home.png" alt="Home" loading="lazy" />
+            </div>
+          </div>
+          <div class="phone-caption">Home</div>
+        </div>
+        <div class="phone-frame">
+          <div class="phone-outer">
+            <div class="phone-screen">
+              <img src="https://raw.githubusercontent.com/green-rou/Kanata/master/screenshots/02_home_filters.png" alt="Filters" loading="lazy" />
+            </div>
+          </div>
+          <div class="phone-caption">Filters</div>
+        </div>
+        <div class="phone-frame">
+          <div class="phone-outer">
+            <div class="phone-screen">
+              <img src="https://raw.githubusercontent.com/green-rou/Kanata/master/screenshots/08_discover_mood.png" alt="Mood" loading="lazy" />
+            </div>
+          </div>
+          <div class="phone-caption">Mood Pick</div>
+        </div>
+        <div class="phone-frame">
+          <div class="phone-outer">
+            <div class="phone-screen">
+              <img src="https://raw.githubusercontent.com/green-rou/Kanata/master/screenshots/09_discover_random.png" alt="Random" loading="lazy" />
+            </div>
+          </div>
+          <div class="phone-caption">Random</div>
+        </div>
+        <div class="phone-frame">
+          <div class="phone-outer">
+            <div class="phone-screen">
+              <img src="https://raw.githubusercontent.com/green-rou/Kanata/master/screenshots/10_discover_wallpaper.png" alt="Wallpaper" loading="lazy" />
+            </div>
+          </div>
+          <div class="phone-caption">Wallpapers</div>
+        </div>
+        <div class="phone-frame">
+          <div class="phone-outer">
+            <div class="phone-screen">
+              <img src="https://raw.githubusercontent.com/green-rou/Kanata/master/screenshots/07_favourites.png" alt="Favourites" loading="lazy" />
+            </div>
+          </div>
+          <div class="phone-caption">Favourites</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="screenshot-group-label">Detail &amp; Episodes</div>
+      <div class="screenshots-row">
+        <div class="phone-frame">
+          <div class="phone-outer">
+            <div class="phone-screen">
+              <img src="https://raw.githubusercontent.com/green-rou/Kanata/master/screenshots/03_detail.png" alt="Detail" loading="lazy" />
+            </div>
+          </div>
+          <div class="phone-caption">Detail</div>
+        </div>
+        <div class="phone-frame">
+          <div class="phone-outer">
+            <div class="phone-screen">
+              <img src="https://raw.githubusercontent.com/green-rou/Kanata/master/screenshots/04_detail_downloaded.png" alt="Downloaded" loading="lazy" />
+            </div>
+          </div>
+          <div class="phone-caption">Downloaded</div>
+        </div>
+        <div class="phone-frame">
+          <div class="phone-outer">
+            <div class="phone-screen">
+              <img src="https://raw.githubusercontent.com/green-rou/Kanata/master/screenshots/05_episodes.png" alt="Episodes" loading="lazy" />
+            </div>
+          </div>
+          <div class="phone-caption">Episodes</div>
+        </div>
+        <div class="phone-frame">
+          <div class="phone-outer">
+            <div class="phone-screen">
+              <img src="https://raw.githubusercontent.com/green-rou/Kanata/master/screenshots/06_player.png" alt="Player" loading="lazy" />
+            </div>
+          </div>
+          <div class="phone-caption">Player</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="screenshot-group-label">Downloads &amp; Settings</div>
+      <div class="screenshots-row">
+        <div class="phone-frame">
+          <div class="phone-outer">
+            <div class="phone-screen">
+              <img src="https://raw.githubusercontent.com/green-rou/Kanata/master/screenshots/11_downloads_queue.png" alt="Queue" loading="lazy" />
+            </div>
+          </div>
+          <div class="phone-caption">Queue</div>
+        </div>
+        <div class="phone-frame">
+          <div class="phone-outer">
+            <div class="phone-screen">
+              <img src="https://raw.githubusercontent.com/green-rou/Kanata/master/screenshots/12_downloads_completed.png" alt="Completed" loading="lazy" />
+            </div>
+          </div>
+          <div class="phone-caption">Completed</div>
+        </div>
+        <div class="phone-frame">
+          <div class="phone-outer">
+            <div class="phone-screen">
+              <img src="https://raw.githubusercontent.com/green-rou/Kanata/master/screenshots/13_settings.png" alt="Settings" loading="lazy" />
+            </div>
+          </div>
+          <div class="phone-caption">Settings</div>
+        </div>
+        <div class="phone-frame">
+          <div class="phone-outer">
+            <div class="phone-screen">
+              <img src="https://raw.githubusercontent.com/green-rou/Kanata/master/screenshots/14_settings_sources.png" alt="Sources" loading="lazy" />
+            </div>
+          </div>
+          <div class="phone-caption">Sources</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOURCES -->
+<section class="sources" id="sources">
+  <div class="sources-header">
+    <div class="section-label">Streaming Sources</div>
+    <h2 class="section-title">Multiple languages</h2>
+    <p class="section-sub">Kanata searches all active sources automatically when you open any anime.</p>
+  </div>
+  <div class="sources-grid">
+    <div class="source-card">
+      <div class="source-dot active"></div>
+      <div class="source-info">
+        <h4>Mikai</h4>
+        <span>Ukrainian dub · REST API</span>
+      </div>
+    </div>
+    <div class="source-card">
+      <div class="source-dot active"></div>
+      <div class="source-info">
+        <h4>AniStar</h4>
+        <span>Ukrainian dub · Scraping</span>
+      </div>
+    </div>
+    <div class="source-card">
+      <div class="source-dot active"></div>
+      <div class="source-info">
+        <h4>YummyAnime</h4>
+        <span>Russian dub · Scraping</span>
+      </div>
+    </div>
+    <div class="source-card">
+      <div class="source-dot active"></div>
+      <div class="source-info">
+        <h4>AnimeGO</h4>
+        <span>Russian dub · Scraping</span>
+      </div>
+    </div>
+    <div class="source-card">
+      <div class="source-dot active"></div>
+      <div class="source-info">
+        <h4>KissKH</h4>
+        <span>English sub · Scraping</span>
+      </div>
+    </div>
+    <div class="source-card">
+      <div class="source-dot active"></div>
+      <div class="source-info">
+        <h4>YouTube</h4>
+        <span>Various · NewPipe extractor</span>
+      </div>
+    </div>
+    <div class="source-card">
+      <div class="source-dot active"></div>
+      <div class="source-info">
+        <h4>Archive.org</h4>
+        <span>Various · Public API</span>
+      </div>
+    </div>
+    <div class="source-card">
+      <div class="source-dot active"></div>
+      <div class="source-info">
+        <h4>AniList</h4>
+        <span>Metadata · GraphQL API</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TECH -->
+<section class="tech" id="tech">
+  <div class="tech-header">
+    <div class="section-label">Built with</div>
+    <h2 class="section-title">Modern Android Stack</h2>
+    <p class="section-sub">100% Kotlin with declarative UI, clean architecture, and the latest Jetpack libraries.</p>
+  </div>
+  <div class="tech-grid">
+    <span class="tech-pill highlight">Kotlin</span>
+    <span class="tech-pill highlight">Jetpack Compose</span>
+    <span class="tech-pill highlight">Material 3</span>
+    <span class="tech-pill">MVVM + Clean Architecture</span>
+    <span class="tech-pill">Navigation3</span>
+    <span class="tech-pill">Koin 4</span>
+    <span class="tech-pill">Retrofit 2 + OkHttp</span>
+    <span class="tech-pill">Apollo GraphQL</span>
+    <span class="tech-pill">Room</span>
+    <span class="tech-pill">DataStore</span>
+    <span class="tech-pill">WorkManager</span>
+    <span class="tech-pill">Media3 / ExoPlayer</span>
+    <span class="tech-pill">Coil</span>
+    <span class="tech-pill">Jsoup</span>
+    <span class="tech-pill">Kotlin Serialization</span>
+    <span class="tech-pill">NewPipe Extractor</span>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-left">
+    <img src="https://raw.githubusercontent.com/green-rou/Kanata/master/AppIcon.png" alt="Kanata" />
+    <p>© 2026 Kanata · <a href="https://github.com/green-rou/Kanata/blob/master/LICENSE" target="_blank" rel="noopener">MIT License</a></p>
+  </div>
+  <div class="footer-right">
+    <a href="https://github.com/green-rou/Kanata" target="_blank" rel="noopener">GitHub</a>
+    <a href="https://github.com/green-rou/Kanata/releases" target="_blank" rel="noopener">Releases</a>
+    <a href="https://github.com/green-rou/Kanata/blob/master/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a>
+    <a href="https://ko-fi.com/C0C31ZLH6K" target="_blank" rel="noopener">Ko-fi</a>
+  </div>
+</footer>
+
+<!-- LIGHTBOX -->
+<div class="lb-overlay" id="lightbox" role="dialog" aria-modal="true" aria-label="Screenshot viewer">
+  <button class="lb-close" id="lb-close" aria-label="Close">&#x2715;</button>
+  <button class="lb-arrow" id="lb-prev" aria-label="Previous">&#x2039;</button>
+  <div class="lb-content">
+    <div class="lb-phone">
+      <div class="lb-screen">
+        <img id="lb-img" src="" alt="" />
+      </div>
+    </div>
+    <div class="lb-caption" id="lb-caption"></div>
+  </div>
+  <button class="lb-arrow" id="lb-next" aria-label="Next">&#x203A;</button>
+</div>
+
+<script>
+  (function () {
+    const frames = Array.from(document.querySelectorAll('.phone-frame'));
+    const items = frames.map(f => ({
+      src: f.querySelector('img').src,
+      alt: f.querySelector('.phone-caption').textContent,
+    }));
+
+    const overlay  = document.getElementById('lightbox');
+    const lbImg    = document.getElementById('lb-img');
+    const lbCap    = document.getElementById('lb-caption');
+    const btnClose = document.getElementById('lb-close');
+    const btnPrev  = document.getElementById('lb-prev');
+    const btnNext  = document.getElementById('lb-next');
+
+    let current = 0;
+
+    function open(index) {
+      current = index;
+      show();
+      document.body.style.overflow = 'hidden';
+      overlay.classList.add('active');
+      btnClose.focus();
+    }
+
+    function close() {
+      overlay.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    function show() {
+      const item = items[current];
+      lbImg.classList.add('loading');
+      lbImg.onload = () => lbImg.classList.remove('loading');
+      lbImg.src = item.src;
+      lbImg.alt = item.alt;
+      lbCap.textContent = item.alt;
+      btnPrev.disabled = current === 0;
+      btnNext.disabled = current === items.length - 1;
+    }
+
+    function prev() { if (current > 0) { current--; show(); } }
+    function next() { if (current < items.length - 1) { current++; show(); } }
+
+    frames.forEach((frame, i) => frame.addEventListener('click', () => open(i)));
+
+    btnClose.addEventListener('click', close);
+    btnPrev.addEventListener('click', prev);
+    btnNext.addEventListener('click', next);
+
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+
+    document.addEventListener('keydown', e => {
+      if (!overlay.classList.contains('active')) return;
+      if (e.key === 'Escape')      close();
+      if (e.key === 'ArrowLeft')   prev();
+      if (e.key === 'ArrowRight')  next();
+    });
+
+    /* swipe on mobile */
+    let touchX = null;
+    overlay.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
+    overlay.addEventListener('touchend', e => {
+      if (touchX === null) return;
+      const dx = e.changedTouches[0].clientX - touchX;
+      if (Math.abs(dx) > 50) dx < 0 ? next() : prev();
+      touchX = null;
+    }, { passive: true });
+  })();
+</script>
+
+</body>
+</html>
