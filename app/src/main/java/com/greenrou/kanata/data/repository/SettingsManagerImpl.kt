@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.greenrou.kanata.domain.model.VideoSourceType
 import com.greenrou.kanata.domain.repository.SettingsManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -19,6 +20,8 @@ class SettingsManagerImpl(private val context: Context) : SettingsManager {
         val COVER_FILLS_TOP_BAR = booleanPreferencesKey("cover_fills_top_bar")
         val DOWNLOAD_FOLDER = stringPreferencesKey("download_folder")
         val ACCENT_COLOR = stringPreferencesKey("accent_color")
+        val DISABLED_SOURCES = stringPreferencesKey("disabled_sources")
+        val SKIPPED_VERSION = stringPreferencesKey("skipped_version")
     }
 
     override val showAdultContent: Flow<Boolean> = context.dataStore.data
@@ -44,6 +47,16 @@ class SettingsManagerImpl(private val context: Context) : SettingsManager {
     override val accentColor: Flow<String> = context.dataStore.data
         .map { preferences ->
             preferences[PreferencesKeys.ACCENT_COLOR] ?: "Green"
+        }
+
+    override val disabledSources: Flow<Set<VideoSourceType>> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.DISABLED_SOURCES]
+                ?.split(",")
+                ?.filter { it.isNotBlank() }
+                ?.mapNotNull { name -> runCatching { VideoSourceType.valueOf(name) }.getOrNull() }
+                ?.toSet()
+                ?: emptySet()
         }
 
     override suspend fun setShowAdultContent(show: Boolean) {
@@ -73,6 +86,23 @@ class SettingsManagerImpl(private val context: Context) : SettingsManager {
     override suspend fun setAccentColor(name: String) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.ACCENT_COLOR] = name
+        }
+    }
+
+    override suspend fun setDisabledSources(sources: Set<VideoSourceType>) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.DISABLED_SOURCES] = sources.joinToString(",") { it.name }
+        }
+    }
+
+    override val skippedVersion: Flow<String> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.SKIPPED_VERSION] ?: ""
+        }
+
+    override suspend fun setSkippedVersion(version: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SKIPPED_VERSION] = version
         }
     }
 }

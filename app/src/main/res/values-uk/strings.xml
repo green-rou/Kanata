@@ -151,6 +151,8 @@
     <string name="settings_adult_off_title">Дорослий контент</string>
     <string name="settings_adult_on_subtitle">Показуються лише тайтли 18+</string>
     <string name="settings_adult_off_subtitle">Показувати лише тайтли без 18+</string>
+    <string name="settings_section_sources">Джерела</string>
+    <string name="settings_sources_select">Оберіть активні джерела</string>
     <string name="settings_section_downloads">Завантаження</string>
     <string name="settings_download_folder_title">Папка завантажень</string>
     <string name="settings_download_folder_default">За замовчуванням (зовнішнє сховище)</string>
@@ -161,4 +163,14 @@
     <string name="settings_github_subtitle">green-rou/Kanata</string>
     <string name="settings_support">Підтримати на Ko-fi</string>
     <string name="settings_support_subtitle">ko-fi.com/C0C31ZLH6K</string>
+    <string name="settings_check_update">Перевірити оновлення</string>
+    <string name="settings_check_update_checking">Перевіряємо…</string>
+    <string name="settings_check_update_subtitle">Перевірити наявність нової версії</string>
+    <string name="update_available_title">Доступне оновлення</string>
+    <string name="update_button">Оновити</string>
+    <string name="update_skip_button">Пропустити</string>
+    <string name="update_github_link">Переглянути на GitHub</string>
+    <string name="update_skip_hint">Якщо пропустити — це вікно більше не з\'явиться для версії %s</string>
+    <string name="update_downloading">Завантаження…</string>
+    <string name="update_no_updates">Оновлень немає</string>
 </resources>

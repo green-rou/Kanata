@@ -3,7 +3,6 @@ package com.greenrou.kanata.data.repository
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Base64
-import android.util.Log
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
@@ -407,7 +406,6 @@ class VideoRepositoryImpl(
         val kkey = generateKisskhKey(epId.toInt())
         val apiUrl = "https://kisskh.co/api/DramaList/Episode/$epId.png?err=false&ts=&time=&kkey=$kkey"
         val dramaPageUrl = parseQueryParams(episodeUrl)["drama_page"] ?: "https://kisskh.co/"
-        Log.d("KissKH", "epId=$epId dramaPageUrl=$dramaPageUrl")
 
         val directResult = runCatching {
             val resp = kisskhClient.newCall(
@@ -419,13 +417,11 @@ class VideoRepositoryImpl(
                     .header("X-Requested-With", "XMLHttpRequest")
                     .build()
             ).execute()
-            Log.d("KissKH", "direct HTTP ${resp.code}")
             if (resp.code == 200) resp.body?.string() else null
         }.getOrNull()
 
         if (directResult != null) return parseKisskhVideoStream(directResult, epId)
 
-        Log.d("KissKH", "direct 403, falling back to WebView (dramaPage=$dramaPageUrl)")
         return extractKisskhStreamViaWebView(epId, apiUrl, dramaPageUrl)
     }
 
@@ -451,17 +447,13 @@ class VideoRepositoryImpl(
             webView.addJavascriptInterface(object : Any() {
                 @android.webkit.JavascriptInterface
                 fun onResult(body: String) {
-                    Log.d("KissKH", "JS fetch body=${body.take(300)}")
                     val videoUrl = parseKisskhVideoUrl(body)
                     if (videoUrl != null && !deferred.isCompleted) {
-                        Log.d("KissKH", "JS videoUrl=$videoUrl")
                         deferred.complete(videoUrl)
                     }
                 }
                 @android.webkit.JavascriptInterface
-                fun onError(error: String) {
-                    Log.e("KissKH", "JS fetch error: $error")
-                }
+                fun onError(error: String) { }
             }, "KissKHBridge")
 
             val webViewUA = "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
@@ -476,7 +468,6 @@ class VideoRepositoryImpl(
                 ): WebResourceResponse? {
                     val reqUrl = request.url.toString()
                     if (!deferred.isCompleted && "/api/DramaList/Episode/" in reqUrl) {
-                        Log.d("KissKH", "Intercepted Angular API call: $reqUrl")
                         return runCatching {
                             val cookies = android.webkit.CookieManager.getInstance()
                                 .getCookie("https://kisskh.co") ?: ""
@@ -491,10 +482,8 @@ class VideoRepositoryImpl(
                                     .build()
                             ).execute()
                             val body = okResp.body?.string() ?: ""
-                            Log.d("KissKH", "Intercepted API response: ${body.take(300)}")
                             val videoUrl = parseKisskhVideoUrl(body)
                             if (videoUrl != null && !deferred.isCompleted) {
-                                Log.d("KissKH", "Intercepted videoUrl=$videoUrl")
                                 deferred.complete(videoUrl)
                             }
                             WebResourceResponse(
@@ -505,8 +494,6 @@ class VideoRepositoryImpl(
                                 emptyMap(),
                                 body.byteInputStream(),
                             )
-                        }.onFailure { e ->
-                            Log.e("KissKH", "Intercepted API error: ${e.message}")
                         }.getOrNull()
                     }
                     return null
@@ -514,7 +501,6 @@ class VideoRepositoryImpl(
 
                 override fun onPageFinished(view: WebView, url: String) {
                     if (deferred.isCompleted || "kisskh.co" !in url) return
-                    Log.d("KissKH", "WebView ready at $url — scheduling fallback fetch in 8s")
                     // Fallback: Angular may have cached the response and not re-fetched.
                     // Wait 8s for Cloudflare session to be fully ready, then try manually.
                     view.evaluateJavascript("""
@@ -535,7 +521,6 @@ class VideoRepositoryImpl(
                 }
             }
 
-            Log.d("KissKH", "WebView loading drama page: $dramaPageUrl")
             webView.loadUrl(dramaPageUrl)
         }
 
@@ -558,7 +543,6 @@ class VideoRepositoryImpl(
     private fun parseKisskhVideoStream(body: String, epId: String): VideoStream {
         val videoUrl = parseKisskhVideoUrl(body)
             ?: error("No video URL in KissKH response for $epId: ${body.take(200)}")
-        Log.d("KissKH", "videoUrl=$videoUrl")
         return VideoStream(videoUrl, mapOf("Referer" to "https://kisskh.co/"))
     }
 
