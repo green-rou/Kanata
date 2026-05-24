@@ -35,6 +35,7 @@
     <string name="detail_error">Помилка: %s</string>
     <string name="detail_episodes_count">%d епізодів</string>
     <string name="detail_watch_offline">Дивитись офлайн</string>
+    <string name="detail_offline_picker_title">Завантажені епізоди</string>
     <string name="detail_available_streams">Доступні джерела</string>
     <string name="detail_no_streams">Джерел не знайдено</string>
     <string name="detail_tap_source">Натисніть на джерело, щоб переглянути епізоди</string>

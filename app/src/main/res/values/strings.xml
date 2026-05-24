@@ -35,6 +35,7 @@
     <string name="detail_error">Error: %s</string>
     <string name="detail_episodes_count">%d episodes</string>
     <string name="detail_watch_offline">Watch offline</string>
+    <string name="detail_offline_picker_title">Downloaded episodes</string>
     <string name="detail_available_streams">Available streams</string>
     <string name="detail_no_streams">No streams found</string>
     <string name="detail_tap_source">Tap a source to browse episodes</string>

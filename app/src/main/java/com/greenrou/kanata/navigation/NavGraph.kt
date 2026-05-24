@@ -49,12 +49,12 @@ fun NavGraph(backStack: SnapshotStateList<Any>) {
             onNavigateToEpisodeList = { source, animeTitle, episodeCount ->
                 backStack.add(EpisodeListRoute(source.animePageUrl, source.label, animeTitle, current.animeId, episodeCount))
             },
-            onNavigateToOfflinePlayer = { localFilePaths, titles ->
+            onNavigateToOfflinePlayer = { localFilePaths, titles, startIndex ->
                 backStack.add(
                     PlayerRoute(
                         episodeUrls = localFilePaths,
                         episodeTitles = titles,
-                        startIndex = 0,
+                        startIndex = startIndex,
                     )
                 )
             },

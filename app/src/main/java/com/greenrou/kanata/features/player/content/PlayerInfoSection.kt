@@ -5,13 +5,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.DownloadDone
 import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.HourglassTop
-import com.greenrou.kanata.core.composable.KanataSmallLoader
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -24,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.greenrou.kanata.R
+import com.greenrou.kanata.core.composable.KanataSmallLoader
 import com.greenrou.kanata.domain.model.DownloadStatus
 
 @Composable
@@ -33,6 +32,7 @@ internal fun PlayerInfoSection(
     episodeCount: Int,
     modifier: Modifier = Modifier,
     downloadStatus: DownloadStatus? = null,
+    showDownloadButton: Boolean = true,
     onDownloadClick: () -> Unit = {},
 ) {
     Row(
@@ -54,31 +54,33 @@ internal fun PlayerInfoSection(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        IconButton(onClick = onDownloadClick) {
-            when (downloadStatus) {
-                DownloadStatus.COMPLETED -> Icon(
-                    imageVector = Icons.Rounded.DownloadDone,
-                    contentDescription = stringResource(R.string.player_cd_downloaded),
-                    tint = MaterialTheme.colorScheme.primary,
-                )
-                DownloadStatus.DOWNLOADING -> KanataSmallLoader(
-                    size = 20.dp,
-                    strokeWidth = 2.dp,
-                )
-                DownloadStatus.QUEUED -> Icon(
-                    imageVector = Icons.Rounded.HourglassTop,
-                    contentDescription = stringResource(R.string.player_cd_queued),
-                    tint = MaterialTheme.colorScheme.secondary,
-                )
-                DownloadStatus.FAILED -> Icon(
-                    imageVector = Icons.Rounded.ErrorOutline,
-                    contentDescription = stringResource(R.string.player_cd_failed),
-                    tint = MaterialTheme.colorScheme.error,
-                )
-                else -> Icon(
-                    imageVector = Icons.Rounded.Download,
-                    contentDescription = stringResource(R.string.player_cd_download),
-                )
+        if (showDownloadButton) {
+            IconButton(onClick = onDownloadClick) {
+                when (downloadStatus) {
+                    DownloadStatus.COMPLETED -> Icon(
+                        imageVector = Icons.Rounded.DownloadDone,
+                        contentDescription = stringResource(R.string.player_cd_downloaded),
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                    DownloadStatus.DOWNLOADING -> KanataSmallLoader(
+                        size = 20.dp,
+                        strokeWidth = 2.dp,
+                    )
+                    DownloadStatus.QUEUED -> Icon(
+                        imageVector = Icons.Rounded.HourglassTop,
+                        contentDescription = stringResource(R.string.player_cd_queued),
+                        tint = MaterialTheme.colorScheme.secondary,
+                    )
+                    DownloadStatus.FAILED -> Icon(
+                        imageVector = Icons.Rounded.ErrorOutline,
+                        contentDescription = stringResource(R.string.player_cd_failed),
+                        tint = MaterialTheme.colorScheme.error,
+                    )
+                    else -> Icon(
+                        imageVector = Icons.Rounded.Download,
+                        contentDescription = stringResource(R.string.player_cd_download),
+                    )
+                }
             }
         }
     }
