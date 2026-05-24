@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
-import com.greenrou.kanata.core.composable.KanataLoader
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -28,13 +27,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.greenrou.kanata.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.greenrou.kanata.R
+import com.greenrou.kanata.core.composable.FavoriteIconTopBar
+import com.greenrou.kanata.core.composable.KanataLoader
+import com.greenrou.kanata.core.composable.OfflineState
 import com.greenrou.kanata.domain.model.VideoSource
 import com.greenrou.kanata.features.details.content.AnimeDetailContent
+import com.greenrou.kanata.features.details.content.OfflineEpisodePickerBottomSheet
 import com.greenrou.kanata.features.details.model.AnimeDetailsEvent
-import com.greenrou.kanata.core.composable.FavoriteIconTopBar
-import com.greenrou.kanata.core.composable.OfflineState
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,7 +44,7 @@ fun AnimeDetailsScreen(
     animeId: Int,
     onNavigateBack: () -> Unit,
     onNavigateToEpisodeList: (VideoSource, animeTitle: String, episodeCount: Int) -> Unit,
-    onNavigateToOfflinePlayer: (localFilePaths: List<String>, titles: List<String>) -> Unit,
+    onNavigateToOfflinePlayer: (localFilePaths: List<String>, titles: List<String>, startIndex: Int) -> Unit,
     viewModel: AnimeDetailsViewModel = koinViewModel(key = animeId.toString()),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -63,7 +64,7 @@ fun AnimeDetailsScreen(
                 is AnimeDetailsEvent.NavigateToOfflinePlayer -> {
                     val paths = event.items.mapNotNull { it.localFilePath }.map { "file://$it" }
                     val titles = event.items.map { it.episodeTitle }
-                    if (paths.isNotEmpty()) onNavigateToOfflinePlayer(paths, titles)
+                    if (paths.isNotEmpty()) onNavigateToOfflinePlayer(paths, titles, event.startIndex)
                 }
                 else -> Unit
             }
@@ -99,6 +100,15 @@ fun AnimeDetailsScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
+        if (state.offlineEpisodesForPicker.isNotEmpty()) {
+            OfflineEpisodePickerBottomSheet(
+                episodes = state.offlineEpisodesForPicker,
+                onEpisodeSelected = { index ->
+                    viewModel.handleEvent(AnimeDetailsEvent.SelectOfflineEpisode(index))
+                },
+                onDismiss = { viewModel.handleEvent(AnimeDetailsEvent.DismissOfflinePicker) },
+            )
+        }
         Box(modifier = Modifier.fillMaxSize()) {
             when {
                 state.isLoading -> KanataLoader(

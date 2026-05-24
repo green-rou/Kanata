@@ -46,7 +46,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.greenrou.kanata.R
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -62,6 +61,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.ui.PlayerView
+import com.greenrou.kanata.R
 import com.greenrou.kanata.features.player.content.EpisodeSideButtons
 import com.greenrou.kanata.features.player.content.NextEpisodeCard
 import com.greenrou.kanata.features.player.content.PlayerErrorContent
@@ -331,6 +331,7 @@ fun PlayerScreen(
                         currentIndex = state.currentIndex,
                         episodeCount = state.episodeCount,
                         downloadStatus = state.currentEpisodeDownloadStatus,
+                        showDownloadButton = episodeUrls.getOrNull(state.currentIndex)?.startsWith("file://") != true,
                         onDownloadClick = {
                             viewModel.handleEvent(
                                 PlayerEvent.DownloadCurrentEpisode(
