@@ -2,20 +2,19 @@ package com.greenrou.kanata.features.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.greenrou.kanata.domain.model.AnimeFilter
-import com.greenrou.kanata.domain.model.AnimeFormat
-import com.greenrou.kanata.domain.model.VideoSourceType
-import com.greenrou.kanata.domain.parser.SiteParser
-import com.greenrou.kanata.core.network.NetworkMonitor
 import com.greenrou.kanata.core.analytics.AnalyticsManager
 import com.greenrou.kanata.core.analytics.reportToCrashlytics
+import com.greenrou.kanata.core.network.NetworkMonitor
+import com.greenrou.kanata.domain.model.AnimeFilter
+import com.greenrou.kanata.domain.model.VideoSourceType
+import com.greenrou.kanata.domain.parser.SiteParser
+import com.greenrou.kanata.domain.repository.SettingsManager
 import com.greenrou.kanata.domain.usecase.AddFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.GetAnimeListUseCase
 import com.greenrou.kanata.domain.usecase.GetFavoritesUseCase
 import com.greenrou.kanata.domain.usecase.IsFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.RemoveFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.SetDownloadFolderUseCase
-import com.greenrou.kanata.domain.repository.SettingsManager
 import com.greenrou.kanata.features.main.model.MainEvent
 import com.greenrou.kanata.features.main.model.MainState
 import kotlinx.coroutines.Job
@@ -106,6 +105,22 @@ class MainViewModel(
 
         settingsManager.disabledSources
             .onEach { sources -> _state.update { it.copy(disabledSources = sources) } }
+            .launchIn(viewModelScope)
+
+        settingsManager.adBlockerEnabled
+            .onEach { enabled -> _state.update { it.copy(adBlockerEnabled = enabled) } }
+            .launchIn(viewModelScope)
+        settingsManager.webBackNavTopBar
+            .onEach { enabled -> _state.update { it.copy(webBackNavTopBar = enabled) } }
+            .launchIn(viewModelScope)
+        settingsManager.analyticsEnabled
+            .onEach { enabled ->
+                _state.update { it.copy(analyticsEnabled = enabled) }
+                analytics.setCollectionEnabled(enabled)
+            }
+            .launchIn(viewModelScope)
+        settingsManager.analyticsConsentShown
+            .onEach { shown -> _state.update { it.copy(analyticsConsentShown = shown) } }
             .launchIn(viewModelScope)
     }
 
@@ -207,6 +222,23 @@ class MainViewModel(
                 val updated = _state.value.disabledSources.toMutableSet()
                 if (!updated.add(event.type)) updated.remove(event.type)
                 settingsManager.setDisabledSources(updated)
+            }
+            MainEvent.ToggleAdBlocker -> viewModelScope.launch {
+                settingsManager.setAdBlockerEnabled(!_state.value.adBlockerEnabled)
+            }
+            MainEvent.ToggleWebBackNavTopBar -> viewModelScope.launch {
+                settingsManager.setWebBackNavTopBar(!_state.value.webBackNavTopBar)
+            }
+            MainEvent.ToggleAnalytics -> viewModelScope.launch {
+                settingsManager.setAnalyticsEnabled(!_state.value.analyticsEnabled)
+            }
+            MainEvent.AcceptAnalytics -> viewModelScope.launch {
+                settingsManager.setAnalyticsEnabled(true)
+                settingsManager.setAnalyticsConsentShown(true)
+            }
+            MainEvent.DenyAnalytics -> viewModelScope.launch {
+                settingsManager.setAnalyticsEnabled(false)
+                settingsManager.setAnalyticsConsentShown(true)
             }
             else -> Unit
         }

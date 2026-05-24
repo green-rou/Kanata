@@ -56,11 +56,12 @@ class UpdateViewModel(
                             isChecking = false,
                             pendingRelease = release,
                             noUpdatesAvailable = release == null,
+                            updateCheckHasRun = true,
                         )
                     }
                 }
                 .onFailure { e ->
-                    _state.update { it.copy(isChecking = false, error = e.message) }
+                    _state.update { it.copy(isChecking = false, error = e.message, updateCheckHasRun = true) }
                 }
         }
     }

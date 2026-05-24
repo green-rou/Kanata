@@ -24,6 +24,10 @@ data class MainState(
     val accentColor: String = "Green",
     val isOffline: Boolean = false,
     val disabledSources: Set<VideoSourceType> = emptySet(),
+    val adBlockerEnabled: Boolean = true,
+    val webBackNavTopBar: Boolean = false,
+    val analyticsEnabled: Boolean = true,
+    val analyticsConsentShown: Boolean = false,
 ) {
     val hasActiveFilters: Boolean get() = selectedGenres.isNotEmpty() || selectedFormats.isNotEmpty()
 }

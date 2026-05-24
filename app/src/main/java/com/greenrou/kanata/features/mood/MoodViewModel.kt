@@ -1,8 +1,8 @@
 package com.greenrou.kanata.features.mood
 
 import androidx.lifecycle.ViewModel
-import com.greenrou.kanata.core.analytics.reportToCrashlytics
 import androidx.lifecycle.viewModelScope
+import com.greenrou.kanata.core.analytics.AnalyticsManager
 import com.greenrou.kanata.domain.repository.SettingsManager
 import com.greenrou.kanata.domain.usecase.GetAnimeByMoodUseCase
 import com.greenrou.kanata.features.mood.model.Mood
@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 class MoodViewModel(
     private val getAnimeByMood: GetAnimeByMoodUseCase,
     private val settingsManager: SettingsManager,
+    private val analytics: AnalyticsManager,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(MoodState())
@@ -26,6 +27,10 @@ class MoodViewModel(
 
     private val _events = Channel<MoodEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
+
+    init {
+        analytics.setScreen("discover")
+    }
 
     fun handleEvent(event: MoodEvent) {
         when (event) {
@@ -57,7 +62,7 @@ class MoodViewModel(
             ).onSuccess { page ->
                 _state.update { it.copy(isLoading = false, animeList = page.items) }
             }.onFailure { e ->
-                e.reportToCrashlytics("mood_load_anime")
+                analytics.recordError(e, "mood_load_anime", mapOf("mood" to mood.name))
                 _state.update { it.copy(isLoading = false, error = e.message) }
             }
         }

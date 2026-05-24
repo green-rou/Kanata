@@ -13,7 +13,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -31,6 +30,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.greenrou.kanata.R
 import com.greenrou.kanata.core.composable.FavoriteIconTopBar
 import com.greenrou.kanata.core.composable.KanataLoader
+import com.greenrou.kanata.core.composable.KanataSnackbarHost
 import com.greenrou.kanata.core.composable.OfflineState
 import com.greenrou.kanata.domain.model.VideoSource
 import com.greenrou.kanata.features.details.content.AnimeDetailContent
@@ -98,7 +98,7 @@ fun AnimeDetailsScreen(
                 },
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+        snackbarHost = { KanataSnackbarHost(snackbarHostState) },
     ) { padding ->
         if (state.offlineEpisodesForPicker.isNotEmpty()) {
             OfflineEpisodePickerBottomSheet(

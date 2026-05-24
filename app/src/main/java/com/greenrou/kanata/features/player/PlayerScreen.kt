@@ -80,10 +80,12 @@ fun PlayerScreen(
     startIndex: Int,
     animeTitle: String = "",
     sourceName: String = "",
+    headerKeys: List<String> = emptyList(),
+    headerValues: List<String> = emptyList(),
     onNavigateBack: () -> Unit,
     viewModel: PlayerViewModel = koinViewModel(
         key = "${episodeUrls.firstOrNull() ?: "player"}_$startIndex",
-        parameters = { parametersOf(episodeUrls, episodeTitles, startIndex, animeTitle, sourceName) },
+        parameters = { parametersOf(episodeUrls, episodeTitles, startIndex, animeTitle, sourceName, headerKeys, headerValues) },
     ),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()

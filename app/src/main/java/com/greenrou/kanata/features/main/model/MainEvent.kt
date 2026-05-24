@@ -23,6 +23,11 @@ sealed interface MainEvent {
     data class SetDownloadFolder(val uri: String) : MainEvent
     data class SetAccentColor(val name: String) : MainEvent
     data class ToggleSource(val type: VideoSourceType) : MainEvent
+    data object ToggleAdBlocker : MainEvent
+    data object ToggleWebBackNavTopBar : MainEvent
+    data object ToggleAnalytics : MainEvent
+    data object AcceptAnalytics : MainEvent
+    data object DenyAnalytics : MainEvent
 
     data class NavigateToDetail(val animeId: Int) : MainEvent
     data class ShowError(val message: String) : MainEvent
