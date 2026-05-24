@@ -256,7 +256,7 @@ fun PlayerScreen(
         }
     } else {
         val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
-        val topBarIconTint = if (isLandscape) Color.White else Color.Unspecified
+        val topBarIconTint = if (isLandscape) Color.White else MaterialTheme.colorScheme.onSurface
         Scaffold(
             containerColor = if (isLandscape) Color.Black else MaterialTheme.colorScheme.surface,
             contentWindowInsets = WindowInsets(0, 0, 0, 0),
