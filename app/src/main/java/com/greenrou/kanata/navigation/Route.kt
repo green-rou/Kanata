@@ -29,4 +29,4 @@ data class PlayerRoute(
 )
 
 @Serializable
-data object WebPlayerRoute
+data class WebPlayerRoute(val initialUrl: String = "")

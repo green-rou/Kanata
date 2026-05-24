@@ -50,7 +50,7 @@ class SettingsManagerImpl(private val context: Context) : SettingsManager {
 
     override val accentColor: Flow<String> = context.dataStore.data
         .map { preferences ->
-            preferences[PreferencesKeys.ACCENT_COLOR] ?: "Green"
+            preferences[PreferencesKeys.ACCENT_COLOR] ?: "Gray"
         }
 
     override val disabledSources: Flow<Set<VideoSourceType>> = context.dataStore.data

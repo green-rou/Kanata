@@ -95,7 +95,55 @@ private fun lightScheme(accentColor: String) = when (accentColor) {
         tertiaryContainer = AnimeLight_TertiaryContainer, onTertiaryContainer = AnimeLight_OnTertiaryContainer,
         outline = AnimeLight_Outline,
     )
-    else -> lightColorScheme( // Green
+    "Purple" -> lightColorScheme(
+        primary = PurpleLight_Primary, onPrimary = PurpleLight_OnPrimary,
+        primaryContainer = PurpleLight_PrimaryContainer, onPrimaryContainer = PurpleLight_OnPrimaryContainer,
+        background = PurpleLight_Background, onBackground = PurpleLight_OnBackground,
+        surface = PurpleLight_Surface, onSurface = PurpleLight_OnSurface,
+        surfaceVariant = PurpleLight_SurfaceVariant, onSurfaceVariant = PurpleLight_OnSurfaceVariant,
+        surfaceContainer = PurpleLight_SurfaceContainer,
+        surfaceContainerHigh = PurpleLight_SurfaceContainerHigh,
+        surfaceContainerHighest = PurpleLight_SurfaceContainerHighest,
+        outlineVariant = PurpleLight_OutlineVariant,
+        secondary = AnimeLight_Secondary, onSecondary = AnimeLight_OnSecondary,
+        secondaryContainer = AnimeLight_SecondaryContainer, onSecondaryContainer = AnimeLight_OnSecondaryContainer,
+        tertiary = AnimeLight_Tertiary, onTertiary = AnimeLight_OnTertiary,
+        tertiaryContainer = AnimeLight_TertiaryContainer, onTertiaryContainer = AnimeLight_OnTertiaryContainer,
+        outline = AnimeLight_Outline,
+    )
+    "Rose" -> lightColorScheme(
+        primary = RoseLight_Primary, onPrimary = RoseLight_OnPrimary,
+        primaryContainer = RoseLight_PrimaryContainer, onPrimaryContainer = RoseLight_OnPrimaryContainer,
+        background = RoseLight_Background, onBackground = RoseLight_OnBackground,
+        surface = RoseLight_Surface, onSurface = RoseLight_OnSurface,
+        surfaceVariant = RoseLight_SurfaceVariant, onSurfaceVariant = RoseLight_OnSurfaceVariant,
+        surfaceContainer = RoseLight_SurfaceContainer,
+        surfaceContainerHigh = RoseLight_SurfaceContainerHigh,
+        surfaceContainerHighest = RoseLight_SurfaceContainerHighest,
+        outlineVariant = RoseLight_OutlineVariant,
+        secondary = AnimeLight_Secondary, onSecondary = AnimeLight_OnSecondary,
+        secondaryContainer = AnimeLight_SecondaryContainer, onSecondaryContainer = AnimeLight_OnSecondaryContainer,
+        tertiary = AnimeLight_Tertiary, onTertiary = AnimeLight_OnTertiary,
+        tertiaryContainer = AnimeLight_TertiaryContainer, onTertiaryContainer = AnimeLight_OnTertiaryContainer,
+        outline = AnimeLight_Outline,
+    )
+    "Teal" -> lightColorScheme(
+        primary = TealLight_Primary, onPrimary = TealLight_OnPrimary,
+        primaryContainer = TealLight_PrimaryContainer, onPrimaryContainer = TealLight_OnPrimaryContainer,
+        background = TealLight_Background, onBackground = TealLight_OnBackground,
+        surface = TealLight_Surface, onSurface = TealLight_OnSurface,
+        surfaceVariant = TealLight_SurfaceVariant, onSurfaceVariant = TealLight_OnSurfaceVariant,
+        surfaceContainer = TealLight_SurfaceContainer,
+        surfaceContainerHigh = TealLight_SurfaceContainerHigh,
+        surfaceContainerHighest = TealLight_SurfaceContainerHighest,
+        outlineVariant = TealLight_OutlineVariant,
+        secondary = AnimeLight_Secondary, onSecondary = AnimeLight_OnSecondary,
+        secondaryContainer = AnimeLight_SecondaryContainer, onSecondaryContainer = AnimeLight_OnSecondaryContainer,
+        tertiary = AnimeLight_Tertiary, onTertiary = AnimeLight_OnTertiary,
+        tertiaryContainer = AnimeLight_TertiaryContainer, onTertiaryContainer = AnimeLight_OnTertiaryContainer,
+        outline = AnimeLight_Outline,
+    )
+    "Green" -> lightColorScheme(
         primary = AnimeLight_Primary, onPrimary = AnimeLight_OnPrimary,
         primaryContainer = AnimeLight_PrimaryContainer, onPrimaryContainer = AnimeLight_OnPrimaryContainer,
         background = AnimeLight_Background, onBackground = AnimeLight_OnBackground,
@@ -105,6 +153,22 @@ private fun lightScheme(accentColor: String) = when (accentColor) {
         surfaceContainerHigh = AnimeLight_SurfaceContainerHigh,
         surfaceContainerHighest = AnimeLight_SurfaceContainerHighest,
         outlineVariant = AnimeLight_OutlineVariant,
+        secondary = AnimeLight_Secondary, onSecondary = AnimeLight_OnSecondary,
+        secondaryContainer = AnimeLight_SecondaryContainer, onSecondaryContainer = AnimeLight_OnSecondaryContainer,
+        tertiary = AnimeLight_Tertiary, onTertiary = AnimeLight_OnTertiary,
+        tertiaryContainer = AnimeLight_TertiaryContainer, onTertiaryContainer = AnimeLight_OnTertiaryContainer,
+        outline = AnimeLight_Outline,
+    )
+    else -> lightColorScheme( // Gray (default)
+        primary = GrayLight_Primary, onPrimary = GrayLight_OnPrimary,
+        primaryContainer = GrayLight_PrimaryContainer, onPrimaryContainer = GrayLight_OnPrimaryContainer,
+        background = GrayLight_Background, onBackground = GrayLight_OnBackground,
+        surface = GrayLight_Surface, onSurface = GrayLight_OnSurface,
+        surfaceVariant = GrayLight_SurfaceVariant, onSurfaceVariant = GrayLight_OnSurfaceVariant,
+        surfaceContainer = GrayLight_SurfaceContainer,
+        surfaceContainerHigh = GrayLight_SurfaceContainerHigh,
+        surfaceContainerHighest = GrayLight_SurfaceContainerHighest,
+        outlineVariant = GrayLight_OutlineVariant,
         secondary = AnimeLight_Secondary, onSecondary = AnimeLight_OnSecondary,
         secondaryContainer = AnimeLight_SecondaryContainer, onSecondaryContainer = AnimeLight_OnSecondaryContainer,
         tertiary = AnimeLight_Tertiary, onTertiary = AnimeLight_OnTertiary,
@@ -178,7 +242,55 @@ private fun darkScheme(accentColor: String) = when (accentColor) {
         tertiaryContainer = AnimeDark_TertiaryContainer, onTertiaryContainer = AnimeDark_OnTertiaryContainer,
         outline = AnimeDark_Outline,
     )
-    else -> darkColorScheme( // Green
+    "Purple" -> darkColorScheme(
+        primary = PurpleDark_Primary, onPrimary = PurpleDark_OnPrimary,
+        primaryContainer = PurpleDark_PrimaryContainer, onPrimaryContainer = PurpleDark_OnPrimaryContainer,
+        background = PurpleDark_Background, onBackground = PurpleDark_OnBackground,
+        surface = PurpleDark_Surface, onSurface = PurpleDark_OnSurface,
+        surfaceVariant = PurpleDark_SurfaceVariant, onSurfaceVariant = PurpleDark_OnSurfaceVariant,
+        surfaceContainer = PurpleDark_SurfaceContainer,
+        surfaceContainerHigh = PurpleDark_SurfaceContainerHigh,
+        surfaceContainerHighest = PurpleDark_SurfaceContainerHighest,
+        outlineVariant = PurpleDark_OutlineVariant,
+        secondary = AnimeDark_Secondary, onSecondary = AnimeDark_OnSecondary,
+        secondaryContainer = AnimeDark_SecondaryContainer, onSecondaryContainer = AnimeDark_OnSecondaryContainer,
+        tertiary = AnimeDark_Tertiary, onTertiary = AnimeDark_OnTertiary,
+        tertiaryContainer = AnimeDark_TertiaryContainer, onTertiaryContainer = AnimeDark_OnTertiaryContainer,
+        outline = AnimeDark_Outline,
+    )
+    "Rose" -> darkColorScheme(
+        primary = RoseDark_Primary, onPrimary = RoseDark_OnPrimary,
+        primaryContainer = RoseDark_PrimaryContainer, onPrimaryContainer = RoseDark_OnPrimaryContainer,
+        background = RoseDark_Background, onBackground = RoseDark_OnBackground,
+        surface = RoseDark_Surface, onSurface = RoseDark_OnSurface,
+        surfaceVariant = RoseDark_SurfaceVariant, onSurfaceVariant = RoseDark_OnSurfaceVariant,
+        surfaceContainer = RoseDark_SurfaceContainer,
+        surfaceContainerHigh = RoseDark_SurfaceContainerHigh,
+        surfaceContainerHighest = RoseDark_SurfaceContainerHighest,
+        outlineVariant = RoseDark_OutlineVariant,
+        secondary = AnimeDark_Secondary, onSecondary = AnimeDark_OnSecondary,
+        secondaryContainer = AnimeDark_SecondaryContainer, onSecondaryContainer = AnimeDark_OnSecondaryContainer,
+        tertiary = AnimeDark_Tertiary, onTertiary = AnimeDark_OnTertiary,
+        tertiaryContainer = AnimeDark_TertiaryContainer, onTertiaryContainer = AnimeDark_OnTertiaryContainer,
+        outline = AnimeDark_Outline,
+    )
+    "Teal" -> darkColorScheme(
+        primary = TealDark_Primary, onPrimary = TealDark_OnPrimary,
+        primaryContainer = TealDark_PrimaryContainer, onPrimaryContainer = TealDark_OnPrimaryContainer,
+        background = TealDark_Background, onBackground = TealDark_OnBackground,
+        surface = TealDark_Surface, onSurface = TealDark_OnSurface,
+        surfaceVariant = TealDark_SurfaceVariant, onSurfaceVariant = TealDark_OnSurfaceVariant,
+        surfaceContainer = TealDark_SurfaceContainer,
+        surfaceContainerHigh = TealDark_SurfaceContainerHigh,
+        surfaceContainerHighest = TealDark_SurfaceContainerHighest,
+        outlineVariant = TealDark_OutlineVariant,
+        secondary = AnimeDark_Secondary, onSecondary = AnimeDark_OnSecondary,
+        secondaryContainer = AnimeDark_SecondaryContainer, onSecondaryContainer = AnimeDark_OnSecondaryContainer,
+        tertiary = AnimeDark_Tertiary, onTertiary = AnimeDark_OnTertiary,
+        tertiaryContainer = AnimeDark_TertiaryContainer, onTertiaryContainer = AnimeDark_OnTertiaryContainer,
+        outline = AnimeDark_Outline,
+    )
+    "Green" -> darkColorScheme(
         primary = AnimeDark_Primary, onPrimary = AnimeDark_OnPrimary,
         primaryContainer = AnimeDark_PrimaryContainer, onPrimaryContainer = AnimeDark_OnPrimaryContainer,
         background = AnimeDark_Background, onBackground = AnimeDark_OnBackground,
@@ -194,12 +306,28 @@ private fun darkScheme(accentColor: String) = when (accentColor) {
         tertiaryContainer = AnimeDark_TertiaryContainer, onTertiaryContainer = AnimeDark_OnTertiaryContainer,
         outline = AnimeDark_Outline,
     )
+    else -> darkColorScheme( // Gray (default)
+        primary = GrayDark_Primary, onPrimary = GrayDark_OnPrimary,
+        primaryContainer = GrayDark_PrimaryContainer, onPrimaryContainer = GrayDark_OnPrimaryContainer,
+        background = GrayDark_Background, onBackground = GrayDark_OnBackground,
+        surface = GrayDark_Surface, onSurface = GrayDark_OnSurface,
+        surfaceVariant = GrayDark_SurfaceVariant, onSurfaceVariant = GrayDark_OnSurfaceVariant,
+        surfaceContainer = GrayDark_SurfaceContainer,
+        surfaceContainerHigh = GrayDark_SurfaceContainerHigh,
+        surfaceContainerHighest = GrayDark_SurfaceContainerHighest,
+        outlineVariant = GrayDark_OutlineVariant,
+        secondary = AnimeDark_Secondary, onSecondary = AnimeDark_OnSecondary,
+        secondaryContainer = AnimeDark_SecondaryContainer, onSecondaryContainer = AnimeDark_OnSecondaryContainer,
+        tertiary = AnimeDark_Tertiary, onTertiary = AnimeDark_OnTertiary,
+        tertiaryContainer = AnimeDark_TertiaryContainer, onTertiaryContainer = AnimeDark_OnTertiaryContainer,
+        outline = AnimeDark_Outline,
+    )
 }
 
 @Composable
 fun KanataTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    accentColor: String = "Green",
+    accentColor: String = "Gray",
     content: @Composable () -> Unit,
 ) {
     val colorScheme = if (darkTheme) darkScheme(accentColor) else lightScheme(accentColor)

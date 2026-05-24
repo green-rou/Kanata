@@ -37,9 +37,12 @@ import com.greenrou.kanata.R
 private data class AccentOption(val name: String, val color: Color)
 
 private val accentOptions = listOf(
-    AccentOption("Green",  Color(0xFF15803D)),
     AccentOption("Gray",   Color(0xFF4B5563)),
+    AccentOption("Green",  Color(0xFF15803D)),
     AccentOption("Blue",   Color(0xFF1D4ED8)),
+    AccentOption("Purple", Color(0xFF6D28D9)),
+    AccentOption("Teal",   Color(0xFF0D9488)),
+    AccentOption("Rose",   Color(0xFFBE123C)),
     AccentOption("Red",    Color(0xFFDC2626)),
     AccentOption("Orange", Color(0xFFEA580C)),
 )

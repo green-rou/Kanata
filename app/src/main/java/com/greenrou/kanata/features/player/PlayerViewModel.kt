@@ -121,6 +121,7 @@ class PlayerViewModel(
                 streamUrl = null,
                 streamHeaders = emptyMap(),
                 currentEpisodeDownloadStatus = null,
+                isChangingEpisode = true,
             )
         }
     }
@@ -131,7 +132,7 @@ class PlayerViewModel(
         if (url.startsWith("file://") || isDirectStreamUrl(url)) {
             val headers = initialHeaderKeys.zip(initialHeaderValues).toMap()
             Log.i(TAG, "Direct stream, skipping extraction → streamUrl=$url  headers=$headers")
-            _state.update { it.copy(isLoading = false, streamUrl = url, streamHeaders = headers) }
+            _state.update { it.copy(isLoading = false, streamUrl = url, streamHeaders = headers, isChangingEpisode = false) }
             return
         }
         loadJob?.cancel()
@@ -140,12 +141,12 @@ class PlayerViewModel(
             getVideoStream(url)
                 .onSuccess { stream ->
                     Log.i(TAG, "Stream loaded → url=${stream.url}  headers=${stream.headers}")
-                    _state.update { it.copy(isLoading = false, streamUrl = stream.url, streamHeaders = stream.headers) }
+                    _state.update { it.copy(isLoading = false, streamUrl = stream.url, streamHeaders = stream.headers, isChangingEpisode = false) }
                 }
                 .onFailure { e ->
                     Log.e(TAG, "Stream load failed for episodeUrl=$url", e)
                     analytics.recordError(e, "player_load_stream", mapOf("episode_url" to url, "anime" to animeTitle, "source" to sourceName))
-                    _state.update { it.copy(isLoading = false, error = e.message) }
+                    _state.update { it.copy(isLoading = false, error = e.message, isChangingEpisode = false) }
                 }
         }
     }

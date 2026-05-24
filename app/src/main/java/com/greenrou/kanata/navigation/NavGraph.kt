@@ -43,7 +43,8 @@ fun NavGraph(backStack: SnapshotStateList<Any>) {
             onNavigateToAnimeDetails = { animeId ->
                 backStack.add(AnimeDetailsRoute(animeId))
             },
-            onOpenWebPlayer = { backStack.add(WebPlayerRoute) },
+            onOpenWebPlayer = { backStack.add(WebPlayerRoute()) },
+            onNavigateToWebPlayer = { url -> backStack.add(WebPlayerRoute(url)) },
         )
         is AnimeDetailsRoute -> AnimeDetailsScreen(
             animeId = current.animeId,
@@ -95,6 +96,7 @@ fun NavGraph(backStack: SnapshotStateList<Any>) {
             )
         }
         is WebPlayerRoute -> WebPlayerScreen(
+            initialUrl = current.initialUrl,
             onNavigateBack = { backStack.removeAt(backStack.size - 1) },
             onNavigateToPlayer = { streamUrl, referer ->
                 backStack.add(

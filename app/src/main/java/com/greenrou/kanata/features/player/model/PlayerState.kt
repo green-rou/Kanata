@@ -12,4 +12,5 @@ data class PlayerState(
     val episodeCount: Int = 1,
     val nextEpisodeTitle: String? = null,
     val currentEpisodeDownloadStatus: DownloadStatus? = null,
+    val isChangingEpisode: Boolean = false,
 )
