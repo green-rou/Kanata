@@ -15,7 +15,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.platform.LocalView
 import androidx.core.content.FileProvider
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -23,12 +26,16 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.greenrou.kanata.core.util.LanguagePrefs
 import com.greenrou.kanata.features.main.MainViewModel
+import com.greenrou.kanata.features.main.model.MainEvent
+import com.greenrou.kanata.features.update.AnalyticsConsentDialog
 import com.greenrou.kanata.features.update.UpdateDialog
 import com.greenrou.kanata.features.update.UpdateViewModel
 import com.greenrou.kanata.features.update.model.UpdateEvent
 import com.greenrou.kanata.navigation.MainRoute
 import com.greenrou.kanata.navigation.NavGraph
 import com.greenrou.kanata.ui.theme.KanataTheme
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import org.koin.androidx.compose.koinViewModel
 import java.util.Locale
 
@@ -60,8 +67,22 @@ class MainActivity : ComponentActivity() {
             val updateViewModel: UpdateViewModel = koinViewModel()
             val updateState by updateViewModel.state.collectAsStateWithLifecycle()
 
+            var analyticsConsentVisible by remember { mutableStateOf(false) }
+
             LaunchedEffect(Unit) {
                 updateViewModel.handleEvent(UpdateEvent.CheckUpdate)
+
+                // Dialog queue: wait for update check + any update dialog, then show analytics consent
+                snapshotFlow {
+                    !state.analyticsConsentShown &&
+                    updateState.updateCheckHasRun &&
+                    updateState.pendingRelease == null
+                }.first { it }
+
+                delay(1000)
+                if (!state.analyticsConsentShown) {
+                    analyticsConsentVisible = true
+                }
             }
 
             LaunchedEffect(Unit) {
@@ -111,6 +132,19 @@ class MainActivity : ComponentActivity() {
                         onUpdate = { updateViewModel.handleEvent(UpdateEvent.StartDownload) },
                         onSkip = { updateViewModel.handleEvent(UpdateEvent.SkipUpdate) },
                         onDismiss = { updateViewModel.handleEvent(UpdateEvent.DismissDialog) },
+                    )
+                }
+
+                if (analyticsConsentVisible) {
+                    AnalyticsConsentDialog(
+                        onAccept = {
+                            analyticsConsentVisible = false
+                            mainViewModel.handleEvent(MainEvent.AcceptAnalytics)
+                        },
+                        onDeny = {
+                            analyticsConsentVisible = false
+                            mainViewModel.handleEvent(MainEvent.DenyAnalytics)
+                        },
                     )
                 }
             }

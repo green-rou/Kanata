@@ -2,6 +2,7 @@ package com.greenrou.kanata.features.main
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -146,10 +147,12 @@ fun MainScreen(
         }
     }
 
-    var fabVisible by remember { mutableStateOf(true) }
+    val fabAllowedOnTab = selectedTab == BottomNavItem.AnimeList || selectedTab == BottomNavItem.Favorites
+
+    var fabScrollVisible by remember { mutableStateOf(true) }
     LaunchedEffect(gridState, selectedTab) {
         if (selectedTab != BottomNavItem.AnimeList) {
-            fabVisible = true
+            fabScrollVisible = true
             return@LaunchedEffect
         }
         var lastIndex = 0
@@ -157,14 +160,16 @@ fun MainScreen(
         snapshotFlow { gridState.firstVisibleItemIndex to gridState.firstVisibleItemScrollOffset }
             .collect { (index, offset) ->
                 when {
-                    index == 0 -> fabVisible = true
-                    index != lastIndex -> fabVisible = index < lastIndex
-                    offset != lastOffset -> fabVisible = offset < lastOffset
+                    index == 0 -> fabScrollVisible = true
+                    index != lastIndex -> fabScrollVisible = index < lastIndex
+                    offset != lastOffset -> fabScrollVisible = offset < lastOffset
                 }
                 lastIndex = index
                 lastOffset = offset
             }
     }
+
+    val isFabVisible = fabAllowedOnTab && fabScrollVisible
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
@@ -178,6 +183,10 @@ fun MainScreen(
 
     val systemNavBarBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val floatingNavBottom = NavBarHeight + systemNavBarBottom
+    val snackbarBottomPadding by animateDpAsState(
+        targetValue = if (isFabVisible) floatingNavBottom + 72.dp else floatingNavBottom,
+        label = "snackbar_bottom",
+    )
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
@@ -333,7 +342,7 @@ fun MainScreen(
             snackbarHost = {
                 KanataSnackbarHost(
                     hostState = snackbarHostState,
-                    modifier = Modifier.padding(bottom = floatingNavBottom),
+                    modifier = Modifier.padding(bottom = snackbarBottomPadding),
                 )
             },
         ) { scaffoldPadding ->
@@ -482,6 +491,12 @@ fun MainScreen(
                         regularSources = viewModel.regularSources,
                         adultSources = viewModel.adultSources,
                         onToggleSource = { viewModel.handleEvent(MainEvent.ToggleSource(it)) },
+                        adBlockerEnabled = state.adBlockerEnabled,
+                        onToggleAdBlocker = { viewModel.handleEvent(MainEvent.ToggleAdBlocker) },
+                        webBackNavTopBar = state.webBackNavTopBar,
+                        onToggleWebBackNavTopBar = { viewModel.handleEvent(MainEvent.ToggleWebBackNavTopBar) },
+                        analyticsEnabled = state.analyticsEnabled,
+                        onToggleAnalytics = { viewModel.handleEvent(MainEvent.ToggleAnalytics) },
                         isCheckingUpdate = updateState.isChecking,
                         onCheckUpdate = { updateViewModel.handleEvent(UpdateEvent.CheckUpdate) },
                         bottomPadding = contentPadding.calculateBottomPadding(),
@@ -494,7 +509,7 @@ fun MainScreen(
         }
 
         AnimatedVisibility(
-            visible = fabVisible,
+            visible = isFabVisible,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 16.dp, bottom = floatingNavBottom + 12.dp),

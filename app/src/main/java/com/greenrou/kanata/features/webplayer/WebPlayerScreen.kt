@@ -2,9 +2,12 @@ package com.greenrou.kanata.features.webplayer
 
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.webkit.JavascriptInterface
+import android.webkit.RenderProcessGoneDetail
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
@@ -16,6 +19,8 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
@@ -24,6 +29,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -36,6 +42,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
@@ -43,7 +50,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,6 +63,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.greenrou.kanata.R
@@ -62,15 +72,19 @@ import com.greenrou.kanata.features.webplayer.content.WebPlayerGuide
 import com.greenrou.kanata.features.webplayer.model.WebPlayerEvent
 import org.koin.androidx.compose.koinViewModel
 
-private val VIDEO_URL_REGEX = Regex("""\.(m3u8|mp4|mkv|webm|ts)(\?.*)?$""", RegexOption.IGNORE_CASE)
+private const val TAG = "WebPlayer"
+
+private val VIDEO_URL_REGEX = Regex("""\.(m3u8|mp4|mkv|webm)(\?.*)?$""", RegexOption.IGNORE_CASE)
 
 private val JS_INJECTION = """
 (function() {
   if (window.__kanataInjected) return;
   window.__kanataInjected = true;
+  var reported = new Set();
   var notify = function(url) {
     try {
-      if (/\.(m3u8|mp4|mkv|webm|ts)(\?.*)?$/i.test(url)) {
+      if (/\.(m3u8|mp4|mkv|webm)(\?.*)?$/i.test(url) && !reported.has(url)) {
+        reported.add(url);
         StreamBridge.onStream(url, location.href);
       }
     } catch(e) {}
@@ -113,17 +127,29 @@ fun WebPlayerScreen(
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
-                is WebPlayerEvent.NavigateToPlayer -> onNavigateToPlayer(event.streamUrl, event.referer)
+                is WebPlayerEvent.NavigateToPlayer -> {
+                    Log.i(TAG, "Opening in player → streamUrl=${event.streamUrl}  referer=${event.referer}")
+                    onNavigateToPlayer(event.streamUrl, event.referer)
+                }
                 WebPlayerEvent.NavigateBack -> onNavigateBack()
                 else -> Unit
             }
         }
     }
 
+    val adBlockerEnabled = remember { java.util.concurrent.atomic.AtomicBoolean(true) }
+    SideEffect { adBlockerEnabled.set(state.adBlockerEnabled) }
+
     val onStreamDetected: (String, String) -> Unit = remember(viewModel) {
         { url, referer ->
-            Handler(Looper.getMainLooper()).post {
-                viewModel.handleEvent(WebPlayerEvent.StreamDetected(url, referer))
+            val isAd = adBlockerEnabled.get() && AdBlocker.isAdStream(url)
+            if (isAd) {
+                Log.d(TAG, "Stream BLOCKED by AdBlocker: $url")
+            } else {
+                Log.i(TAG, "Stream detected → url=$url  referer=$referer")
+                Handler(Looper.getMainLooper()).post {
+                    viewModel.handleEvent(WebPlayerEvent.StreamDetected(url, referer))
+                }
             }
         }
     }
@@ -136,7 +162,12 @@ fun WebPlayerScreen(
         { loading -> viewModel.handleEvent(WebPlayerEvent.LoadingChanged(loading)) }
     }
 
+    val canGoBackState = remember { mutableStateOf(false) }
+    val canGoBack by canGoBackState
+
     val webView = remember(context) {
+        val reportedNetworkUrls = mutableSetOf<String>()
+
         WebView(context).apply {
             settings.apply {
                 javaScriptEnabled = true
@@ -163,33 +194,71 @@ fun WebPlayerScreen(
                     request: WebResourceRequest,
                 ): WebResourceResponse? {
                     val url = request.url.toString()
-                    if (VIDEO_URL_REGEX.containsMatchIn(url)) {
+                    if (adBlockerEnabled.get() && AdBlocker.shouldBlock(url)) {
+                        Log.d(TAG, "Request BLOCKED: $url")
+                        return AdBlocker.emptyResponse()
+                    }
+                    if (VIDEO_URL_REGEX.containsMatchIn(url) && reportedNetworkUrls.add(url)) {
+                        val referer = request.requestHeaders["Referer"].orEmpty()
+                        Log.i(TAG, "Video request intercepted [network]: $url  (referer=$referer)")
                         Handler(Looper.getMainLooper()).post {
-                            onStreamDetected(url, request.requestHeaders["Referer"].orEmpty())
+                            onStreamDetected(url, referer)
                         }
                     }
                     return null
                 }
 
                 override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
+                    Log.d(TAG, "Page started: $url")
+                    reportedNetworkUrls.clear()
                     onLoadingChanged(true)
                     onPageNavigated(url)
                 }
 
                 override fun onPageFinished(view: WebView, url: String) {
+                    Log.d(TAG, "Page finished: $url")
+                    canGoBackState.value = view.canGoBack()
                     onLoadingChanged(false)
                     view.evaluateJavascript(JS_INJECTION, null)
                 }
 
                 override fun doUpdateVisitedHistory(view: WebView, url: String, isReload: Boolean) {
+                    canGoBackState.value = view.canGoBack()
                     onPageNavigated(url)
+                }
+
+                override fun onRenderProcessGone(view: WebView, detail: RenderProcessGoneDetail): Boolean {
+                    val url = view.url?.takeIf { it.isNotBlank() }
+                    Log.w(TAG, "Renderer gone (crashed=${detail.didCrash()}), reloading url=$url")
+                    reportedNetworkUrls.clear()
+                    Handler(Looper.getMainLooper()).post {
+                        if (url != null) view.loadUrl(url) else view.reload()
+                    }
+                    return true
                 }
             }
         }
     }
 
     DisposableEffect(webView) {
-        onDispose { webView.destroy() }
+        onDispose {
+            val bundle = Bundle()
+            webView.saveState(bundle)
+            if (!bundle.isEmpty) viewModel.saveWebViewState(bundle)
+            webView.destroy()
+        }
+    }
+
+    // Restore full history when WebView is recreated after returning from player,
+    // otherwise load the last URL (first launch or no saved state).
+    LaunchedEffect(webView) {
+        val saved = viewModel.consumeWebViewState()
+        if (saved != null) {
+            webView.restoreState(saved)
+            canGoBackState.value = webView.canGoBack()
+        } else if (state.hasNavigated && state.addressBarText.isNotBlank()) {
+            webView.loadUrl(state.addressBarText)
+        }
     }
 
     LaunchedEffect(state.urlToLoad) {
@@ -210,7 +279,7 @@ fun WebPlayerScreen(
                 TopAppBar(
                     navigationIcon = {
                         IconButton(onClick = {
-                            if (webView.canGoBack()) webView.goBack()
+                            if (state.webBackNavTopBar && webView.canGoBack()) webView.goBack()
                             else viewModel.handleEvent(WebPlayerEvent.NavigateBack)
                         }) {
                             Icon(
@@ -281,7 +350,31 @@ fun WebPlayerScreen(
                 enter = fadeIn(),
                 exit = slideOutVertically { it / 4 } + fadeOut(),
             ) {
-                WebPlayerGuide()
+                WebPlayerGuide(
+                    adBlockerEnabled = state.adBlockerEnabled,
+                    onDisableAdBlocker = { viewModel.handleEvent(WebPlayerEvent.DisableAdBlocker) },
+                )
+            }
+
+            AnimatedVisibility(
+                visible = !state.webBackNavTopBar && canGoBack,
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .navigationBarsPadding()
+                    .padding(start = 16.dp, bottom = 16.dp),
+                enter = scaleIn() + fadeIn(),
+                exit = scaleOut() + fadeOut(),
+            ) {
+                SmallFloatingActionButton(
+                    onClick = { webView.goBack() },
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                ) {
+                    Icon(
+                        Icons.AutoMirrored.Rounded.ArrowBack,
+                        contentDescription = stringResource(R.string.action_back),
+                    )
+                }
             }
 
             AnimatedVisibility(
@@ -311,6 +404,7 @@ fun WebPlayerScreen(
 private class StreamJsBridge(private val onStream: (url: String, referer: String) -> Unit) {
     @JavascriptInterface
     fun onStream(url: String, referer: String) {
+        Log.i(TAG, "Video request intercepted [JS]: $url  (referer=$referer)")
         Handler(Looper.getMainLooper()).post { onStream(url, referer) }
     }
 }

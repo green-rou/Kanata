@@ -2,7 +2,6 @@ package com.greenrou.kanata.features.settings
 
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.compose.ui.unit.Dp
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,6 +12,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.BarChart
+import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.Code
 import androidx.compose.material.icons.rounded.DarkMode
 import androidx.compose.material.icons.rounded.Folder
@@ -30,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.greenrou.kanata.R
 import com.greenrou.kanata.domain.model.VideoSourceType
@@ -59,6 +62,12 @@ fun SettingsScreen(
     regularSources: List<Pair<VideoSourceType, String>> = emptyList(),
     adultSources: List<Pair<VideoSourceType, String>> = emptyList(),
     onToggleSource: (VideoSourceType) -> Unit = {},
+    adBlockerEnabled: Boolean = true,
+    onToggleAdBlocker: () -> Unit = {},
+    webBackNavTopBar: Boolean = false,
+    onToggleWebBackNavTopBar: () -> Unit = {},
+    analyticsEnabled: Boolean = true,
+    onToggleAnalytics: () -> Unit = {},
     isCheckingUpdate: Boolean = false,
     onCheckUpdate: () -> Unit = {},
     bottomPadding: Dp = 0.dp,
@@ -141,6 +150,39 @@ fun SettingsScreen(
                 title = stringResource(R.string.settings_download_folder_title),
                 subtitle = downloadFolder.ifBlank { stringResource(R.string.settings_download_folder_default) },
                 onClick = { folderPickerLauncher.launch(null) },
+            )
+        }
+
+        SettingsSection(title = stringResource(R.string.settings_section_webplayer)) {
+            SettingsItem(
+                icon = Icons.Rounded.Block,
+                title = if (adBlockerEnabled) stringResource(R.string.settings_adblock_on_title)
+                        else stringResource(R.string.settings_adblock_off_title),
+                subtitle = if (adBlockerEnabled) stringResource(R.string.settings_adblock_on_subtitle)
+                           else stringResource(R.string.settings_adblock_off_subtitle),
+                checked = adBlockerEnabled,
+                onCheckedChange = { onToggleAdBlocker() },
+            )
+            SettingsItem(
+                icon = Icons.AutoMirrored.Rounded.ArrowBack,
+                title = if (webBackNavTopBar) stringResource(R.string.settings_web_back_topbar_title)
+                        else stringResource(R.string.settings_web_back_fab_title),
+                subtitle = if (webBackNavTopBar) stringResource(R.string.settings_web_back_topbar_subtitle)
+                           else stringResource(R.string.settings_web_back_fab_subtitle),
+                checked = webBackNavTopBar,
+                onCheckedChange = { onToggleWebBackNavTopBar() },
+            )
+        }
+
+        SettingsSection(title = stringResource(R.string.settings_section_privacy)) {
+            SettingsItem(
+                icon = Icons.Rounded.BarChart,
+                title = if (analyticsEnabled) stringResource(R.string.settings_analytics_on_title)
+                        else stringResource(R.string.settings_analytics_off_title),
+                subtitle = if (analyticsEnabled) stringResource(R.string.settings_analytics_on_subtitle)
+                           else stringResource(R.string.settings_analytics_off_subtitle),
+                checked = analyticsEnabled,
+                onCheckedChange = { onToggleAnalytics() },
             )
         }
 

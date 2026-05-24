@@ -9,6 +9,7 @@ sealed interface WebPlayerEvent {
     data object OpenInPlayer : WebPlayerEvent
     data object DismissStream : WebPlayerEvent
     data object UrlLoadDispatched : WebPlayerEvent
+    data object DisableAdBlocker : WebPlayerEvent
     data object NavigateBack : WebPlayerEvent
     // navigation-only, sent via Channel
     data class NavigateToPlayer(val streamUrl: String, val referer: String) : WebPlayerEvent

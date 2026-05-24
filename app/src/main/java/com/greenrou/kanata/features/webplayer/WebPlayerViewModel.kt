@@ -1,17 +1,21 @@
 package com.greenrou.kanata.features.webplayer
 
+import android.os.Bundle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.greenrou.kanata.domain.repository.SettingsManager
 import com.greenrou.kanata.features.webplayer.model.WebPlayerEvent
 import com.greenrou.kanata.features.webplayer.model.WebPlayerState
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class WebPlayerViewModel : ViewModel() {
+class WebPlayerViewModel(private val settingsManager: SettingsManager) : ViewModel() {
 
     private val _state = MutableStateFlow(WebPlayerState())
     val state = _state.asStateFlow()
@@ -20,6 +24,22 @@ class WebPlayerViewModel : ViewModel() {
     val events = _events.receiveAsFlow()
 
     private var lastDetectedUrl: String? = null
+    private var savedWebViewState: Bundle? = null
+
+    fun saveWebViewState(bundle: Bundle) {
+        savedWebViewState = bundle
+    }
+
+    fun consumeWebViewState(): Bundle? = savedWebViewState?.also { savedWebViewState = null }
+
+    init {
+        settingsManager.adBlockerEnabled
+            .onEach { enabled -> _state.update { it.copy(adBlockerEnabled = enabled) } }
+            .launchIn(viewModelScope)
+        settingsManager.webBackNavTopBar
+            .onEach { enabled -> _state.update { it.copy(webBackNavTopBar = enabled) } }
+            .launchIn(viewModelScope)
+    }
 
     fun handleEvent(event: WebPlayerEvent) {
         when (event) {
@@ -70,6 +90,10 @@ class WebPlayerViewModel : ViewModel() {
 
             WebPlayerEvent.UrlLoadDispatched ->
                 _state.update { it.copy(urlToLoad = null) }
+
+            WebPlayerEvent.DisableAdBlocker -> viewModelScope.launch {
+                settingsManager.setAdBlockerEnabled(false)
+            }
 
             WebPlayerEvent.NavigateBack -> viewModelScope.launch {
                 _events.send(WebPlayerEvent.NavigateBack)

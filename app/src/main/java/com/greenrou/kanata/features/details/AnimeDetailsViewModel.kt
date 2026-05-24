@@ -2,7 +2,7 @@ package com.greenrou.kanata.features.details
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.greenrou.kanata.core.analytics.reportToCrashlytics
+import com.greenrou.kanata.core.analytics.AnalyticsManager
 import com.greenrou.kanata.core.network.NetworkMonitor
 import com.greenrou.kanata.domain.model.Anime
 import com.greenrou.kanata.domain.repository.SettingsManager
@@ -35,6 +35,7 @@ class AnimeDetailsViewModel(
     private val settingsManager: SettingsManager,
     private val getCompletedDownloads: GetCompletedDownloadsUseCase,
     private val networkMonitor: NetworkMonitor,
+    private val analytics: AnalyticsManager,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AnimeDetailsState())
@@ -46,6 +47,7 @@ class AnimeDetailsViewModel(
     val events = _events.receiveAsFlow()
 
     init {
+        analytics.setScreen("anime_details")
         settingsManager.coverFillsTopBar
             .onEach { enabled -> _state.update { it.copy(coverFillsTopBar = enabled) } }
             .launchIn(viewModelScope)
@@ -113,7 +115,7 @@ class AnimeDetailsViewModel(
                 }
                 .onFailure { e ->
 
-                    e.reportToCrashlytics("details_load_anime")
+                    analytics.recordError(e, "details_load_anime")
                     loadedAnimeId = -1
                     val isOffline = !networkMonitor.isConnectedNow()
                     _state.update { it.copy(isLoading = false, error = e.message, isOffline = isOffline) }

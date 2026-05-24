@@ -9,4 +9,5 @@ data class UpdateState(
     val downloadProgress: Float = 0f,
     val error: String? = null,
     val noUpdatesAvailable: Boolean = false,
+    val updateCheckHasRun: Boolean = false,
 )

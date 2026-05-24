@@ -7,4 +7,6 @@ data class WebPlayerState(
     val detectedReferer: String? = null,
     val urlToLoad: String? = null,
     val hasNavigated: Boolean = false,
+    val adBlockerEnabled: Boolean = true,
+    val webBackNavTopBar: Boolean = false,
 )
