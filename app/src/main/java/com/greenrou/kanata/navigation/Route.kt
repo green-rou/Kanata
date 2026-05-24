@@ -24,4 +24,9 @@ data class PlayerRoute(
     val startIndex: Int,
     val animeTitle: String = "",
     val sourceName: String = "",
+    val headerKeys: List<String> = emptyList(),
+    val headerValues: List<String> = emptyList(),
 )
+
+@Serializable
+data object WebPlayerRoute

@@ -1,8 +1,8 @@
 package com.greenrou.kanata.features.player
 
 import androidx.lifecycle.ViewModel
-import com.greenrou.kanata.core.analytics.reportToCrashlytics
 import androidx.lifecycle.viewModelScope
+import com.greenrou.kanata.core.analytics.reportToCrashlytics
 import com.greenrou.kanata.domain.usecase.GetEpisodeDownloadStatusUseCase
 import com.greenrou.kanata.domain.usecase.GetVideoStreamUseCase
 import com.greenrou.kanata.domain.usecase.StartEpisodeDownloadUseCase
@@ -27,6 +27,8 @@ class PlayerViewModel(
     startIndex: Int,
     private val animeTitle: String = "",
     private val sourceName: String = "",
+    private val initialHeaderKeys: List<String> = emptyList(),
+    private val initialHeaderValues: List<String> = emptyList(),
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
@@ -113,8 +115,9 @@ class PlayerViewModel(
 
     private fun loadStream() {
         val url = episodeUrls.getOrNull(currentIndex) ?: return
-        if (url.startsWith("file://")) {
-            _state.update { it.copy(isLoading = false, streamUrl = url) }
+        if (url.startsWith("file://") || isDirectStreamUrl(url)) {
+            val headers = initialHeaderKeys.zip(initialHeaderValues).toMap()
+            _state.update { it.copy(isLoading = false, streamUrl = url, streamHeaders = headers) }
             return
         }
         loadJob?.cancel()
@@ -131,9 +134,12 @@ class PlayerViewModel(
         }
     }
 
+    private fun isDirectStreamUrl(url: String) =
+        Regex("""\.(m3u8|mp4|mkv|webm)(\?|${'$'})""", RegexOption.IGNORE_CASE).containsMatchIn(url)
+
     private fun observeDownloadStatus() {
         val url = episodeUrls.getOrNull(currentIndex) ?: return
-        if (url.startsWith("file://")) return
+        if (url.startsWith("file://") || isDirectStreamUrl(url)) return
         statusJob?.cancel()
         statusJob = getEpisodeDownloadStatus(url)
             .onEach { item -> _state.update { it.copy(currentEpisodeDownloadStatus = item?.status) } }

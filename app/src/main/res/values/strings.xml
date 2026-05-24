@@ -89,6 +89,18 @@
     <string name="notif_channel_downloads">Downloads</string>
     <string name="notif_downloading">Downloading: %s</string>
 
+    <!-- Web player -->
+    <string name="webplayer_hint">Enter URL…</string>
+    <string name="webplayer_stream_found">Stream detected</string>
+    <string name="webplayer_open_in_player">Open in player</string>
+    <string name="webplayer_cd_reload">Reload</string>
+    <string name="webplayer_cd_open_webplayer">Open web player</string>
+    <string name="webplayer_guide_title">Web Player</string>
+    <string name="webplayer_guide_subtitle">Stream video from any website directly to the player</string>
+    <string name="webplayer_guide_step1">Enter the site URL in the address bar above</string>
+    <string name="webplayer_guide_step2">Navigate to the episode and start the video</string>
+    <string name="webplayer_guide_step3">When a stream is detected, tap "Open in Player"</string>
+
     <!-- Player -->
     <string name="player_cd_exit_fullscreen">Exit fullscreen</string>
     <string name="player_cd_fullscreen">Fullscreen</string>

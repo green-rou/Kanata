@@ -91,6 +91,18 @@
     <string name="notif_channel_downloads">Завантаження</string>
     <string name="notif_downloading">Завантаження: %s</string>
 
+    <!-- Web player -->
+    <string name="webplayer_hint">Введіть URL…</string>
+    <string name="webplayer_stream_found">Знайдено стрім</string>
+    <string name="webplayer_open_in_player">Відкрити в плеєрі</string>
+    <string name="webplayer_cd_reload">Оновити</string>
+    <string name="webplayer_cd_open_webplayer">Відкрити веб-плеєр</string>
+    <string name="webplayer_guide_title">Веб-Плеєр</string>
+    <string name="webplayer_guide_subtitle">Транслюйте відео з будь-якого сайту прямо в плеєр</string>
+    <string name="webplayer_guide_step1">Введіть URL сайту в адресний рядок вище</string>
+    <string name="webplayer_guide_step2">Перейдіть до серії та запустіть відео</string>
+    <string name="webplayer_guide_step3">Коли знайдено стрім — натисніть «Відкрити в плеєрі»</string>
+
     <!-- Player -->
     <string name="player_cd_exit_fullscreen">Вийти з повного екрану</string>
     <string name="player_cd_fullscreen">Повний екран</string>
