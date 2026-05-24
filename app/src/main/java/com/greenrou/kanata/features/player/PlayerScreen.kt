@@ -56,6 +56,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.hls.HlsMediaSource
@@ -161,9 +162,10 @@ fun PlayerScreen(
         state.streamUrl?.let { url ->
             exoPlayer.stop()
             exoPlayer.clearMediaItems()
-            val dataSourceFactory = DefaultHttpDataSource.Factory().apply {
+            val httpFactory = DefaultHttpDataSource.Factory().apply {
                 if (state.streamHeaders.isNotEmpty()) setDefaultRequestProperties(state.streamHeaders)
             }
+            val dataSourceFactory = DefaultDataSource.Factory(context, httpFactory)
             val mediaItem = MediaItem.fromUri(url)
             val mediaSource = if (".m3u8" in url) {
                 HlsMediaSource.Factory(dataSourceFactory).createMediaSource(mediaItem)
