@@ -2,12 +2,13 @@ package com.greenrou.kanata.core.network
 
 import com.greenrou.kanata.data.remote.AnnApi
 import com.greenrou.kanata.data.remote.GitHubApi
+import com.greenrou.kanata.data.remote.ModIndexApi
 import com.greenrou.kanata.data.remote.NekosiaApi
-import org.koin.android.ext.koin.androidContext
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import org.koin.android.ext.koin.androidContext
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import retrofit2.Retrofit
@@ -59,8 +60,18 @@ val networkModule = module {
             .build()
     }
 
+    single(named("rawgithub_retrofit")) {
+        val json = Json { ignoreUnknownKeys = true }
+        Retrofit.Builder()
+            .baseUrl(ModIndexApi.BASE_URL)
+            .client(get())
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .build()
+    }
+
     single { get<Retrofit>(named("ann_retrofit")).create(AnnApi::class.java) }
     single { get<Retrofit>(named("nekosia_retrofit")).create(NekosiaApi::class.java) }
     single { get<Retrofit>(named("github_retrofit")).create(GitHubApi::class.java) }
+    single { get<Retrofit>(named("rawgithub_retrofit")).create(ModIndexApi::class.java) }
     single { NetworkMonitor(androidContext()) }
 }

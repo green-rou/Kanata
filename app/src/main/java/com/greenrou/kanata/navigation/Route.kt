@@ -30,3 +30,6 @@ data class PlayerRoute(
 
 @Serializable
 data class WebPlayerRoute(val initialUrl: String = "")
+
+@Serializable
+data object ModsRoute

@@ -17,6 +17,7 @@ import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.Code
 import androidx.compose.material.icons.rounded.DarkMode
+import androidx.compose.material.icons.rounded.Extension
 import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material.icons.rounded.Fullscreen
 import androidx.compose.material.icons.rounded.FullscreenExit
@@ -70,6 +71,7 @@ fun SettingsScreen(
     onToggleAnalytics: () -> Unit = {},
     isCheckingUpdate: Boolean = false,
     onCheckUpdate: () -> Unit = {},
+    onNavigateToMods: () -> Unit = {},
     bottomPadding: Dp = 0.dp,
     modifier: Modifier = Modifier,
 ) {
@@ -150,6 +152,15 @@ fun SettingsScreen(
                 title = stringResource(R.string.settings_download_folder_title),
                 subtitle = downloadFolder.ifBlank { stringResource(R.string.settings_download_folder_default) },
                 onClick = { folderPickerLauncher.launch(null) },
+            )
+        }
+
+        SettingsSection(title = "Extensions") {
+            SettingsLinkItem(
+                icon = Icons.Rounded.Extension,
+                title = "Manage Extensions",
+                subtitle = "Install or remove source mods",
+                onClick = onNavigateToMods,
             )
         }
 

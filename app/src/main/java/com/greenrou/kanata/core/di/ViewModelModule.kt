@@ -7,6 +7,7 @@ import com.greenrou.kanata.features.downloads.DownloadManagerViewModel
 import com.greenrou.kanata.features.episodes.EpisodeListViewModel
 import com.greenrou.kanata.features.favorites.FavoritesViewModel
 import com.greenrou.kanata.features.main.MainViewModel
+import com.greenrou.kanata.features.mods.ModsViewModel
 import com.greenrou.kanata.features.mood.MoodViewModel
 import com.greenrou.kanata.features.player.PlayerViewModel
 import com.greenrou.kanata.features.random.RandomImageViewModel
@@ -30,6 +31,7 @@ val viewModelModule = module {
     }
     viewModel { DownloadManagerViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
     viewModel { WebPlayerViewModel(get(), get()) }
+    viewModel { ModsViewModel(get(), get(), get(), get(), get()) }
     single { CheckUpdateUseCase(get(), get(), androidContext()) }
     viewModel { UpdateViewModel(get(), get(), androidContext(), get()) }
 }
