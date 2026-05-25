@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -29,22 +30,27 @@ import com.greenrou.kanata.features.player.model.PlayerState
 internal fun BoxScope.EpisodeSideButtons(
     state: PlayerState,
     controlsVisible: Boolean,
+    isChangingEpisode: Boolean,
     onPrevious: () -> Unit,
     onNext: () -> Unit,
 ) {
     if (state.episodeCount <= 1) return
 
+    val showWhenChanging = isChangingEpisode
+
     AnimatedVisibility(
-        visible = controlsVisible && state.currentIndex > 0,
+        visible = (controlsVisible || showWhenChanging) && state.currentIndex > 0,
         modifier = Modifier.align(Alignment.CenterStart),
         enter = fadeIn(),
         exit = fadeOut(),
     ) {
         IconButton(
             onClick = onPrevious,
+            enabled = !isChangingEpisode,
             modifier = Modifier
                 .padding(start = 12.dp)
                 .size(52.dp)
+                .alpha(if (isChangingEpisode) 0.38f else 1f)
                 .background(Color.Black.copy(alpha = 0.45f), CircleShape),
         ) {
             Icon(
@@ -57,7 +63,7 @@ internal fun BoxScope.EpisodeSideButtons(
     }
 
     AnimatedVisibility(
-        visible = controlsVisible,
+        visible = controlsVisible || showWhenChanging,
         modifier = Modifier
             .align(Alignment.BottomCenter)
             .padding(bottom = 56.dp),
@@ -75,16 +81,18 @@ internal fun BoxScope.EpisodeSideButtons(
     }
 
     AnimatedVisibility(
-        visible = controlsVisible && state.currentIndex < state.episodeCount - 1,
+        visible = (controlsVisible || showWhenChanging) && state.currentIndex < state.episodeCount - 1,
         modifier = Modifier.align(Alignment.CenterEnd),
         enter = fadeIn(),
         exit = fadeOut(),
     ) {
         IconButton(
             onClick = onNext,
+            enabled = !isChangingEpisode,
             modifier = Modifier
                 .padding(end = 12.dp)
                 .size(52.dp)
+                .alpha(if (isChangingEpisode) 0.38f else 1f)
                 .background(Color.Black.copy(alpha = 0.45f), CircleShape),
         ) {
             Icon(

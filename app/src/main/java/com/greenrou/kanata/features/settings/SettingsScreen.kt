@@ -56,7 +56,7 @@ fun SettingsScreen(
     onToggleCoverLayout: () -> Unit,
     downloadFolder: String = "",
     onSetDownloadFolder: (String) -> Unit = {},
-    accentColor: String = "Green",
+    accentColor: String = "Gray",
     onSetAccentColor: (String) -> Unit = {},
     disabledSources: Set<VideoSourceType> = emptySet(),
     regularSources: List<Pair<VideoSourceType, String>> = emptyList(),

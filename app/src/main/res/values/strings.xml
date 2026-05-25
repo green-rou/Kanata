@@ -5,6 +5,7 @@
     <!-- Common -->
     <string name="action_retry">Retry</string>
     <string name="action_back">Back</string>
+    <string name="action_save">Save</string>
     <string name="error_something_wrong">Something went wrong</string>
     <string name="error_service_title">Technical issues</string>
     <string name="error_service_subtitle">The service is temporarily unavailable.\nPlease try again later.</string>
@@ -65,6 +66,8 @@
     <string name="favorites_empty_title">No favorites yet</string>
     <string name="favorites_empty_subtitle">Anime you bookmark will appear here</string>
     <string name="favorites_explore">Explore anime</string>
+    <string name="favorites_saved_pages_title">Saved Pages</string>
+    <string name="saved_page_delete">Delete saved page</string>
 
     <!-- Downloads screen -->
     <string name="downloads_tab_downloaded">Downloaded (%d)</string>
@@ -103,6 +106,9 @@
     <string name="webplayer_adblock_warning">Some sites may block playback when ad blocker is enabled.</string>
     <string name="webplayer_adblock_warning_hint">You can re-enable it at any time in app settings.</string>
     <string name="webplayer_adblock_warning_disable">Disable ad blocker</string>
+    <string name="webplayer_save_page">Save page</string>
+    <string name="webplayer_save_page_title">Save Page</string>
+    <string name="webplayer_save_page_hint">Page name</string>
 
     <!-- Player -->
     <string name="player_cd_exit_fullscreen">Exit fullscreen</string>

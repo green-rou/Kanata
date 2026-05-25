@@ -202,7 +202,11 @@ fun PlayerScreen(
                 .fillMaxSize()
                 .background(Color.Black)
         ) {
-            AndroidView(factory = playerFactory, modifier = Modifier.fillMaxSize())
+            AndroidView(
+                factory = playerFactory,
+                update = { view -> view.useController = !state.isChangingEpisode },
+                modifier = Modifier.fillMaxSize(),
+            )
 
             AnimatedVisibility(
                 visible = controlsVisible,
@@ -246,15 +250,16 @@ fun PlayerScreen(
                             )
                         }
                     }
-
-                    EpisodeSideButtons(
-                        state = state,
-                        controlsVisible = true,
-                        onPrevious = { viewModel.handleEvent(PlayerEvent.PreviousEpisode) },
-                        onNext = { viewModel.handleEvent(PlayerEvent.NextEpisode) },
-                    )
                 }
             }
+
+            EpisodeSideButtons(
+                state = state,
+                controlsVisible = controlsVisible,
+                isChangingEpisode = state.isChangingEpisode,
+                onPrevious = { viewModel.handleEvent(PlayerEvent.PreviousEpisode) },
+                onNext = { viewModel.handleEvent(PlayerEvent.NextEpisode) },
+            )
 
             PlayerStatusOverlay(isLoading = state.isLoading, error = null)
         }
@@ -319,10 +324,15 @@ fun PlayerScreen(
                             .aspectRatio(16f / 9f)
                             .background(Color.Black),
                     ) {
-                        AndroidView(factory = playerFactory, modifier = Modifier.fillMaxSize())
+                        AndroidView(
+                            factory = playerFactory,
+                            update = { view -> view.useController = !state.isChangingEpisode },
+                            modifier = Modifier.fillMaxSize(),
+                        )
                         EpisodeSideButtons(
                             state = state,
                             controlsVisible = controlsVisible,
+                            isChangingEpisode = state.isChangingEpisode,
                             onPrevious = { viewModel.handleEvent(PlayerEvent.PreviousEpisode) },
                             onNext = { viewModel.handleEvent(PlayerEvent.NextEpisode) },
                         )

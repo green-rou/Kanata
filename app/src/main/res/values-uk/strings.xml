@@ -5,6 +5,7 @@
     <!-- Common -->
     <string name="action_retry">Повторити</string>
     <string name="action_back">Назад</string>
+    <string name="action_save">Зберегти</string>
     <string name="error_service_title">Технічні неполадки</string>
     <string name="error_service_subtitle">Сервіс тимчасово недоступний.\nСпробуйте пізніше.</string>
     <string name="error_offline_title">Немає інтернет-з\'єднання</string>
@@ -67,6 +68,8 @@
     <string name="favorites_empty_title">Немає вподобань</string>
     <string name="favorites_empty_subtitle">Аніме, які ви додасте, з\'являться тут</string>
     <string name="favorites_explore">Переглянути аніме</string>
+    <string name="favorites_saved_pages_title">Збережені сторінки</string>
+    <string name="saved_page_delete">Видалити збережену сторінку</string>
 
     <!-- Downloads screen -->
     <string name="downloads_tab_downloaded">Завантажено (%d)</string>
@@ -105,6 +108,9 @@
     <string name="webplayer_adblock_warning">Деякі сайти можуть блокувати відтворення при увімкненому Adblock.</string>
     <string name="webplayer_adblock_warning_hint">Ви можете ввімкнути його будь-коли в налаштуваннях додатку.</string>
     <string name="webplayer_adblock_warning_disable">Вимкнути Adblock</string>
+    <string name="webplayer_save_page">Зберегти сторінку</string>
+    <string name="webplayer_save_page_title">Зберегти сторінку</string>
+    <string name="webplayer_save_page_hint">Назва сторінки</string>
 
     <!-- Player -->
     <string name="player_cd_exit_fullscreen">Вийти з повного екрану</string>

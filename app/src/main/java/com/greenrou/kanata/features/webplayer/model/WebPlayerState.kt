@@ -9,4 +9,5 @@ data class WebPlayerState(
     val hasNavigated: Boolean = false,
     val adBlockerEnabled: Boolean = true,
     val webBackNavTopBar: Boolean = false,
+    val showSaveDialog: Boolean = false,
 )

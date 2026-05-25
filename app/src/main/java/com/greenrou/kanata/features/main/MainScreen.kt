@@ -100,6 +100,7 @@ fun MainScreen(
     onOpenEpisodeList: (animePageUrl: String, sourceName: String, animeTitle: String) -> Unit = { _, _, _ -> },
     onNavigateToAnimeDetails: (animeId: Int) -> Unit = {},
     onOpenWebPlayer: () -> Unit = {},
+    onNavigateToWebPlayer: (url: String) -> Unit = {},
     viewModel: MainViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -454,6 +455,7 @@ fun MainScreen(
 
                     BottomNavItem.Favorites -> FavoritesScreen(
                         onNavigateToDetails = onNavigateToDetails,
+                        onNavigateToWebPlayer = onNavigateToWebPlayer,
                         onExploreClick = { onTabSelected(BottomNavItem.AnimeList.name) },
                         contentPadding = contentPadding,
                         modifier = Modifier.fillMaxSize(),

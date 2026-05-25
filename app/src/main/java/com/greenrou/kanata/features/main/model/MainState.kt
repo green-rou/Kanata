@@ -21,7 +21,7 @@ data class MainState(
     val selectedFormats: Set<AnimeFormat> = emptySet(),
     val isFilterSheetVisible: Boolean = false,
     val downloadFolder: String = "",
-    val accentColor: String = "Green",
+    val accentColor: String = "Gray",
     val isOffline: Boolean = false,
     val disabledSources: Set<VideoSourceType> = emptySet(),
     val adBlockerEnabled: Boolean = true,

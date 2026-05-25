@@ -35,14 +35,20 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.BookmarkAdd
 import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
@@ -54,6 +60,8 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -116,6 +124,7 @@ private val JS_INJECTION = """
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WebPlayerScreen(
+    initialUrl: String = "",
     onNavigateBack: () -> Unit,
     onNavigateToPlayer: (streamUrl: String, referer: String) -> Unit,
     viewModel: WebPlayerViewModel = koinViewModel(),
@@ -125,6 +134,9 @@ fun WebPlayerScreen(
     val keyboard = LocalSoftwareKeyboardController.current
 
     LaunchedEffect(Unit) {
+        if (initialUrl.isNotBlank()) {
+            viewModel.handleEvent(WebPlayerEvent.UrlSubmitted(initialUrl))
+        }
         viewModel.events.collect { event ->
             when (event) {
                 is WebPlayerEvent.NavigateToPlayer -> {
@@ -313,6 +325,16 @@ fun WebPlayerScreen(
                         )
                     },
                     actions = {
+                        if (state.hasNavigated) {
+                            IconButton(onClick = {
+                                viewModel.handleEvent(WebPlayerEvent.ShowSaveDialog)
+                            }) {
+                                Icon(
+                                    Icons.Rounded.BookmarkAdd,
+                                    contentDescription = stringResource(R.string.webplayer_save_page),
+                                )
+                            }
+                        }
                         IconButton(onClick = { webView.reload() }) {
                             Icon(
                                 Icons.Rounded.Refresh,
@@ -399,7 +421,43 @@ fun WebPlayerScreen(
             }
         }
     }
+
+    if (state.showSaveDialog) {
+        var nameText by rememberSaveable { mutableStateOf(state.addressBarText.toSuggestedName()) }
+        AlertDialog(
+            onDismissRequest = { viewModel.handleEvent(WebPlayerEvent.DismissSaveDialog) },
+            title = { Text(stringResource(R.string.webplayer_save_page_title)) },
+            text = {
+                OutlinedTextField(
+                    value = nameText,
+                    onValueChange = { nameText = it },
+                    label = { Text(stringResource(R.string.webplayer_save_page_hint)) },
+                    singleLine = true,
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val name = nameText.trim().ifBlank { state.addressBarText.toSuggestedName() }
+                        viewModel.handleEvent(WebPlayerEvent.SavePage(name, state.addressBarText))
+                    },
+                    enabled = nameText.isNotBlank(),
+                ) {
+                    Text(stringResource(R.string.action_save))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.handleEvent(WebPlayerEvent.DismissSaveDialog) }) {
+                    Text(stringResource(android.R.string.cancel))
+                }
+            },
+        )
+    }
 }
+
+private fun String.toSuggestedName(): String = runCatching {
+    java.net.URI(this).host?.removePrefix("www.") ?: this
+}.getOrDefault(this)
 
 private class StreamJsBridge(private val onStream: (url: String, referer: String) -> Unit) {
     @JavascriptInterface

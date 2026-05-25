@@ -7,8 +7,8 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
-    entities = [StorageEntity::class, FavoriteEntity::class, DownloadEntity::class],
-    version = 5,
+    entities = [StorageEntity::class, FavoriteEntity::class, DownloadEntity::class, SavedPageEntity::class],
+    version = 6,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -17,8 +17,24 @@ abstract class StorageDatabase : RoomDatabase() {
     abstract fun storageDao(): StorageDao
     abstract fun favoritesDao(): FavoritesDao
     abstract fun downloadDao(): DownloadDao
+    abstract fun savedPagesDao(): SavedPagesDao
 
     companion object {
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS saved_pages (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        name TEXT NOT NULL,
+                        url TEXT NOT NULL,
+                        savedAt INTEGER NOT NULL
+                    )
+                    """.trimIndent()
+                )
+            }
+        }
+
         val MIGRATION_4_5 = object : Migration(4, 5) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE downloads ADD COLUMN animeId INTEGER NOT NULL DEFAULT 0")

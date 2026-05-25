@@ -1,13 +1,14 @@
 package com.greenrou.kanata.core.di
 
-import com.greenrou.kanata.domain.usecase.GetAnimegongoTranslationsUseCase
 import com.greenrou.kanata.domain.usecase.AddFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.CancelDownloadUseCase
 import com.greenrou.kanata.domain.usecase.DeleteCompletedDownloadUseCase
+import com.greenrou.kanata.domain.usecase.DeleteSavedPageUseCase
 import com.greenrou.kanata.domain.usecase.EnqueueDownloadUseCase
 import com.greenrou.kanata.domain.usecase.GetAnimeByIdUseCase
 import com.greenrou.kanata.domain.usecase.GetAnimeByMoodUseCase
 import com.greenrou.kanata.domain.usecase.GetAnimeListUseCase
+import com.greenrou.kanata.domain.usecase.GetAnimegongoTranslationsUseCase
 import com.greenrou.kanata.domain.usecase.GetCompletedDownloadsUseCase
 import com.greenrou.kanata.domain.usecase.GetDownloadFolderUseCase
 import com.greenrou.kanata.domain.usecase.GetDownloadQueueUseCase
@@ -16,11 +17,13 @@ import com.greenrou.kanata.domain.usecase.GetEpisodeListUseCase
 import com.greenrou.kanata.domain.usecase.GetFavoritesUseCase
 import com.greenrou.kanata.domain.usecase.GetRandomAnimeUseCase
 import com.greenrou.kanata.domain.usecase.GetRandomImageUseCase
+import com.greenrou.kanata.domain.usecase.GetSavedPagesUseCase
 import com.greenrou.kanata.domain.usecase.GetVideoStreamUseCase
 import com.greenrou.kanata.domain.usecase.IsFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.RemoveFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.ReorderDownloadQueueUseCase
 import com.greenrou.kanata.domain.usecase.RetryDownloadUseCase
+import com.greenrou.kanata.domain.usecase.SavePageUseCase
 import com.greenrou.kanata.domain.usecase.SearchExternalAnimeUseCase
 import com.greenrou.kanata.domain.usecase.SetDownloadFolderUseCase
 import com.greenrou.kanata.domain.usecase.StartEpisodeDownloadUseCase
@@ -51,4 +54,7 @@ val useCaseModule = module {
     factory { SetDownloadFolderUseCase(get()) }
     factory { StartEpisodeDownloadUseCase(get(), get()) }
     factory { RetryDownloadUseCase(get(), get()) }
+    factory { GetSavedPagesUseCase(get()) }
+    factory { SavePageUseCase(get()) }
+    factory { DeleteSavedPageUseCase(get()) }
 }
