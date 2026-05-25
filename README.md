@@ -13,6 +13,7 @@ An Android app for browsing anime information and streaming or downloading episo
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 [![Contributing](https://img.shields.io/badge/PRs-welcome-brightgreen)](CONTRIBUTING.md)
 [![Screenshots](https://img.shields.io/badge/Screenshots-view-lightgrey)](screenshots/SCREENSHOTS.md)
+[![Website](https://img.shields.io/badge/Website-green--rou.github.io%2FKanata-blueviolet)](https://green-rou.github.io/Kanata/)
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/C0C31ZLH6K)
 
 ---
@@ -28,11 +29,14 @@ An Android app for browsing anime information and streaming or downloading episo
 - **Available streams** — clickable source chips (YummyAnime / Mikai / AniStar / AnimeGO / KissKH / YouTube / Archive.org) appear when found
 - **Episode list** — browse all episodes from the selected source; download any episode from the list
 - **Video player** — built-in HLS player via Media3 / ExoPlayer, auto-locks to landscape
+- **Web Player** — opens embedded player pages in a built-in browser; detects stream URLs automatically and offers to play them in ExoPlayer
+- **Ad Blocker** — built-in WebView ad blocker for the Web Player; blocks ads and trackers on embedded player pages
+- **Saved Pages** — bookmark Web Player pages for quick access without re-searching
 - **Episode downloading** — background download (HLS + direct video) via WorkManager with progress notifications
 - **Offline playback** — play downloaded episodes without an internet connection
 - **Download Manager** — dedicated screen with two tabs: active queue (drag-to-reorder, cancel) and completed downloads (open / delete)
 - **Discover** — mood-based anime recommendations, random anime picker, and anime wallpaper browser in one section
-- **Settings** — theme toggle (light/dark), accent color, language, adult content toggle, active sources selector, download folder picker
+- **Settings** — theme (light/dark/system), extended accent color palette, language, adult content toggle, active sources selector, download folder picker
 
 ---
 
@@ -66,7 +70,8 @@ app/
 │   ├── mood/           # Mood-based recommendation screen
 │   ├── player/         # ExoPlayer screen
 │   ├── random/         # Random anime screen
-│   └── settings/       # Settings screen
+│   ├── settings/       # Settings screen
+│   └── webplayer/      # Web Player screen (WebView + stream detection)
 └── navigation/         # Navigation3 back-stack + routes
 ```
 
@@ -142,7 +147,6 @@ Each feature has its own `State` / `Event` model pair. ViewModels expose `StateF
 Active development. All core features are functional.
 
 Planned:
-- In-app catalogue search by title (search bar on main screen)
 - More streaming sources
 
 ---

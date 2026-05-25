@@ -2,8 +2,9 @@ package com.greenrou.kanata.features.details
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.greenrou.kanata.domain.model.Anime
+import com.greenrou.kanata.core.analytics.AnalyticsManager
 import com.greenrou.kanata.core.network.NetworkMonitor
+import com.greenrou.kanata.domain.model.Anime
 import com.greenrou.kanata.domain.repository.SettingsManager
 import com.greenrou.kanata.domain.usecase.AddFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.GetAnimeByIdUseCase
@@ -12,7 +13,6 @@ import com.greenrou.kanata.domain.usecase.GetVideoStreamUseCase
 import com.greenrou.kanata.domain.usecase.IsFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.RemoveFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.SearchExternalAnimeUseCase
-import com.greenrou.kanata.core.analytics.reportToCrashlytics
 import com.greenrou.kanata.features.details.model.AnimeDetailsEvent
 import com.greenrou.kanata.features.details.model.AnimeDetailsState
 import kotlinx.coroutines.channels.Channel
@@ -35,6 +35,7 @@ class AnimeDetailsViewModel(
     private val settingsManager: SettingsManager,
     private val getCompletedDownloads: GetCompletedDownloadsUseCase,
     private val networkMonitor: NetworkMonitor,
+    private val analytics: AnalyticsManager,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AnimeDetailsState())
@@ -46,6 +47,7 @@ class AnimeDetailsViewModel(
     val events = _events.receiveAsFlow()
 
     init {
+        analytics.setScreen("anime_details")
         settingsManager.coverFillsTopBar
             .onEach { enabled -> _state.update { it.copy(coverFillsTopBar = enabled) } }
             .launchIn(viewModelScope)
@@ -70,8 +72,16 @@ class AnimeDetailsViewModel(
                 val animeTitle = _state.value.anime?.title.orEmpty()
                 val matching = getCompletedDownloads().first().filter { it.animeTitle == animeTitle }
                 if (matching.isNotEmpty()) {
-                    _events.send(AnimeDetailsEvent.NavigateToOfflinePlayer(matching))
+                    _state.update { it.copy(offlineEpisodesForPicker = matching) }
                 }
+            }
+            AnimeDetailsEvent.DismissOfflinePicker -> {
+                _state.update { it.copy(offlineEpisodesForPicker = emptyList()) }
+            }
+            is AnimeDetailsEvent.SelectOfflineEpisode -> viewModelScope.launch {
+                val items = _state.value.offlineEpisodesForPicker
+                _state.update { it.copy(offlineEpisodesForPicker = emptyList()) }
+                _events.send(AnimeDetailsEvent.NavigateToOfflinePlayer(items, event.index))
             }
             else -> Unit
         }
@@ -105,7 +115,7 @@ class AnimeDetailsViewModel(
                 }
                 .onFailure { e ->
 
-                    e.reportToCrashlytics("details_load_anime")
+                    analytics.recordError(e, "details_load_anime")
                     loadedAnimeId = -1
                     val isOffline = !networkMonitor.isConnectedNow()
                     _state.update { it.copy(isLoading = false, error = e.message, isOffline = isOffline) }

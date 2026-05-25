@@ -5,6 +5,7 @@
     <!-- Common -->
     <string name="action_retry">Retry</string>
     <string name="action_back">Back</string>
+    <string name="action_save">Save</string>
     <string name="error_something_wrong">Something went wrong</string>
     <string name="error_service_title">Technical issues</string>
     <string name="error_service_subtitle">The service is temporarily unavailable.\nPlease try again later.</string>
@@ -35,6 +36,7 @@
     <string name="detail_error">Error: %s</string>
     <string name="detail_episodes_count">%d episodes</string>
     <string name="detail_watch_offline">Watch offline</string>
+    <string name="detail_offline_picker_title">Downloaded episodes</string>
     <string name="detail_available_streams">Available streams</string>
     <string name="detail_no_streams">No streams found</string>
     <string name="detail_tap_source">Tap a source to browse episodes</string>
@@ -64,6 +66,8 @@
     <string name="favorites_empty_title">No favorites yet</string>
     <string name="favorites_empty_subtitle">Anime you bookmark will appear here</string>
     <string name="favorites_explore">Explore anime</string>
+    <string name="favorites_saved_pages_title">Saved Pages</string>
+    <string name="saved_page_delete">Delete saved page</string>
 
     <!-- Downloads screen -->
     <string name="downloads_tab_downloaded">Downloaded (%d)</string>
@@ -87,6 +91,24 @@
     <!-- Notifications -->
     <string name="notif_channel_downloads">Downloads</string>
     <string name="notif_downloading">Downloading: %s</string>
+
+    <!-- Web player -->
+    <string name="webplayer_hint">Enter URL…</string>
+    <string name="webplayer_stream_found">Stream detected</string>
+    <string name="webplayer_open_in_player">Open in player</string>
+    <string name="webplayer_cd_reload">Reload</string>
+    <string name="webplayer_cd_open_webplayer">Open web player</string>
+    <string name="webplayer_guide_title">Web Player</string>
+    <string name="webplayer_guide_subtitle">Stream video from any website directly to the player</string>
+    <string name="webplayer_guide_step1">Enter the site URL in the address bar above</string>
+    <string name="webplayer_guide_step2">Navigate to the episode and start the video</string>
+    <string name="webplayer_guide_step3">When a stream is detected, tap "Open in Player"</string>
+    <string name="webplayer_adblock_warning">Some sites may block playback when ad blocker is enabled.</string>
+    <string name="webplayer_adblock_warning_hint">You can re-enable it at any time in app settings.</string>
+    <string name="webplayer_adblock_warning_disable">Disable ad blocker</string>
+    <string name="webplayer_save_page">Save page</string>
+    <string name="webplayer_save_page_title">Save Page</string>
+    <string name="webplayer_save_page_hint">Page name</string>
 
     <!-- Player -->
     <string name="player_cd_exit_fullscreen">Exit fullscreen</string>
@@ -154,6 +176,24 @@
     <string name="settings_section_downloads">Downloads</string>
     <string name="settings_download_folder_title">Download folder</string>
     <string name="settings_download_folder_default">Default (app external storage)</string>
+    <string name="settings_section_webplayer">Web Player</string>
+    <string name="settings_adblock_on_title">Ad Blocker: On</string>
+    <string name="settings_adblock_off_title">Ad Blocker: Off</string>
+    <string name="settings_adblock_on_subtitle">Ads and trackers are blocked</string>
+    <string name="settings_adblock_off_subtitle">Ads are not blocked in the web player</string>
+    <string name="settings_web_back_fab_title">Back Navigation: Button</string>
+    <string name="settings_web_back_fab_subtitle">A back button appears over the web page</string>
+    <string name="settings_web_back_topbar_title">Back Navigation: Top Bar</string>
+    <string name="settings_web_back_topbar_subtitle">Top bar back button navigates within the web page</string>
+    <string name="settings_section_privacy">Privacy</string>
+    <string name="settings_analytics_on_title">Analytics &amp; Crash Reports: On</string>
+    <string name="settings_analytics_off_title">Analytics &amp; Crash Reports: Off</string>
+    <string name="settings_analytics_on_subtitle">Helps improve the app by collecting usage data</string>
+    <string name="settings_analytics_off_subtitle">No usage data is collected</string>
+    <string name="analytics_consent_title">Help improve Kanata</string>
+    <string name="analytics_consent_body">We collect anonymous crash reports and usage analytics to improve the app. No personal data is collected. You can change this at any time in app settings.</string>
+    <string name="analytics_consent_allow">Allow</string>
+    <string name="analytics_consent_deny">Deny</string>
     <string name="settings_section_about">About</string>
     <string name="settings_version">Kanata v%s</string>
     <string name="settings_made_by">Made by GreenRou</string>

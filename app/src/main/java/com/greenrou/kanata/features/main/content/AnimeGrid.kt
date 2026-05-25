@@ -8,10 +8,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import com.greenrou.kanata.core.composable.KanataLoader
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -20,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.greenrou.kanata.core.composable.KanataLoader
 import com.greenrou.kanata.domain.model.Anime
 
 @Composable
@@ -33,6 +34,7 @@ internal fun AnimeGrid(
     onLoadMore: () -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
+    headerContent: (LazyGridScope.() -> Unit)? = null,
 ) {
 
     val nearEnd by remember {
@@ -60,6 +62,7 @@ internal fun AnimeGrid(
         verticalArrangement = Arrangement.spacedBy(10.dp),
         modifier = modifier.fillMaxSize(),
     ) {
+        headerContent?.invoke(this)
         items(animeList, key = { it.id }) { anime ->
             AnimeCard(
                 isFavorite = favoriteIds.contains(anime.id),

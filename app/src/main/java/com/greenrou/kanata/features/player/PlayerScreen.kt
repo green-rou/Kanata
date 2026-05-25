@@ -46,7 +46,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.greenrou.kanata.R
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -56,11 +55,13 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.ui.PlayerView
+import com.greenrou.kanata.R
 import com.greenrou.kanata.features.player.content.EpisodeSideButtons
 import com.greenrou.kanata.features.player.content.NextEpisodeCard
 import com.greenrou.kanata.features.player.content.PlayerErrorContent
@@ -79,10 +80,12 @@ fun PlayerScreen(
     startIndex: Int,
     animeTitle: String = "",
     sourceName: String = "",
+    headerKeys: List<String> = emptyList(),
+    headerValues: List<String> = emptyList(),
     onNavigateBack: () -> Unit,
     viewModel: PlayerViewModel = koinViewModel(
         key = "${episodeUrls.firstOrNull() ?: "player"}_$startIndex",
-        parameters = { parametersOf(episodeUrls, episodeTitles, startIndex, animeTitle, sourceName) },
+        parameters = { parametersOf(episodeUrls, episodeTitles, startIndex, animeTitle, sourceName, headerKeys, headerValues) },
     ),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -161,9 +164,10 @@ fun PlayerScreen(
         state.streamUrl?.let { url ->
             exoPlayer.stop()
             exoPlayer.clearMediaItems()
-            val dataSourceFactory = DefaultHttpDataSource.Factory().apply {
+            val httpFactory = DefaultHttpDataSource.Factory().apply {
                 if (state.streamHeaders.isNotEmpty()) setDefaultRequestProperties(state.streamHeaders)
             }
+            val dataSourceFactory = DefaultDataSource.Factory(context, httpFactory)
             val mediaItem = MediaItem.fromUri(url)
             val mediaSource = if (".m3u8" in url) {
                 HlsMediaSource.Factory(dataSourceFactory).createMediaSource(mediaItem)
@@ -198,7 +202,11 @@ fun PlayerScreen(
                 .fillMaxSize()
                 .background(Color.Black)
         ) {
-            AndroidView(factory = playerFactory, modifier = Modifier.fillMaxSize())
+            AndroidView(
+                factory = playerFactory,
+                update = { view -> view.useController = !state.isChangingEpisode },
+                modifier = Modifier.fillMaxSize(),
+            )
 
             AnimatedVisibility(
                 visible = controlsVisible,
@@ -242,21 +250,22 @@ fun PlayerScreen(
                             )
                         }
                     }
-
-                    EpisodeSideButtons(
-                        state = state,
-                        controlsVisible = true,
-                        onPrevious = { viewModel.handleEvent(PlayerEvent.PreviousEpisode) },
-                        onNext = { viewModel.handleEvent(PlayerEvent.NextEpisode) },
-                    )
                 }
             }
+
+            EpisodeSideButtons(
+                state = state,
+                controlsVisible = controlsVisible,
+                isChangingEpisode = state.isChangingEpisode,
+                onPrevious = { viewModel.handleEvent(PlayerEvent.PreviousEpisode) },
+                onNext = { viewModel.handleEvent(PlayerEvent.NextEpisode) },
+            )
 
             PlayerStatusOverlay(isLoading = state.isLoading, error = null)
         }
     } else {
         val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
-        val topBarIconTint = if (isLandscape) Color.White else Color.Unspecified
+        val topBarIconTint = if (isLandscape) Color.White else MaterialTheme.colorScheme.onSurface
         Scaffold(
             containerColor = if (isLandscape) Color.Black else MaterialTheme.colorScheme.surface,
             contentWindowInsets = WindowInsets(0, 0, 0, 0),
@@ -315,10 +324,15 @@ fun PlayerScreen(
                             .aspectRatio(16f / 9f)
                             .background(Color.Black),
                     ) {
-                        AndroidView(factory = playerFactory, modifier = Modifier.fillMaxSize())
+                        AndroidView(
+                            factory = playerFactory,
+                            update = { view -> view.useController = !state.isChangingEpisode },
+                            modifier = Modifier.fillMaxSize(),
+                        )
                         EpisodeSideButtons(
                             state = state,
                             controlsVisible = controlsVisible,
+                            isChangingEpisode = state.isChangingEpisode,
                             onPrevious = { viewModel.handleEvent(PlayerEvent.PreviousEpisode) },
                             onNext = { viewModel.handleEvent(PlayerEvent.NextEpisode) },
                         )
@@ -329,6 +343,7 @@ fun PlayerScreen(
                         currentIndex = state.currentIndex,
                         episodeCount = state.episodeCount,
                         downloadStatus = state.currentEpisodeDownloadStatus,
+                        showDownloadButton = episodeUrls.getOrNull(state.currentIndex)?.startsWith("file://") != true,
                         onDownloadClick = {
                             viewModel.handleEvent(
                                 PlayerEvent.DownloadCurrentEpisode(

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Kanata — Android app for browsing anime, streaming and downloading episodes from multiple sources." />
+  <meta name="description" content="Kanata — Android app for browsing anime, streaming and downloading episodes from multiple sources. Built-in web player with ad blocker and offline playback." />
   <meta name="keywords" content="anime, android app, anime streaming, anime download, ukrainian dub, kotlin, open source, free anime" />
   <link rel="canonical" href="https://green-rou.github.io/Kanata/" />
 
@@ -11,7 +11,7 @@
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://green-rou.github.io/Kanata/" />
   <meta property="og:title" content="Kanata — Anime for Android" />
-  <meta property="og:description" content="Browse anime, stream or download episodes from multiple sources — all in one beautiful Android app. Free &amp; open source." />
+  <meta property="og:description" content="Browse anime, stream or download episodes from multiple sources — built-in web player, ad blocker, offline playback. Free &amp; open source." />
   <meta property="og:image" content="https://raw.githubusercontent.com/green-rou/Kanata/master/AppIcon.png" />
   <meta property="og:image:width" content="1024" />
   <meta property="og:image:height" content="1024" />
@@ -21,7 +21,7 @@
   <!-- Twitter / X Card -->
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="Kanata — Anime for Android" />
-  <meta name="twitter:description" content="Browse anime, stream or download episodes from multiple sources — all in one beautiful Android app. Free &amp; open source." />
+  <meta name="twitter:description" content="Browse anime, stream or download episodes from multiple sources — built-in web player, ad blocker, offline playback. Free &amp; open source." />
   <meta name="twitter:image" content="https://raw.githubusercontent.com/green-rou/Kanata/master/AppIcon.png" />
 
   <title>Kanata — Anime for Android</title>
@@ -438,11 +438,15 @@
     "screenshot": "https://raw.githubusercontent.com/green-rou/Kanata/master/screenshots/01_home.png",
     "featureList": [
       "Anime catalogue via AniList GraphQL",
-      "Multi-source streaming",
-      "HLS episode downloads",
+      "Multi-source streaming (8 active sources)",
+      "HLS and direct video episode downloads",
       "Offline playback",
+      "Built-in web player with stream detection",
+      "Ad blocker for embedded players",
+      "Saved pages for web player",
       "Favourites list",
-      "Light and dark theme"
+      "Mood-based discovery and random picker",
+      "Light, dark and system theme with custom accent colors"
     ]
   }
   </script>
@@ -473,7 +477,7 @@
        src="https://raw.githubusercontent.com/green-rou/Kanata/master/AppIcon.png"
        alt="Kanata" />
   <h1>Kanata</h1>
-  <p>Browse anime, stream or download episodes from multiple sources — all in one beautiful Android app.</p>
+  <p>Browse anime, stream or download episodes from multiple sources — with a built-in web player, ad blocker, and offline playback, all in one beautiful Android app.</p>
   <div class="hero-cta">
     <a class="btn btn-primary" href="https://github.com/green-rou/Kanata/releases" target="_blank" rel="noopener">
       ↓ Download APK
@@ -501,7 +505,7 @@
   <div class="features-header">
     <div class="section-label">Features</div>
     <h2 class="section-title">One app, many sources</h2>
-    <p class="section-sub">Search once — Kanata checks all active sources and shows what's available to stream or download.</p>
+    <p class="section-sub">Search once — Kanata checks all active sources and shows what's available to stream, download, or open in the built-in ad-blocking web player.</p>
   </div>
   <div class="features-grid">
     <div class="feat-card">
@@ -542,7 +546,22 @@
     <div class="feat-card">
       <span class="feat-num">08</span>
       <h3>Settings</h3>
-      <p>Light/dark theme, accent color, language, adult content toggle, per-source on/off, download folder.</p>
+      <p>Light/dark/system theme, extended accent color palette, language, adult content toggle, per-source on/off, download folder picker.</p>
+    </div>
+    <div class="feat-card">
+      <span class="feat-num">09</span>
+      <h3>Web Player</h3>
+      <p>Opens embedded player pages in a built-in browser. Detects stream URLs automatically and offers to play them in ExoPlayer — no copy-pasting needed.</p>
+    </div>
+    <div class="feat-card">
+      <span class="feat-num">10</span>
+      <h3>Ad Blocker</h3>
+      <p>Built-in WebView ad blocker for the Web Player. Blocks ads and trackers on embedded player pages so streams load cleanly.</p>
+    </div>
+    <div class="feat-card">
+      <span class="feat-num">11</span>
+      <h3>Saved Pages</h3>
+      <p>Bookmark Web Player pages for quick access. Skip re-searching and go straight to your preferred source with one tap.</p>
     </div>
   </div>
 </section>

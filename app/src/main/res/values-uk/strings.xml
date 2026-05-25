@@ -5,6 +5,7 @@
     <!-- Common -->
     <string name="action_retry">Повторити</string>
     <string name="action_back">Назад</string>
+    <string name="action_save">Зберегти</string>
     <string name="error_service_title">Технічні неполадки</string>
     <string name="error_service_subtitle">Сервіс тимчасово недоступний.\nСпробуйте пізніше.</string>
     <string name="error_offline_title">Немає інтернет-з\'єднання</string>
@@ -35,6 +36,7 @@
     <string name="detail_error">Помилка: %s</string>
     <string name="detail_episodes_count">%d епізодів</string>
     <string name="detail_watch_offline">Дивитись офлайн</string>
+    <string name="detail_offline_picker_title">Завантажені епізоди</string>
     <string name="detail_available_streams">Доступні джерела</string>
     <string name="detail_no_streams">Джерел не знайдено</string>
     <string name="detail_tap_source">Натисніть на джерело, щоб переглянути епізоди</string>
@@ -66,6 +68,8 @@
     <string name="favorites_empty_title">Немає вподобань</string>
     <string name="favorites_empty_subtitle">Аніме, які ви додасте, з\'являться тут</string>
     <string name="favorites_explore">Переглянути аніме</string>
+    <string name="favorites_saved_pages_title">Збережені сторінки</string>
+    <string name="saved_page_delete">Видалити збережену сторінку</string>
 
     <!-- Downloads screen -->
     <string name="downloads_tab_downloaded">Завантажено (%d)</string>
@@ -89,6 +93,24 @@
     <!-- Notifications -->
     <string name="notif_channel_downloads">Завантаження</string>
     <string name="notif_downloading">Завантаження: %s</string>
+
+    <!-- Web player -->
+    <string name="webplayer_hint">Введіть URL…</string>
+    <string name="webplayer_stream_found">Знайдено стрім</string>
+    <string name="webplayer_open_in_player">Відкрити в плеєрі</string>
+    <string name="webplayer_cd_reload">Оновити</string>
+    <string name="webplayer_cd_open_webplayer">Відкрити веб-плеєр</string>
+    <string name="webplayer_guide_title">Веб-Плеєр</string>
+    <string name="webplayer_guide_subtitle">Транслюйте відео з будь-якого сайту прямо в плеєр</string>
+    <string name="webplayer_guide_step1">Введіть URL сайту в адресний рядок вище</string>
+    <string name="webplayer_guide_step2">Перейдіть до серії та запустіть відео</string>
+    <string name="webplayer_guide_step3">Коли знайдено стрім — натисніть «Відкрити в плеєрі»</string>
+    <string name="webplayer_adblock_warning">Деякі сайти можуть блокувати відтворення при увімкненому Adblock.</string>
+    <string name="webplayer_adblock_warning_hint">Ви можете ввімкнути його будь-коли в налаштуваннях додатку.</string>
+    <string name="webplayer_adblock_warning_disable">Вимкнути Adblock</string>
+    <string name="webplayer_save_page">Зберегти сторінку</string>
+    <string name="webplayer_save_page_title">Зберегти сторінку</string>
+    <string name="webplayer_save_page_hint">Назва сторінки</string>
 
     <!-- Player -->
     <string name="player_cd_exit_fullscreen">Вийти з повного екрану</string>
@@ -156,6 +178,24 @@
     <string name="settings_section_downloads">Завантаження</string>
     <string name="settings_download_folder_title">Папка завантажень</string>
     <string name="settings_download_folder_default">За замовчуванням (зовнішнє сховище)</string>
+    <string name="settings_section_webplayer">Веб-плеєр</string>
+    <string name="settings_adblock_on_title">Adblock: Увімкнено</string>
+    <string name="settings_adblock_off_title">Adblock: Вимкнено</string>
+    <string name="settings_adblock_on_subtitle">Реклама та трекери блокуються</string>
+    <string name="settings_adblock_off_subtitle">Реклама не блокується у веб-плеєрі</string>
+    <string name="settings_web_back_fab_title">Навігація назад: Кнопка</string>
+    <string name="settings_web_back_fab_subtitle">Над веб-сторінкою з\'являється кнопка «Назад»</string>
+    <string name="settings_web_back_topbar_title">Навігація назад: Топ-бар</string>
+    <string name="settings_web_back_topbar_subtitle">Кнопка «Назад» у топ-барі навігує в межах веб-сторінки</string>
+    <string name="settings_section_privacy">Конфіденційність</string>
+    <string name="settings_analytics_on_title">Аналітика та звіти: Увімкнено</string>
+    <string name="settings_analytics_off_title">Аналітика та звіти: Вимкнено</string>
+    <string name="settings_analytics_on_subtitle">Допомагає покращити додаток, збираючи дані про використання</string>
+    <string name="settings_analytics_off_subtitle">Дані про використання не збираються</string>
+    <string name="analytics_consent_title">Допоможіть покращити Kanata</string>
+    <string name="analytics_consent_body">Ми збираємо анонімні звіти про збої та аналітику використання, щоб покращити додаток. Жодні особисті дані не збираються. Ви можете змінити це будь-коли в налаштуваннях додатку.</string>
+    <string name="analytics_consent_allow">Дозволити</string>
+    <string name="analytics_consent_deny">Заборонити</string>
     <string name="settings_section_about">Про додаток</string>
     <string name="settings_version">Kanata v%s</string>
     <string name="settings_made_by">Зроблено GreenRou</string>

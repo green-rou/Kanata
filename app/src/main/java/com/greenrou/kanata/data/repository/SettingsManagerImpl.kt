@@ -21,6 +21,10 @@ class SettingsManagerImpl(private val context: Context) : SettingsManager {
         val DOWNLOAD_FOLDER = stringPreferencesKey("download_folder")
         val ACCENT_COLOR = stringPreferencesKey("accent_color")
         val DISABLED_SOURCES = stringPreferencesKey("disabled_sources")
+        val AD_BLOCKER_ENABLED = booleanPreferencesKey("ad_blocker_enabled")
+        val WEB_BACK_NAV_TOPBAR = booleanPreferencesKey("web_back_nav_topbar")
+        val ANALYTICS_ENABLED = booleanPreferencesKey("analytics_enabled")
+        val ANALYTICS_CONSENT_SHOWN = booleanPreferencesKey("analytics_consent_shown")
         val SKIPPED_VERSION = stringPreferencesKey("skipped_version")
     }
 
@@ -46,7 +50,7 @@ class SettingsManagerImpl(private val context: Context) : SettingsManager {
 
     override val accentColor: Flow<String> = context.dataStore.data
         .map { preferences ->
-            preferences[PreferencesKeys.ACCENT_COLOR] ?: "Green"
+            preferences[PreferencesKeys.ACCENT_COLOR] ?: "Gray"
         }
 
     override val disabledSources: Flow<Set<VideoSourceType>> = context.dataStore.data
@@ -92,6 +96,46 @@ class SettingsManagerImpl(private val context: Context) : SettingsManager {
     override suspend fun setDisabledSources(sources: Set<VideoSourceType>) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.DISABLED_SOURCES] = sources.joinToString(",") { it.name }
+        }
+    }
+
+    override val adBlockerEnabled: Flow<Boolean> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.AD_BLOCKER_ENABLED] ?: true
+        }
+
+    override suspend fun setAdBlockerEnabled(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.AD_BLOCKER_ENABLED] = enabled
+        }
+    }
+
+    override val webBackNavTopBar: Flow<Boolean> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.WEB_BACK_NAV_TOPBAR] ?: false
+        }
+
+    override suspend fun setWebBackNavTopBar(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.WEB_BACK_NAV_TOPBAR] = enabled
+        }
+    }
+
+    override val analyticsEnabled: Flow<Boolean> = context.dataStore.data
+        .map { preferences -> preferences[PreferencesKeys.ANALYTICS_ENABLED] ?: true }
+
+    override suspend fun setAnalyticsEnabled(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.ANALYTICS_ENABLED] = enabled
+        }
+    }
+
+    override val analyticsConsentShown: Flow<Boolean> = context.dataStore.data
+        .map { preferences -> preferences[PreferencesKeys.ANALYTICS_CONSENT_SHOWN] ?: false }
+
+    override suspend fun setAnalyticsConsentShown(shown: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.ANALYTICS_CONSENT_SHOWN] = shown
         }
     }
 

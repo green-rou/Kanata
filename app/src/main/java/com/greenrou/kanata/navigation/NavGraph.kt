@@ -15,6 +15,7 @@ import com.greenrou.kanata.features.episodes.EpisodeListScreen
 import com.greenrou.kanata.features.main.BottomNavItem
 import com.greenrou.kanata.features.main.MainScreen
 import com.greenrou.kanata.features.player.PlayerScreen
+import com.greenrou.kanata.features.webplayer.WebPlayerScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,6 +43,8 @@ fun NavGraph(backStack: SnapshotStateList<Any>) {
             onNavigateToAnimeDetails = { animeId ->
                 backStack.add(AnimeDetailsRoute(animeId))
             },
+            onOpenWebPlayer = { backStack.add(WebPlayerRoute()) },
+            onNavigateToWebPlayer = { url -> backStack.add(WebPlayerRoute(url)) },
         )
         is AnimeDetailsRoute -> AnimeDetailsScreen(
             animeId = current.animeId,
@@ -49,12 +52,12 @@ fun NavGraph(backStack: SnapshotStateList<Any>) {
             onNavigateToEpisodeList = { source, animeTitle, episodeCount ->
                 backStack.add(EpisodeListRoute(source.animePageUrl, source.label, animeTitle, current.animeId, episodeCount))
             },
-            onNavigateToOfflinePlayer = { localFilePaths, titles ->
+            onNavigateToOfflinePlayer = { localFilePaths, titles, startIndex ->
                 backStack.add(
                     PlayerRoute(
                         episodeUrls = localFilePaths,
                         episodeTitles = titles,
-                        startIndex = 0,
+                        startIndex = startIndex,
                     )
                 )
             },
@@ -87,8 +90,25 @@ fun NavGraph(backStack: SnapshotStateList<Any>) {
                 startIndex = current.startIndex,
                 animeTitle = current.animeTitle,
                 sourceName = current.sourceName,
+                headerKeys = current.headerKeys,
+                headerValues = current.headerValues,
                 onNavigateBack = { backStack.removeAt(backStack.size - 1) },
             )
         }
+        is WebPlayerRoute -> WebPlayerScreen(
+            initialUrl = current.initialUrl,
+            onNavigateBack = { backStack.removeAt(backStack.size - 1) },
+            onNavigateToPlayer = { streamUrl, referer ->
+                backStack.add(
+                    PlayerRoute(
+                        episodeUrls = listOf(streamUrl),
+                        episodeTitles = listOf(""),
+                        startIndex = 0,
+                        headerKeys = if (referer.isNotEmpty()) listOf("Referer") else emptyList(),
+                        headerValues = if (referer.isNotEmpty()) listOf(referer) else emptyList(),
+                    )
+                )
+            },
+        )
     }
 }

@@ -1,8 +1,9 @@
 package com.greenrou.kanata.features.player
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
-import com.greenrou.kanata.core.analytics.reportToCrashlytics
 import androidx.lifecycle.viewModelScope
+import com.greenrou.kanata.core.analytics.AnalyticsManager
 import com.greenrou.kanata.domain.usecase.GetEpisodeDownloadStatusUseCase
 import com.greenrou.kanata.domain.usecase.GetVideoStreamUseCase
 import com.greenrou.kanata.domain.usecase.StartEpisodeDownloadUseCase
@@ -18,15 +19,20 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+private const val TAG = "PlayerVM"
+
 class PlayerViewModel(
     private val getVideoStream: GetVideoStreamUseCase,
     private val startEpisodeDownload: StartEpisodeDownloadUseCase,
     private val getEpisodeDownloadStatus: GetEpisodeDownloadStatusUseCase,
+    private val analytics: AnalyticsManager,
     private val episodeUrls: List<String>,
     private val episodeTitles: List<String>,
     startIndex: Int,
     private val animeTitle: String = "",
     private val sourceName: String = "",
+    private val initialHeaderKeys: List<String> = emptyList(),
+    private val initialHeaderValues: List<String> = emptyList(),
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
@@ -48,6 +54,7 @@ class PlayerViewModel(
     private var statusJob: Job? = null
 
     init {
+        analytics.setScreen("player")
         loadStream()
         observeDownloadStatus()
     }
@@ -61,6 +68,13 @@ class PlayerViewModel(
             PlayerEvent.NextEpisode -> nextEpisode()
             PlayerEvent.Retry -> loadStream()
             is PlayerEvent.PlaybackError -> {
+                val url = _state.value.streamUrl ?: "unknown"
+                Log.e(TAG, "PlaybackError: ${event.message}  streamUrl=$url")
+                analytics.recordError(
+                    RuntimeException("PlaybackError: ${event.message}"),
+                    "player_playback_error",
+                    mapOf("stream_url" to url, "anime" to animeTitle, "source" to sourceName),
+                )
                 _state.update {
                     it.copy(
                         isLoading = false,
@@ -107,14 +121,18 @@ class PlayerViewModel(
                 streamUrl = null,
                 streamHeaders = emptyMap(),
                 currentEpisodeDownloadStatus = null,
+                isChangingEpisode = true,
             )
         }
     }
 
     private fun loadStream() {
         val url = episodeUrls.getOrNull(currentIndex) ?: return
-        if (url.startsWith("file://")) {
-            _state.update { it.copy(isLoading = false, streamUrl = url) }
+        Log.i(TAG, "loadStream: episodeUrl=$url")
+        if (url.startsWith("file://") || isDirectStreamUrl(url)) {
+            val headers = initialHeaderKeys.zip(initialHeaderValues).toMap()
+            Log.i(TAG, "Direct stream, skipping extraction → streamUrl=$url  headers=$headers")
+            _state.update { it.copy(isLoading = false, streamUrl = url, streamHeaders = headers, isChangingEpisode = false) }
             return
         }
         loadJob?.cancel()
@@ -122,18 +140,23 @@ class PlayerViewModel(
             _state.update { it.copy(isLoading = true, error = null) }
             getVideoStream(url)
                 .onSuccess { stream ->
-                    _state.update { it.copy(isLoading = false, streamUrl = stream.url, streamHeaders = stream.headers) }
+                    Log.i(TAG, "Stream loaded → url=${stream.url}  headers=${stream.headers}")
+                    _state.update { it.copy(isLoading = false, streamUrl = stream.url, streamHeaders = stream.headers, isChangingEpisode = false) }
                 }
                 .onFailure { e ->
-                    e.reportToCrashlytics("player_load_stream")
-                    _state.update { it.copy(isLoading = false, error = e.message) }
+                    Log.e(TAG, "Stream load failed for episodeUrl=$url", e)
+                    analytics.recordError(e, "player_load_stream", mapOf("episode_url" to url, "anime" to animeTitle, "source" to sourceName))
+                    _state.update { it.copy(isLoading = false, error = e.message, isChangingEpisode = false) }
                 }
         }
     }
 
+    private fun isDirectStreamUrl(url: String) =
+        Regex("""\.(m3u8|mp4|mkv|webm|ts)(\?|${'$'})""", RegexOption.IGNORE_CASE).containsMatchIn(url)
+
     private fun observeDownloadStatus() {
         val url = episodeUrls.getOrNull(currentIndex) ?: return
-        if (url.startsWith("file://")) return
+        if (url.startsWith("file://") || isDirectStreamUrl(url)) return
         statusJob?.cancel()
         statusJob = getEpisodeDownloadStatus(url)
             .onEach { item -> _state.update { it.copy(currentEpisodeDownloadStatus = item?.status) } }

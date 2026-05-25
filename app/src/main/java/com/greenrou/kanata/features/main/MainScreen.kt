@@ -2,8 +2,11 @@ package com.greenrou.kanata.features.main
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
@@ -26,17 +29,17 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.FilterList
+import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
-import com.greenrou.kanata.core.composable.KanataLoader
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -53,6 +56,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -63,18 +67,20 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
-import com.greenrou.kanata.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.greenrou.kanata.features.favorites.FavoritesScreen
-import com.greenrou.kanata.features.main.content.AnimeGrid
+import com.greenrou.kanata.R
+import com.greenrou.kanata.core.composable.KanataLoader
+import com.greenrou.kanata.core.composable.KanataSnackbarHost
 import com.greenrou.kanata.core.composable.OfflineBanner
 import com.greenrou.kanata.core.composable.OfflineState
-import com.greenrou.kanata.features.main.content.ErrorState
-import com.greenrou.kanata.features.main.content.FilterBottomSheet
-import com.greenrou.kanata.features.main.model.MainEvent
 import com.greenrou.kanata.features.downloads.DownloadManagerScreen
 import com.greenrou.kanata.features.downloads.DownloadManagerViewModel
 import com.greenrou.kanata.features.downloads.model.DownloadManagerEvent
+import com.greenrou.kanata.features.favorites.FavoritesScreen
+import com.greenrou.kanata.features.main.content.AnimeGrid
+import com.greenrou.kanata.features.main.content.ErrorState
+import com.greenrou.kanata.features.main.content.FilterBottomSheet
+import com.greenrou.kanata.features.main.model.MainEvent
 import com.greenrou.kanata.features.random.RandomScreen
 import com.greenrou.kanata.features.settings.SettingsScreen
 import com.greenrou.kanata.features.update.UpdateViewModel
@@ -93,6 +99,8 @@ fun MainScreen(
     onNavigateToPlayer: (localFilePath: String, title: String) -> Unit = { _, _ -> },
     onOpenEpisodeList: (animePageUrl: String, sourceName: String, animeTitle: String) -> Unit = { _, _, _ -> },
     onNavigateToAnimeDetails: (animeId: Int) -> Unit = {},
+    onOpenWebPlayer: () -> Unit = {},
+    onNavigateToWebPlayer: (url: String) -> Unit = {},
     viewModel: MainViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -140,6 +148,30 @@ fun MainScreen(
         }
     }
 
+    val fabAllowedOnTab = selectedTab == BottomNavItem.AnimeList || selectedTab == BottomNavItem.Favorites
+
+    var fabScrollVisible by remember { mutableStateOf(true) }
+    LaunchedEffect(gridState, selectedTab) {
+        if (selectedTab != BottomNavItem.AnimeList) {
+            fabScrollVisible = true
+            return@LaunchedEffect
+        }
+        var lastIndex = 0
+        var lastOffset = 0
+        snapshotFlow { gridState.firstVisibleItemIndex to gridState.firstVisibleItemScrollOffset }
+            .collect { (index, offset) ->
+                when {
+                    index == 0 -> fabScrollVisible = true
+                    index != lastIndex -> fabScrollVisible = index < lastIndex
+                    offset != lastOffset -> fabScrollVisible = offset < lastOffset
+                }
+                lastIndex = index
+                lastOffset = offset
+            }
+    }
+
+    val isFabVisible = fabAllowedOnTab && fabScrollVisible
+
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
@@ -152,6 +184,10 @@ fun MainScreen(
 
     val systemNavBarBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val floatingNavBottom = NavBarHeight + systemNavBarBottom
+    val snackbarBottomPadding by animateDpAsState(
+        targetValue = if (isFabVisible) floatingNavBottom + 72.dp else floatingNavBottom,
+        label = "snackbar_bottom",
+    )
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
@@ -305,9 +341,9 @@ fun MainScreen(
                 }
             },
             snackbarHost = {
-                SnackbarHost(
+                KanataSnackbarHost(
                     hostState = snackbarHostState,
-                    modifier = Modifier.padding(bottom = floatingNavBottom),
+                    modifier = Modifier.padding(bottom = snackbarBottomPadding),
                 )
             },
         ) { scaffoldPadding ->
@@ -419,6 +455,7 @@ fun MainScreen(
 
                     BottomNavItem.Favorites -> FavoritesScreen(
                         onNavigateToDetails = onNavigateToDetails,
+                        onNavigateToWebPlayer = onNavigateToWebPlayer,
                         onExploreClick = { onTabSelected(BottomNavItem.AnimeList.name) },
                         contentPadding = contentPadding,
                         modifier = Modifier.fillMaxSize(),
@@ -456,6 +493,12 @@ fun MainScreen(
                         regularSources = viewModel.regularSources,
                         adultSources = viewModel.adultSources,
                         onToggleSource = { viewModel.handleEvent(MainEvent.ToggleSource(it)) },
+                        adBlockerEnabled = state.adBlockerEnabled,
+                        onToggleAdBlocker = { viewModel.handleEvent(MainEvent.ToggleAdBlocker) },
+                        webBackNavTopBar = state.webBackNavTopBar,
+                        onToggleWebBackNavTopBar = { viewModel.handleEvent(MainEvent.ToggleWebBackNavTopBar) },
+                        analyticsEnabled = state.analyticsEnabled,
+                        onToggleAnalytics = { viewModel.handleEvent(MainEvent.ToggleAnalytics) },
                         isCheckingUpdate = updateState.isChecking,
                         onCheckUpdate = { updateViewModel.handleEvent(UpdateEvent.CheckUpdate) },
                         bottomPadding = contentPadding.calculateBottomPadding(),
@@ -464,6 +507,22 @@ fun MainScreen(
                             .padding(top = contentPadding.calculateTopPadding()),
                     )
                 }
+            }
+        }
+
+        AnimatedVisibility(
+            visible = isFabVisible,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(end = 16.dp, bottom = floatingNavBottom + 12.dp),
+            enter = scaleIn() + fadeIn(),
+            exit = scaleOut() + fadeOut(),
+        ) {
+            FloatingActionButton(onClick = onOpenWebPlayer) {
+                Icon(
+                    Icons.Rounded.Language,
+                    contentDescription = stringResource(R.string.webplayer_cd_open_webplayer),
+                )
             }
         }
 

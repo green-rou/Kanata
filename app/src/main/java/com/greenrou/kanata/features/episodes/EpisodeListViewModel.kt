@@ -1,8 +1,8 @@
 package com.greenrou.kanata.features.episodes
 
 import androidx.lifecycle.ViewModel
-import com.greenrou.kanata.core.analytics.reportToCrashlytics
 import androidx.lifecycle.viewModelScope
+import com.greenrou.kanata.core.analytics.AnalyticsManager
 import com.greenrou.kanata.domain.model.DownloadItem
 import com.greenrou.kanata.domain.model.Translation
 import com.greenrou.kanata.domain.usecase.GetAnimegongoTranslationsUseCase
@@ -10,7 +10,6 @@ import com.greenrou.kanata.domain.usecase.GetCompletedDownloadsUseCase
 import com.greenrou.kanata.domain.usecase.GetDownloadQueueUseCase
 import com.greenrou.kanata.domain.usecase.GetEpisodeListUseCase
 import com.greenrou.kanata.domain.usecase.StartEpisodeDownloadUseCase
-import java.net.URLEncoder
 import com.greenrou.kanata.features.episodes.model.EpisodeListEvent
 import com.greenrou.kanata.features.episodes.model.EpisodeListState
 import kotlinx.coroutines.channels.Channel
@@ -22,6 +21,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.net.URLEncoder
 
 class EpisodeListViewModel(
     private val getEpisodeList: GetEpisodeListUseCase,
@@ -29,6 +29,7 @@ class EpisodeListViewModel(
     private val getDownloadQueue: GetDownloadQueueUseCase,
     private val getCompletedDownloads: GetCompletedDownloadsUseCase,
     private val getAnimegongoTranslations: GetAnimegongoTranslationsUseCase,
+    private val analytics: AnalyticsManager,
     val animePageUrl: String,
     val label: String,
     val animeTitle: String,
@@ -43,6 +44,7 @@ class EpisodeListViewModel(
     val events = _events.receiveAsFlow()
 
     init {
+        analytics.setScreen("episode_list")
         loadEpisodes()
         observeDownloadStatuses()
     }
@@ -142,7 +144,7 @@ class EpisodeListViewModel(
                     _state.update { it.copy(isLoading = false, episodes = episodes) }
                 }
                 .onFailure { e ->
-                    e.reportToCrashlytics("episode_list_load")
+                    analytics.recordError(e, "episode_list_load", mapOf("source" to label, "anime" to animeTitle))
                     _state.update { it.copy(isLoading = false, error = e.message) }
                 }
         }
