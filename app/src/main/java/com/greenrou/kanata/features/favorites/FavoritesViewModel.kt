@@ -2,7 +2,9 @@ package com.greenrou.kanata.features.favorites
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.greenrou.kanata.domain.usecase.DeleteSavedPageUseCase
 import com.greenrou.kanata.domain.usecase.GetFavoritesUseCase
+import com.greenrou.kanata.domain.usecase.GetSavedPagesUseCase
 import com.greenrou.kanata.domain.usecase.RemoveFavoriteUseCase
 import com.greenrou.kanata.features.favorites.model.FavoritesEvent
 import com.greenrou.kanata.features.favorites.model.FavoritesState
@@ -21,6 +23,8 @@ import kotlinx.coroutines.launch
 class FavoritesViewModel(
     private val getFavorites: GetFavoritesUseCase,
     private val removeFavorite: RemoveFavoriteUseCase,
+    private val getSavedPages: GetSavedPagesUseCase,
+    private val deleteSavedPage: DeleteSavedPageUseCase,
 ) : ViewModel() {
 
     private val _limit = MutableStateFlow(20)
@@ -34,6 +38,7 @@ class FavoritesViewModel(
 
     init {
         observeFavorites()
+        observeSavedPages()
     }
 
     fun handleEvent(event: FavoritesEvent) {
@@ -43,7 +48,14 @@ class FavoritesViewModel(
             }
             is FavoritesEvent.ToggleFavorite -> removeFavoriteItem(event.animeId)
             FavoritesEvent.LoadMore -> loadMore()
+            is FavoritesEvent.SavedPageClicked -> viewModelScope.launch {
+                _events.send(FavoritesEvent.NavigateToWebPlayer(event.url))
+            }
+            is FavoritesEvent.DeleteSavedPage -> viewModelScope.launch {
+                deleteSavedPage(event.id)
+            }
             is FavoritesEvent.NavigateToDetails -> Unit
+            is FavoritesEvent.NavigateToWebPlayer -> Unit
         }
     }
 
@@ -66,6 +78,12 @@ class FavoritesViewModel(
             }
         }
         .launchIn(viewModelScope)
+    }
+
+    private fun observeSavedPages() {
+        getSavedPages()
+            .onEach { pages -> _state.update { it.copy(savedPages = pages) } }
+            .launchIn(viewModelScope)
     }
 
     private fun loadMore() {

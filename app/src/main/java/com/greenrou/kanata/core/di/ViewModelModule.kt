@@ -19,7 +19,7 @@ import org.koin.dsl.module
 val viewModelModule = module {
     viewModel { MainViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get<List<SiteParser>>()) }
     viewModel { AnimeDetailsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
-    viewModel { FavoritesViewModel(get(), get()) }
+    viewModel { FavoritesViewModel(get(), get(), get(), get()) }
     viewModel { MoodViewModel(get(), get(), get()) }
     viewModel { RandomImageViewModel(get(), get(), get(), get(), get()) }
     viewModel { params ->
@@ -29,7 +29,7 @@ val viewModelModule = module {
         PlayerViewModel(get(), get(), get(), get(), params.get(), params.get(), params.get(), params.get(), params.get(), params.get(), params.get())
     }
     viewModel { DownloadManagerViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
-    viewModel { WebPlayerViewModel(get()) }
+    viewModel { WebPlayerViewModel(get(), get()) }
     single { CheckUpdateUseCase(get(), get(), androidContext()) }
     viewModel { UpdateViewModel(get(), get(), androidContext(), get()) }
 }

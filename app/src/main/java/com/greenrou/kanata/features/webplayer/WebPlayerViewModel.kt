@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.greenrou.kanata.domain.repository.SettingsManager
+import com.greenrou.kanata.domain.usecase.SavePageUseCase
 import com.greenrou.kanata.features.webplayer.model.WebPlayerEvent
 import com.greenrou.kanata.features.webplayer.model.WebPlayerState
 import kotlinx.coroutines.channels.Channel
@@ -15,7 +16,10 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class WebPlayerViewModel(private val settingsManager: SettingsManager) : ViewModel() {
+class WebPlayerViewModel(
+    private val settingsManager: SettingsManager,
+    private val savePage: SavePageUseCase,
+) : ViewModel() {
 
     private val _state = MutableStateFlow(WebPlayerState())
     val state = _state.asStateFlow()
@@ -93,6 +97,17 @@ class WebPlayerViewModel(private val settingsManager: SettingsManager) : ViewMod
 
             WebPlayerEvent.DisableAdBlocker -> viewModelScope.launch {
                 settingsManager.setAdBlockerEnabled(false)
+            }
+
+            WebPlayerEvent.ShowSaveDialog ->
+                _state.update { it.copy(showSaveDialog = true) }
+
+            WebPlayerEvent.DismissSaveDialog ->
+                _state.update { it.copy(showSaveDialog = false) }
+
+            is WebPlayerEvent.SavePage -> viewModelScope.launch {
+                savePage(event.name, event.url)
+                _state.update { it.copy(showSaveDialog = false) }
             }
 
             WebPlayerEvent.NavigateBack -> viewModelScope.launch {
