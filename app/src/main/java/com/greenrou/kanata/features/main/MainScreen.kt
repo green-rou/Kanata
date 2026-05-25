@@ -101,6 +101,7 @@ fun MainScreen(
     onNavigateToAnimeDetails: (animeId: Int) -> Unit = {},
     onOpenWebPlayer: () -> Unit = {},
     onNavigateToWebPlayer: (url: String) -> Unit = {},
+    onNavigateToMods: () -> Unit = {},
     viewModel: MainViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -501,6 +502,7 @@ fun MainScreen(
                         onToggleAnalytics = { viewModel.handleEvent(MainEvent.ToggleAnalytics) },
                         isCheckingUpdate = updateState.isChecking,
                         onCheckUpdate = { updateViewModel.handleEvent(UpdateEvent.CheckUpdate) },
+                        onNavigateToMods = onNavigateToMods,
                         bottomPadding = contentPadding.calculateBottomPadding(),
                         modifier = Modifier
                             .fillMaxSize()

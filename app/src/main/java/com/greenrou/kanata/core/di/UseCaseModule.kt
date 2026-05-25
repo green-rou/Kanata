@@ -5,6 +5,7 @@ import com.greenrou.kanata.domain.usecase.CancelDownloadUseCase
 import com.greenrou.kanata.domain.usecase.DeleteCompletedDownloadUseCase
 import com.greenrou.kanata.domain.usecase.DeleteSavedPageUseCase
 import com.greenrou.kanata.domain.usecase.EnqueueDownloadUseCase
+import com.greenrou.kanata.domain.usecase.FetchRemoteModsUseCase
 import com.greenrou.kanata.domain.usecase.GetAnimeByIdUseCase
 import com.greenrou.kanata.domain.usecase.GetAnimeByMoodUseCase
 import com.greenrou.kanata.domain.usecase.GetAnimeListUseCase
@@ -15,10 +16,12 @@ import com.greenrou.kanata.domain.usecase.GetDownloadQueueUseCase
 import com.greenrou.kanata.domain.usecase.GetEpisodeDownloadStatusUseCase
 import com.greenrou.kanata.domain.usecase.GetEpisodeListUseCase
 import com.greenrou.kanata.domain.usecase.GetFavoritesUseCase
+import com.greenrou.kanata.domain.usecase.GetInstalledModsUseCase
 import com.greenrou.kanata.domain.usecase.GetRandomAnimeUseCase
 import com.greenrou.kanata.domain.usecase.GetRandomImageUseCase
 import com.greenrou.kanata.domain.usecase.GetSavedPagesUseCase
 import com.greenrou.kanata.domain.usecase.GetVideoStreamUseCase
+import com.greenrou.kanata.domain.usecase.InstallModUseCase
 import com.greenrou.kanata.domain.usecase.IsFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.RemoveFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.ReorderDownloadQueueUseCase
@@ -27,6 +30,8 @@ import com.greenrou.kanata.domain.usecase.SavePageUseCase
 import com.greenrou.kanata.domain.usecase.SearchExternalAnimeUseCase
 import com.greenrou.kanata.domain.usecase.SetDownloadFolderUseCase
 import com.greenrou.kanata.domain.usecase.StartEpisodeDownloadUseCase
+import com.greenrou.kanata.domain.usecase.ToggleModUseCase
+import com.greenrou.kanata.domain.usecase.UninstallModUseCase
 import org.koin.dsl.module
 
 val useCaseModule = module {
@@ -57,4 +62,9 @@ val useCaseModule = module {
     factory { GetSavedPagesUseCase(get()) }
     factory { SavePageUseCase(get()) }
     factory { DeleteSavedPageUseCase(get()) }
+    factory { FetchRemoteModsUseCase(get()) }
+    factory { GetInstalledModsUseCase(get()) }
+    factory { InstallModUseCase(get()) }
+    factory { UninstallModUseCase(get()) }
+    factory { ToggleModUseCase(get()) }
 }

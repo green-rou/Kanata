@@ -82,3 +82,5 @@ apollo = { id = "com.apollographql.apollo", version.ref = "apollo" }
 kotlin-ksp = { id = "com.google.devtools.ksp", version = "2.0.21-1.0.25" }
 google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebase-crashlytics-plugin" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+android-library = { id = "com.android.library", version.ref = "agp" }

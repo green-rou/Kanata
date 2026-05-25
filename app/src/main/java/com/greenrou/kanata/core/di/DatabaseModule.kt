@@ -3,6 +3,7 @@ package com.greenrou.kanata.core.di
 import androidx.room.Room
 import com.greenrou.kanata.data.local.DownloadDao
 import com.greenrou.kanata.data.local.FavoritesDao
+import com.greenrou.kanata.data.local.InstalledModDao
 import com.greenrou.kanata.data.local.SavedPagesDao
 import com.greenrou.kanata.data.local.StorageDao
 import com.greenrou.kanata.data.local.StorageDataSource
@@ -27,6 +28,7 @@ val databaseModule = module {
             StorageDatabase.MIGRATION_3_4,
             StorageDatabase.MIGRATION_4_5,
             StorageDatabase.MIGRATION_5_6,
+            StorageDatabase.MIGRATION_6_7,
         ).build()
     }
 
@@ -34,6 +36,7 @@ val databaseModule = module {
     single<FavoritesDao> { get<StorageDatabase>().favoritesDao() }
     single<DownloadDao> { get<StorageDatabase>().downloadDao() }
     single<SavedPagesDao> { get<StorageDatabase>().savedPagesDao() }
+    single<InstalledModDao> { get<StorageDatabase>().installedModDao() }
 
     single { StorageDataSource(get()) }
 

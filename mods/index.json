@@ -1,0 +1,12 @@
+[
+  {
+    "id": "source-example",
+    "label": "Example Source",
+    "language": "uk",
+    "version": 1,
+    "minAppVersion": 1,
+    "parserClass": "com.kanata.mod.example.ModEntry",
+    "apkUrl": "https://github.com/green-rou/Kanata/releases/download/mods-v1/source-example__com.kanata.mod.example.ModEntry.apk",
+    "description": "Example source mod — replace with a real implementation."
+  }
+]

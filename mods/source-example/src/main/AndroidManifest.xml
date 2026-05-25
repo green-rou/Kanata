@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Minimal manifest for a Kanata source mod.
+    No activities or services — the APK is loaded programmatically by the host app.
+-->
+<manifest>
+</manifest>

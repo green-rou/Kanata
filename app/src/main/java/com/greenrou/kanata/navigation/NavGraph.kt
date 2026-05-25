@@ -14,6 +14,7 @@ import com.greenrou.kanata.features.details.AnimeDetailsScreen
 import com.greenrou.kanata.features.episodes.EpisodeListScreen
 import com.greenrou.kanata.features.main.BottomNavItem
 import com.greenrou.kanata.features.main.MainScreen
+import com.greenrou.kanata.features.mods.ModsScreen
 import com.greenrou.kanata.features.player.PlayerScreen
 import com.greenrou.kanata.features.webplayer.WebPlayerScreen
 
@@ -45,6 +46,7 @@ fun NavGraph(backStack: SnapshotStateList<Any>) {
             },
             onOpenWebPlayer = { backStack.add(WebPlayerRoute()) },
             onNavigateToWebPlayer = { url -> backStack.add(WebPlayerRoute(url)) },
+            onNavigateToMods = { backStack.add(ModsRoute) },
         )
         is AnimeDetailsRoute -> AnimeDetailsScreen(
             animeId = current.animeId,
@@ -109,6 +111,9 @@ fun NavGraph(backStack: SnapshotStateList<Any>) {
                     )
                 )
             },
+        )
+        is ModsRoute -> ModsScreen(
+            onNavigateBack = { backStack.removeAt(backStack.size - 1) },
         )
     }
 }
