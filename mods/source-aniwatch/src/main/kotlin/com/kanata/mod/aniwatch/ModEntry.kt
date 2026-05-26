@@ -3,9 +3,7 @@ package com.kanata.mod.aniwatch
 import android.util.Log
 import com.greenrou.kanata.modapi.ModEpisode
 import com.greenrou.kanata.modapi.ModSiteParser
-import org.json.JSONArray
 import org.jsoup.Jsoup
-import java.net.URLEncoder
 
 class ModEntry : ModSiteParser {
 
@@ -21,37 +19,43 @@ class ModEntry : ModSiteParser {
         "aniwatch.fit" in host || "kayoanime.sa.com" in host
 
     override suspend fun search(query: String): Result<String> = runCatching {
-        searchApi(query)
-            ?: searchApi(firstKeyword(query))
-            ?: error("No results on KayoAnime for: $query")
+        slugCandidates(query)
+            .firstNotNullOfOrNull { slug ->
+                val url = "$base/anime/$slug/"
+                Log.d(TAG, "search: trying $url")
+                if (pageExists(url)) url.also { Log.d(TAG, "search: hit $url") } else null
+            } ?: error("No results on KayoAnime for: $query")
     }.onFailure { Log.w(TAG, "search failed '$query': ${it.javaClass.simpleName}: ${it.message}") }
 
-    private fun searchApi(query: String): String? {
-        val encoded = URLEncoder.encode(query, "UTF-8")
-        val apiUrl = "$base/wp-json/wp/v2/anime?search=$encoded&per_page=5"
-        Log.d(TAG, "searchApi: GET $apiUrl")
-        val body = Jsoup.connect(apiUrl)
-            .userAgent(userAgent)
-            .header("Accept", "application/json, text/plain, */*")
-            .header("Accept-Language", "en-US,en;q=0.9")
-            .header("Referer", base)
-            .ignoreContentType(true)
-            .ignoreHttpErrors(true)
-            .execute().body()
-        if (!body.trimStart().startsWith("[")) {
-            Log.w(TAG, "searchApi: unexpected response for '$query': ${body.take(80)}")
-            return null
-        }
-        val arr = JSONArray(body)
-        Log.d(TAG, "searchApi: ${arr.length()} results for '$query'")
-        if (arr.length() == 0) return null
-        return arr.getJSONObject(0).getString("link").also {
-            Log.d(TAG, "searchApi: returning $it")
-        }
+    private fun slugCandidates(query: String): List<String> {
+        val out = LinkedHashSet<String>()
+        out.add(toSlug(query))
+        val beforeColon = query.substringBefore(":").trim()
+        if (beforeColon != query) out.add(toSlug(beforeColon))
+        val words = query.split(Regex("[\\s:-]+")).filter { it.isNotEmpty() }
+        if (words.size > 3) out.add(toSlug(words.take(3).joinToString(" ")))
+        if (words.size > 2) out.add(toSlug(words.take(2).joinToString(" ")))
+        return out.toList()
     }
 
-    private fun firstKeyword(query: String) =
-        query.split(Regex("[\\s:]+")).firstOrNull { it.length > 2 } ?: query
+    private fun toSlug(title: String): String =
+        title.lowercase()
+            .replace(Regex("[^a-z0-9 -]"), "")
+            .trim()
+            .replace(Regex("[ -]+"), "-")
+
+    private fun pageExists(url: String): Boolean = try {
+        val res = Jsoup.connect(url)
+            .userAgent(userAgent)
+            .referrer(base)
+            .ignoreHttpErrors(true)
+            .timeout(8_000)
+            .execute()
+        res.statusCode() == 200 && "Page not found" !in res.body().take(1000)
+    } catch (e: Exception) {
+        Log.w(TAG, "pageExists: $url threw ${e.javaClass.simpleName}")
+        false
+    }
 
     override suspend fun getEpisodes(pageUrl: String): List<ModEpisode> {
         Log.d(TAG, "getEpisodes: GET $pageUrl")
