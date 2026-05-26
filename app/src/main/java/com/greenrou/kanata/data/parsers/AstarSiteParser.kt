@@ -65,7 +65,7 @@ class AstarSiteParser : SiteParser {
                             val season = playlist.getJSONObject(seasonKey)
                             season.keys().forEach { epKey ->
                                 val epLabel = if (playlist.length() > 1)
-                                    "S${seasonKey}E${epKey}" else "Серія $epKey"
+                                    "S${seasonKey}E${epKey}" else "E$epKey"
                                 val epUrl = "$pageUrl?kodikSeason=$seasonKey&kodikEpisode=$epKey"
                                 episodes.add(Episode(epLabel, epUrl))
                             }
@@ -73,7 +73,7 @@ class AstarSiteParser : SiteParser {
                         if (episodes.isNotEmpty()) return episodes
                     }
                 }
-            }.onFailure { e ->
+            }.onFailure { _ ->
             }
         }
 
@@ -98,18 +98,18 @@ class AstarSiteParser : SiteParser {
                         val season = playlist.getJSONObject(seasonKey)
                         season.keys().forEach { epKey ->
                             val epLabel = if (playlist.length() > 1)
-                                "S${seasonKey}E${epKey}" else "Серія $epKey"
+                                "S${seasonKey}E${epKey}" else "E$epKey"
                             episodes.add(Episode(epLabel, "$pageUrl?kodikSeason=$seasonKey&kodikEpisode=$epKey"))
                         }
                     }
                     if (episodes.isNotEmpty()) return episodes
                 }
-            }.onFailure { e ->
+            }.onFailure { _ ->
             }
 
             if (expectedEpisodes > 1 && "/serial/" in kodikIframeSrc) {
                 return (1..expectedEpisodes).map { ep ->
-                    Episode("Серія $ep", "$pageUrl?kodikSeason=1&kodikEpisode=$ep")
+                    Episode("E$ep", "$pageUrl?kodikSeason=1&kodikEpisode=$ep")
                 }
             }
         }
@@ -117,7 +117,7 @@ class AstarSiteParser : SiteParser {
         val customPlayerIframe = iframes.firstOrNull { "/player" in it || "videoas" in it }
         if (expectedEpisodes > 1 && customPlayerIframe != null) {
             return (1..expectedEpisodes).map { ep ->
-                Episode("Серія $ep", "$pageUrl?astarEpisode=$ep")
+                Episode("E$ep", "$pageUrl?astarEpisode=$ep")
             }
         }
 

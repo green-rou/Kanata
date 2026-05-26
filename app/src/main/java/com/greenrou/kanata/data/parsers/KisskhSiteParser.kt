@@ -67,7 +67,7 @@ class KisskhSiteParser : SiteParser {
                 val numStr = if (num % 1.0 == 0.0) num.toInt().toString() else "%.1f".format(num)
                 val epNumUrl = if (num % 1.0 == 0.0) num.toInt().toString() else numStr
                 val dramaPage = "$base/Drama/$titleSlug/Episode-$epNumUrl?id=$id&ep=$epId&page=0&pageSize=100"
-                Episode("Серія $numStr", "$base/episode/$epId?drama_page=${URLEncoder.encode(dramaPage, "UTF-8")}")
+                Episode("E$numStr", "$base/episode/$epId?drama_page=${URLEncoder.encode(dramaPage, "UTF-8")}")
             }
             .reversed()
     }

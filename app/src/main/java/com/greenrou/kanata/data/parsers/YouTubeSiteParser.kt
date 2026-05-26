@@ -20,12 +20,10 @@ class YouTubeSiteParser : SiteParser {
     override fun supports(host: String) = "youtube" in host || "youtu.be" in host
 
     override suspend fun search(query: String): Result<String> = runCatching {
-        val searchQuery = "$query аніме українська"
-
         val info = SearchInfo.getInfo(
             service,
             service.searchQHFactory.fromQuery(
-                searchQuery,
+                query,
                 listOf(YoutubeSearchQueryHandlerFactory.PLAYLISTS),
                 null
             )
@@ -50,7 +48,7 @@ class YouTubeSiteParser : SiteParser {
         }
 
         return items.mapIndexed { index, item ->
-            Episode("Серія ${index + 1}: ${item.name}", item.url)
+            Episode("E${index + 1}: ${item.name}", item.url)
         }
     }
 

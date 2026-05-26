@@ -47,7 +47,7 @@ class AnimegongoSiteParser : SiteParser {
             .map { url ->
                 val epNum = Regex("""/episode-(\d+)\.html""").find(url)?.groupValues?.get(1) ?: "1"
                 val seasonNum = Regex("""/season-(\d+)/""").find(url)?.groupValues?.get(1)
-                val title = if (seasonNum != null && seasonNum != "1") "S${seasonNum}E$epNum" else "Серія $epNum"
+                val title = if (seasonNum != null && seasonNum != "1") "S${seasonNum}E$epNum" else "E$epNum"
                 Episode(title, url)
             }
             .sortedWith(compareBy(
@@ -56,7 +56,7 @@ class AnimegongoSiteParser : SiteParser {
             ))
     }
 
-    suspend fun getTranslations(episodePageUrl: String): Result<List<Translation>> = runCatching {
+    fun getTranslations(episodePageUrl: String): Result<List<Translation>> = runCatching {
         val doc = Jsoup.connect(episodePageUrl)
             .userAgent(userAgent)
             .header("Referer", "https://animego.ngo/")

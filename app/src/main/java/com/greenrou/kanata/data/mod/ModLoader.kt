@@ -20,7 +20,7 @@ class ModLoader(private val context: Context) {
                 val instance = instantiate(apk)
                 if (instance is ModSiteParser) ModSiteParserAdapter(instance) else null
             }
-                .onFailure { Log.e("ModLoader", "Failed to load parser ${apk.name}", it) }
+                .onFailure { Log.e(TAG, "Failed to load parser ${apk.name}", it) }
                 .getOrNull()
         }
 
@@ -28,9 +28,11 @@ class ModLoader(private val context: Context) {
         enabledApks(enabledFileNames).mapNotNull { apk ->
             runCatching {
                 val instance = instantiate(apk)
-                if (instance is ModInfoProvider) ModInfoProviderAdapter(instance) else null
+                val isProvider = instance is ModInfoProvider
+                Log.d(TAG, "loadInfoProviders: ${apk.name} → ${instance.javaClass.name}, isModInfoProvider=$isProvider")
+                if (isProvider) ModInfoProviderAdapter(instance) else null
             }
-                .onFailure { Log.e("ModLoader", "Failed to load info provider ${apk.name}", it) }
+                .onFailure { Log.e(TAG, "Failed to load info provider ${apk.name}", it) }
                 .getOrNull()
         }
 
@@ -41,6 +43,7 @@ class ModLoader(private val context: Context) {
     private fun instantiate(apk: File): Any {
         val className = apk.nameWithoutExtension.substringAfter("__")
             .ifEmpty { error("APK '${apk.name}' missing class name (expected format: id__com.example.ClassName.apk)") }
+        Log.d(TAG, "instantiate: ${apk.name} → class=$className")
         val loader = DexClassLoader(
             apk.absolutePath,
             context.codeCacheDir.absolutePath,
@@ -48,5 +51,9 @@ class ModLoader(private val context: Context) {
             context.classLoader,
         )
         return loader.loadClass(className).getDeclaredConstructor().newInstance()
+    }
+
+    private companion object {
+        const val TAG = "ModLoader"
     }
 }

@@ -75,7 +75,7 @@ class MikaiSiteParser : SiteParser {
             val ep = episodes.getJSONObject(i)
             val number = ep.optInt("number", i + 1)
             val link = ep.getString("playLink")
-            Episode("Серія $number", link)
+            Episode("E$number", link)
         }
     }
 }

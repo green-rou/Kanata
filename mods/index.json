@@ -20,6 +20,16 @@
     "description": "Russian-dubbed anime from AniLibria (anilibria.top) with HLS streams."
   },
   {
+    "id": "info-hikka",
+    "label": "Hikka",
+    "language": "uk",
+    "version": 1,
+    "minAppVersion": 1,
+    "parserClass": "com.kanata.mod.hikka.ModEntry",
+    "apkUrl": "https://github.com/green-rou/Kanata/releases/download/mods-dev/info-hikka__com.kanata.mod.hikka.ModEntry.apk",
+    "description": "Enriches anime details with Ukrainian synopsis, Hikka score, and Ukrainian genre names."
+  },
+  {
     "id": "info-shikimori",
     "label": "Shikimori",
     "language": "ru",

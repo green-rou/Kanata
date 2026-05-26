@@ -1,5 +1,6 @@
 package com.greenrou.kanata.features.details
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.greenrou.kanata.core.analytics.AnalyticsManager
@@ -18,6 +19,7 @@ import com.greenrou.kanata.features.details.model.AnimeDetailsState
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -50,6 +52,13 @@ class AnimeDetailsViewModel(
         analytics.setScreen("anime_details")
         settingsManager.coverFillsTopBar
             .onEach { enabled -> _state.update { it.copy(coverFillsTopBar = enabled) } }
+            .launchIn(viewModelScope)
+        settingsManager.activeInfoProviderId
+            .distinctUntilChanged()
+            .onEach { _ ->
+                val anime = _state.value.anime ?: return@onEach
+                fetchEnrichment(anime)
+            }
             .launchIn(viewModelScope)
     }
 
@@ -156,10 +165,14 @@ class AnimeDetailsViewModel(
                 anime.titleEnglish.takeIf { it.isNotBlank() },
                 anime.title.takeIf { it.isNotBlank() },
             )
+            Log.d(TAG, "fetchEnrichment: titles=$titles")
             val enrichment = getAnimeEnrichment(titles)
-            if (enrichment != null) {
-                _state.update { it.copy(enrichment = enrichment) }
-            }
+            Log.d(TAG, "fetchEnrichment: result=${enrichment?.let { "synopsis=${it.synopsis?.take(30)}, score=${it.score}, studios=${it.studios}" } ?: "null"}")
+            _state.update { it.copy(enrichment = enrichment) }
         }
+    }
+
+    private companion object {
+        const val TAG = "AnimeDetailsVM"
     }
 }
