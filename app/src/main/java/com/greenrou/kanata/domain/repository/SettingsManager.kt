@@ -1,6 +1,5 @@
 package com.greenrou.kanata.domain.repository
 
-import com.greenrou.kanata.domain.model.VideoSourceType
 import kotlinx.coroutines.flow.Flow
 
 interface SettingsManager {
@@ -9,7 +8,7 @@ interface SettingsManager {
     val coverFillsTopBar: Flow<Boolean>
     val downloadFolder: Flow<String>
     val accentColor: Flow<String>
-    val disabledSources: Flow<Set<VideoSourceType>>
+    val disabledSources: Flow<Set<String>>
     val adBlockerEnabled: Flow<Boolean>
     val webBackNavTopBar: Flow<Boolean>
     val analyticsEnabled: Flow<Boolean>
@@ -22,7 +21,7 @@ interface SettingsManager {
     suspend fun setCoverFillsTopBar(enabled: Boolean)
     suspend fun setDownloadFolder(path: String)
     suspend fun setAccentColor(name: String)
-    suspend fun setDisabledSources(sources: Set<VideoSourceType>)
+    suspend fun setDisabledSources(sources: Set<String>)
     suspend fun setAdBlockerEnabled(enabled: Boolean)
     suspend fun setWebBackNavTopBar(enabled: Boolean)
     suspend fun setAnalyticsEnabled(enabled: Boolean)

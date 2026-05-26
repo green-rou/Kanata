@@ -188,9 +188,10 @@ fun MainScreen(
 
     val systemNavBarBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val floatingNavBottom = NavBarHeight + systemNavBarBottom
-    val snackbarBottomPadding by animateDpAsState(
-        targetValue = if (isFabVisible) floatingNavBottom + 72.dp else floatingNavBottom,
-        label = "snackbar_bottom",
+    val isSnackbarVisible = snackbarHostState.currentSnackbarData != null
+    val fabBottomPadding by animateDpAsState(
+        targetValue = floatingNavBottom + 12.dp + if (isFabVisible && isSnackbarVisible) 60.dp else 0.dp,
+        label = "fab_bottom",
     )
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -346,7 +347,7 @@ fun MainScreen(
             snackbarHost = {
                 KanataSnackbarHost(
                     hostState = snackbarHostState,
-                    modifier = Modifier.padding(bottom = snackbarBottomPadding),
+                    modifier = Modifier.padding(bottom = floatingNavBottom),
                 )
             },
         ) { scaffoldPadding ->
@@ -521,7 +522,7 @@ fun MainScreen(
             visible = isFabVisible,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(end = 16.dp, bottom = floatingNavBottom + 12.dp),
+                .padding(end = 16.dp, bottom = fabBottomPadding),
             enter = scaleIn() + fadeIn(),
             exit = scaleOut() + fadeOut(),
         ) {

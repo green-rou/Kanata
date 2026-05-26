@@ -32,7 +32,6 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -51,6 +50,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.greenrou.kanata.core.composable.KanataLoader
+import com.greenrou.kanata.core.composable.KanataSnackbarHost
 import com.greenrou.kanata.domain.model.ModInfo
 import com.greenrou.kanata.features.mods.model.ModsEvent
 import org.koin.androidx.compose.koinViewModel
@@ -97,7 +97,7 @@ fun ModsScreen(
                 },
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+        snackbarHost = { KanataSnackbarHost(snackbarHostState) },
     ) { padding ->
         when {
             state.isLoadingIndex && state.mods.isEmpty() -> {

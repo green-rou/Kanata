@@ -29,15 +29,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.greenrou.kanata.R
-import com.greenrou.kanata.domain.model.VideoSourceType
 
 @Composable
 internal fun SourcesSection(
     showAdultContent: Boolean,
-    regularSources: List<Pair<VideoSourceType, String>>,
-    adultSources: List<Pair<VideoSourceType, String>>,
-    disabledSources: Set<VideoSourceType>,
-    onToggleSource: (VideoSourceType) -> Unit,
+    regularSources: List<String>,
+    adultSources: List<String>,
+    disabledSources: Set<String>,
+    onToggleSource: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val sources = if (showAdultContent) adultSources else regularSources
@@ -84,7 +83,7 @@ internal fun SourcesSection(
 
             AnimatedVisibility(visible = expanded) {
                 Column {
-                    sources.forEachIndexed { index, (type, label) ->
+                    sources.forEachIndexed { index, label ->
                         if (index > 0) {
                             HorizontalDivider(
                                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -105,8 +104,8 @@ internal fun SourcesSection(
                                 modifier = Modifier.weight(1f),
                             )
                             Switch(
-                                checked = type !in disabledSources,
-                                onCheckedChange = { onToggleSource(type) },
+                                checked = label !in disabledSources,
+                                onCheckedChange = { onToggleSource(label) },
                                 colors = SwitchDefaults.colors(
                                     checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
                                     checkedTrackColor = MaterialTheme.colorScheme.primary,

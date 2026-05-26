@@ -36,7 +36,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.greenrou.kanata.R
-import com.greenrou.kanata.domain.model.VideoSourceType
 import com.greenrou.kanata.features.settings.content.ColorPickerItem
 import com.greenrou.kanata.features.settings.content.InfoProviderSection
 import com.greenrou.kanata.features.settings.content.LanguagePickerItem
@@ -61,10 +60,10 @@ fun SettingsScreen(
     onSetDownloadFolder: (String) -> Unit = {},
     accentColor: String = "Gray",
     onSetAccentColor: (String) -> Unit = {},
-    disabledSources: Set<VideoSourceType> = emptySet(),
-    regularSources: List<Pair<VideoSourceType, String>> = emptyList(),
-    adultSources: List<Pair<VideoSourceType, String>> = emptyList(),
-    onToggleSource: (VideoSourceType) -> Unit = {},
+    disabledSources: Set<String> = emptySet(),
+    regularSources: List<String> = emptyList(),
+    adultSources: List<String> = emptyList(),
+    onToggleSource: (String) -> Unit = {},
     adBlockerEnabled: Boolean = true,
     onToggleAdBlocker: () -> Unit = {},
     webBackNavTopBar: Boolean = false,

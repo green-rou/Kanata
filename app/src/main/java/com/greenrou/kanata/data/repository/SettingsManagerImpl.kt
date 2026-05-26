@@ -5,7 +5,6 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.greenrou.kanata.domain.model.VideoSourceType
 import com.greenrou.kanata.domain.repository.SettingsManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -54,12 +53,11 @@ class SettingsManagerImpl(private val context: Context) : SettingsManager {
             preferences[PreferencesKeys.ACCENT_COLOR] ?: "Gray"
         }
 
-    override val disabledSources: Flow<Set<VideoSourceType>> = context.dataStore.data
+    override val disabledSources: Flow<Set<String>> = context.dataStore.data
         .map { preferences ->
             preferences[PreferencesKeys.DISABLED_SOURCES]
                 ?.split(",")
                 ?.filter { it.isNotBlank() }
-                ?.mapNotNull { name -> runCatching { VideoSourceType.valueOf(name) }.getOrNull() }
                 ?.toSet()
                 ?: emptySet()
         }
@@ -94,9 +92,9 @@ class SettingsManagerImpl(private val context: Context) : SettingsManager {
         }
     }
 
-    override suspend fun setDisabledSources(sources: Set<VideoSourceType>) {
+    override suspend fun setDisabledSources(sources: Set<String>) {
         context.dataStore.edit { preferences ->
-            preferences[PreferencesKeys.DISABLED_SOURCES] = sources.joinToString(",") { it.name }
+            preferences[PreferencesKeys.DISABLED_SOURCES] = sources.joinToString(",")
         }
     }
 

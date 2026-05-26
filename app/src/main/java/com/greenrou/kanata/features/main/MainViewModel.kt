@@ -8,7 +8,6 @@ import com.greenrou.kanata.core.network.NetworkMonitor
 import com.greenrou.kanata.data.mod.InfoProviderRegistry
 import com.greenrou.kanata.data.mod.ParserRegistry
 import com.greenrou.kanata.domain.model.AnimeFilter
-import com.greenrou.kanata.domain.model.VideoSourceType
 import com.greenrou.kanata.domain.repository.SettingsManager
 import com.greenrou.kanata.domain.usecase.AddFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.GetAnimeListUseCase
@@ -46,12 +45,12 @@ class MainViewModel(
     infoProviderRegistry: InfoProviderRegistry,
 ) : ViewModel() {
 
-    val regularSources: StateFlow<List<Pair<VideoSourceType, String>>> = parserRegistry.parsers
-        .map { list -> list.filter { !it.isAdultOnly }.map { it.sourceType to it.label } }
+    val regularSources: StateFlow<List<String>> = parserRegistry.parsers
+        .map { list -> list.filter { !it.isAdultOnly }.map { it.label } }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    val adultSources: StateFlow<List<Pair<VideoSourceType, String>>> = parserRegistry.parsers
-        .map { list -> list.filter { it.isAdultOnly }.map { it.sourceType to it.label } }
+    val adultSources: StateFlow<List<String>> = parserRegistry.parsers
+        .map { list -> list.filter { it.isAdultOnly }.map { it.label } }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val infoProviders: StateFlow<List<Pair<String, String>>> = infoProviderRegistry.providers
@@ -228,7 +227,7 @@ class MainViewModel(
             }
             is MainEvent.ToggleSource -> viewModelScope.launch {
                 val updated = _state.value.disabledSources.toMutableSet()
-                if (!updated.add(event.type)) updated.remove(event.type)
+                if (!updated.add(event.label)) updated.remove(event.label)
                 settingsManager.setDisabledSources(updated)
             }
             MainEvent.ToggleAdBlocker -> viewModelScope.launch {

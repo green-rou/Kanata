@@ -21,20 +21,34 @@ class ModEntry : ModSiteParser {
         "aniwatch.fit" in host || "kayoanime.sa.com" in host
 
     override suspend fun search(query: String): Result<String> = runCatching {
+        searchApi(query)
+            ?: searchApi(firstKeyword(query))
+            ?: error("No results on KayoAnime for: $query")
+    }.onFailure { Log.w(TAG, "search failed '$query': ${it.javaClass.simpleName}: ${it.message}") }
+
+    private fun searchApi(query: String): String? {
         val encoded = URLEncoder.encode(query, "UTF-8")
         val apiUrl = "$base/wp-json/wp/v2/anime?search=$encoded&per_page=5"
-        Log.d(TAG, "search: GET $apiUrl")
+        Log.d(TAG, "searchApi: GET $apiUrl")
         val body = Jsoup.connect(apiUrl)
             .userAgent(userAgent)
             .ignoreContentType(true)
+            .ignoreHttpErrors(true)
             .execute().body()
+        if (!body.trimStart().startsWith("[")) {
+            Log.w(TAG, "searchApi: unexpected response for '$query': ${body.take(80)}")
+            return null
+        }
         val arr = JSONArray(body)
-        Log.d(TAG, "search: ${arr.length()} results")
-        if (arr.length() == 0) error("No results on KayoAnime for: $query")
-        val link = arr.getJSONObject(0).getString("link")
-        Log.d(TAG, "search: returning $link")
-        link
+        Log.d(TAG, "searchApi: ${arr.length()} results for '$query'")
+        if (arr.length() == 0) return null
+        return arr.getJSONObject(0).getString("link").also {
+            Log.d(TAG, "searchApi: returning $it")
+        }
     }
+
+    private fun firstKeyword(query: String) =
+        query.split(Regex("[\\s:]+")).firstOrNull { it.length > 2 } ?: query
 
     override suspend fun getEpisodes(pageUrl: String): List<ModEpisode> {
         Log.d(TAG, "getEpisodes: GET $pageUrl")

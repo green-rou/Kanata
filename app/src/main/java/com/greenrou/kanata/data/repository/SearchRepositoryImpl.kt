@@ -19,7 +19,7 @@ class SearchRepositoryImpl(
         val sources = mutableListOf<VideoSource>()
         parserRegistry.parsers.value
             .filter { parser -> !parser.isAdultOnly || showAdult }
-            .filter { parser -> parser.sourceType !in disabled }
+            .filter { parser -> parser.label !in disabled }
             .forEach { parser ->
                 for (title in titles) {
                     val result = parser.search(title)
