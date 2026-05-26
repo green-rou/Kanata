@@ -5,7 +5,6 @@ import android.webkit.WebResourceResponse
 internal object AdBlocker {
 
     private val BLOCKED_HOSTS = setOf(
-        // Google ads & tracking
         "doubleclick.net",
         "googlesyndication.com",
         "googleadservices.com",
@@ -13,10 +12,8 @@ internal object AdBlocker {
         "analytics.google.com",
         "googletagmanager.com",
         "googletagservices.com",
-        // Meta / Facebook
         "connect.facebook.net",
         "facebook.com",
-        // Major ad networks
         "adnxs.com",
         "advertising.com",
         "taboola.com",
@@ -29,7 +26,6 @@ internal object AdBlocker {
         "3lift.com",
         "smartadserver.com",
         "amazon-adsystem.com",
-        // Adult / streaming site specific ad networks
         "exoclick.com",
         "juicyads.com",
         "trafficjunky.net",
@@ -51,7 +47,6 @@ internal object AdBlocker {
         "pushground.com",
         "mgid.com",
         "revcontent.com",
-        // Video ad CDNs (these serve the "wrong" video the user sees)
         "imasdk.googleapis.com",
         "pubads.g.doubleclick.net",
         "securepubads.g.doubleclick.net",
@@ -61,25 +56,21 @@ internal object AdBlocker {
         "ads.adaptv.advertising.com",
         "sync.adaptv.advertising.com",
         "cdn.adnxs.com",
-        // Crypto miners
         "coinhive.com",
         "coin-hive.com",
         "cryptoloot.pro",
         "minero.cc",
-        // Ambient/background video CDNs (decorative site videos, not episode streams)
         "silent-basis.pro",
     )
 
-    // Path/query patterns that strongly indicate an ad request
     private val BLOCKED_PATH_PATTERNS = listOf(
-        // Placeholder/empty video files used by embedded players during initialisation
         Regex("""/_blank\.""", RegexOption.IGNORE_CASE),
         Regex("""/(?:ads?|advert(?:is(?:ement|ing))?|banner|popup|popunder|interstitial)/""", RegexOption.IGNORE_CASE),
         Regex("""[?&](?:ad|adunit|adtype|adzone|adslot|adid)=""", RegexOption.IGNORE_CASE),
-        Regex("""/vast[/?]""", RegexOption.IGNORE_CASE),      // VAST ad tags
-        Regex("""/vpaid[/?]""", RegexOption.IGNORE_CASE),     // VPAID video ads
+        Regex("""/vast[/?]""", RegexOption.IGNORE_CASE),
+        Regex("""/vpaid[/?]""", RegexOption.IGNORE_CASE),
         Regex("""[?&]vast=""", RegexOption.IGNORE_CASE),
-        Regex("""/ima/""", RegexOption.IGNORE_CASE),          // Google IMA SDK paths
+        Regex("""/ima/""", RegexOption.IGNORE_CASE),
         Regex("""googlesyndication""", RegexOption.IGNORE_CASE),
         Regex("""doubleclick""", RegexOption.IGNORE_CASE),
     )

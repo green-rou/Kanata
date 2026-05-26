@@ -27,7 +27,6 @@ class AnalyticsManager(context: Context) {
         crashlytics.setCustomKey("android_sdk", Build.VERSION.SDK_INT)
         crashlytics.setCustomKey("app_version", appVersion)
 
-        // User properties for audience segmentation in Analytics console
         analytics.setUserProperty("device_manufacturer", Build.MANUFACTURER.take(36))
         analytics.setUserProperty("android_version", Build.VERSION.RELEASE.take(36))
     }

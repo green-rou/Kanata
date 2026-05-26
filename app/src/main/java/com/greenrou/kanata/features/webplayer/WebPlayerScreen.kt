@@ -261,8 +261,6 @@ fun WebPlayerScreen(
         }
     }
 
-    // Restore full history when WebView is recreated after returning from player,
-    // otherwise load the last URL (first launch or no saved state).
     LaunchedEffect(webView) {
         val saved = viewModel.consumeWebViewState()
         if (saved != null) {

@@ -72,7 +72,6 @@ class MainActivity : ComponentActivity() {
             LaunchedEffect(Unit) {
                 updateViewModel.handleEvent(UpdateEvent.CheckUpdate)
 
-                // Dialog queue: wait for update check + any update dialog, then show analytics consent
                 snapshotFlow {
                     !state.analyticsConsentShown &&
                     updateState.updateCheckHasRun &&

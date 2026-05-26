@@ -2,7 +2,6 @@ package com.greenrou.kanata.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// ── Green (default) ──────────────────────────────────────────────────────────
 val AnimeLight_Primary = Color(0xFF15803D)
 val AnimeLight_OnPrimary = Color(0xFFFFFFFF)
 val AnimeLight_PrimaryContainer = Color(0xFFDCFCE7)
@@ -51,7 +50,6 @@ val AnimeDark_SurfaceContainerHighest = Color(0xFF1F3A26)
 val AnimeDark_Outline = Color(0xFF6B7280)
 val AnimeDark_OutlineVariant = Color(0xFF2D5A3A)
 
-// ── Gray ──────────────────────────────────────────────────────────────────────
 val GrayLight_Primary = Color(0xFF4B5563)
 val GrayLight_OnPrimary = Color(0xFFFFFFFF)
 val GrayLight_PrimaryContainer = Color(0xFFF3F4F6)
@@ -82,7 +80,6 @@ val GrayDark_SurfaceContainerHigh = Color(0xFF1F2937)
 val GrayDark_SurfaceContainerHighest = Color(0xFF374151)
 val GrayDark_OutlineVariant = Color(0xFF4B5563)
 
-// ── Blue ──────────────────────────────────────────────────────────────────────
 val BlueLight_Primary = Color(0xFF1D4ED8)
 val BlueLight_OnPrimary = Color(0xFFFFFFFF)
 val BlueLight_PrimaryContainer = Color(0xFFDBEAFE)
@@ -113,7 +110,6 @@ val BlueDark_SurfaceContainerHigh = Color(0xFF122235)
 val BlueDark_SurfaceContainerHighest = Color(0xFF1A3048)
 val BlueDark_OutlineVariant = Color(0xFF1E3A5F)
 
-// ── Red ───────────────────────────────────────────────────────────────────────
 val RedLight_Primary = Color(0xFFDC2626)
 val RedLight_OnPrimary = Color(0xFFFFFFFF)
 val RedLight_PrimaryContainer = Color(0xFFFEE2E2)
@@ -144,7 +140,6 @@ val RedDark_SurfaceContainerHigh = Color(0xFF2E0808)
 val RedDark_SurfaceContainerHighest = Color(0xFF3D0A0A)
 val RedDark_OutlineVariant = Color(0xFF7F1D1D)
 
-// ── Orange ────────────────────────────────────────────────────────────────────
 val OrangeLight_Primary = Color(0xFFEA580C)
 val OrangeLight_OnPrimary = Color(0xFFFFFFFF)
 val OrangeLight_PrimaryContainer = Color(0xFFFFEDD5)
@@ -175,7 +170,6 @@ val OrangeDark_SurfaceContainerHigh = Color(0xFF2E1405)
 val OrangeDark_SurfaceContainerHighest = Color(0xFF3D1C07)
 val OrangeDark_OutlineVariant = Color(0xFF7C2D12)
 
-// ── Purple ────────────────────────────────────────────────────────────────────
 val PurpleLight_Primary = Color(0xFF6D28D9)
 val PurpleLight_OnPrimary = Color(0xFFFFFFFF)
 val PurpleLight_PrimaryContainer = Color(0xFFEDE9FE)
@@ -206,7 +200,6 @@ val PurpleDark_SurfaceContainerHigh = Color(0xFF1C1238)
 val PurpleDark_SurfaceContainerHighest = Color(0xFF271A4A)
 val PurpleDark_OutlineVariant = Color(0xFF3B1D8F)
 
-// ── Rose ──────────────────────────────────────────────────────────────────────
 val RoseLight_Primary = Color(0xFFBE123C)
 val RoseLight_OnPrimary = Color(0xFFFFFFFF)
 val RoseLight_PrimaryContainer = Color(0xFFFFE4E6)
@@ -237,7 +230,6 @@ val RoseDark_SurfaceContainerHigh = Color(0xFF2D0818)
 val RoseDark_SurfaceContainerHighest = Color(0xFF3B0B20)
 val RoseDark_OutlineVariant = Color(0xFF881337)
 
-// ── Teal ──────────────────────────────────────────────────────────────────────
 val TealLight_Primary = Color(0xFF0D9488)
 val TealLight_OnPrimary = Color(0xFFFFFFFF)
 val TealLight_PrimaryContainer = Color(0xFFCCFBF1)

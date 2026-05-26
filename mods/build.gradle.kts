@@ -1,2 +1,5 @@
-// Root build file for the KanataMods project.
-// Mod-specific configuration goes in each mod's own build.gradle.kts.
+plugins {
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.kotlin.android) apply false
+    alias(libs.plugins.kotlin.jvm) apply false
+}

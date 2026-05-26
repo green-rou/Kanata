@@ -2,7 +2,7 @@ name: CI / Release
 
 on:
   push:
-    branches: [main, master]
+    branches: [main, master, 'dev*']
     tags: ['v*.*.*']
   pull_request:
     branches: [main, master]
@@ -38,6 +38,51 @@ jobs:
 
       - name: Build debug APK
         run: ./gradlew assembleDebug --no-daemon
+
+  build-mods:
+    name: Build mods
+    if: "startsWith(github.ref, 'refs/heads/dev')"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Build all mods
+        run: |
+          for mod_dir in mods/source-*/; do
+            mod_name=$(basename "$mod_dir")
+            ./gradlew -p mods ":${mod_name}:assembleRelease" --no-daemon
+          done
+
+      - name: Collect APKs
+        run: |
+          mkdir -p mod-apks
+          while IFS='|' read -r id parser; do
+            src="mods/${id}/build/outputs/apk/release/${id}-release-unsigned.apk"
+            [ -f "$src" ] && cp "$src" "mod-apks/${id}__${parser}.apk"
+          done < <(jq -r '.[] | "\(.id)|\(.parserClass)"' mods/index.json)
+
+      - name: Publish to mods-dev pre-release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release delete mods-dev --yes 2>/dev/null || true
+          gh release create mods-dev \
+            --title "Mods (dev)" \
+            --prerelease \
+            --notes "Dev mod builds — updated automatically on every push to dev branches." \
+            mod-apks/*.apk
 
   release:
     name: Release

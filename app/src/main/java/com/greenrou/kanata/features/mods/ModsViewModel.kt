@@ -93,7 +93,6 @@ class ModsViewModel(
                 hasUpdate = inst != null && inst.version < dto.version,
             )
         }
-        // Mods installed manually (not in the remote index) appear at the bottom.
         val indexIds = remoteIndex.map { it.id }.toSet()
         val offlineOnly = installedMods
             .filter { it.id !in indexIds }
