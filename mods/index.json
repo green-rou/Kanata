@@ -26,7 +26,7 @@
     "version": 1,
     "minAppVersion": 1,
     "parserClass": "com.kanata.mod.shikimori.ModEntry",
-    "apkUrl": "https://github.com/green-rou/Kanata/releases/download/mods-dev/source-shikimori__com.kanata.mod.shikimori.ModEntry.apk",
+    "apkUrl": "https://github.com/green-rou/Kanata/releases/download/mods-dev/info-shikimori__com.kanata.mod.shikimori.ModEntry.apk",
     "description": "Enriches anime details with Russian synopsis, Shikimori score, and studio info."
   }
 ]

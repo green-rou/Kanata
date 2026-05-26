@@ -32,4 +32,4 @@ rootProject.name = "KanataMods"
 
 include(":source-aniwatch")
 include(":source-anilibria")
-include(":source-shikimori")
+include(":info-shikimori")

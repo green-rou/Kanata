@@ -60,7 +60,8 @@ jobs:
 
       - name: Build all mods
         run: |
-          for mod_dir in mods/source-*/; do
+          for mod_dir in mods/source-*/ mods/info-*/; do
+            [ -d "$mod_dir" ] || continue
             mod_name=$(basename "$mod_dir")
             ./gradlew -p mods ":${mod_name}:assembleRelease" --no-daemon
           done
@@ -70,7 +71,7 @@ jobs:
           mkdir -p mod-apks
           while IFS='|' read -r id parser; do
             src="mods/${id}/build/outputs/apk/release/${id}-release-unsigned.apk"
-            [ -f "$src" ] && cp "$src" "mod-apks/${id}__${parser}.apk"
+            if [ -f "$src" ]; then cp "$src" "mod-apks/${id}__${parser}.apk"; fi
           done < <(jq -r '.[] | "\(.id)|\(.parserClass)"' mods/index.json)
 
       - name: Publish to mods-dev pre-release
