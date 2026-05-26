@@ -50,11 +50,29 @@ class ModEntry : ModSiteParser {
             .referrer(base)
             .get()
 
+        val directLinks = doc.select("a[href]")
+            .map { it.attr("abs:href") }
+            .filter { base in it && EPISODE_SEGMENT.containsMatchIn(it) }
+            .distinct()
+        Log.d(TAG, "getEpisodes: directLinks(${directLinks.size})=${directLinks.take(3)}")
+
+        if (directLinks.isNotEmpty()) {
+            val sorted = directLinks.sortedBy {
+                EPISODE_SEGMENT.find(it)?.value?.filter { c -> c.isDigit() }?.toIntOrNull() ?: 0
+            }
+            val episodes = sorted.mapIndexed { i, url ->
+                val n = EPISODE_SEGMENT.find(url)?.value?.filter { c -> c.isDigit() }?.toIntOrNull() ?: (i + 1)
+                ModEpisode("Episode $n", url)
+            }
+            Log.d(TAG, "getEpisodes: returning ${episodes.size} direct episodes, ep[0]=${episodes.firstOrNull()?.url}")
+            return episodes
+        }
+
         val totalEpisodes = Regex("""Episodes?\s*[:\-]\s*(\d+)""", RegexOption.IGNORE_CASE)
             .find(doc.text())
             ?.groupValues?.get(1)?.toIntOrNull()
             ?: 1
-        Log.d(TAG, "getEpisodes: totalEpisodes=$totalEpisodes")
+        Log.d(TAG, "getEpisodes: no direct links found, totalEpisodes=$totalEpisodes")
 
         val sampleHref = doc.select("a[href]")
             .map { it.attr("abs:href") }
@@ -65,18 +83,19 @@ class ModEntry : ModSiteParser {
         val suffix: String
 
         if (sampleHref != null) {
-            val m = Regex("""/([\w-]+)-episode-\d+-([\w-]+)/?$""").find(sampleHref)
+            val m = Regex("""/([\w-]+)-episode-\d+(?:-([\w-]+))?/?$""").find(sampleHref)
             slug = m?.groupValues?.get(1) ?: slugFrom(pageUrl)
-            suffix = m?.groupValues?.get(2) ?: "english-subbed"
+            suffix = m?.groupValues?.get(2).orEmpty()
         } else {
             slug = slugFrom(pageUrl)
-            suffix = "english-subbed"
+            suffix = ""
         }
 
         val episodes = (1..totalEpisodes).map { n ->
-            ModEpisode("Episode $n", "$base/$slug-episode-$n-$suffix/")
+            val url = if (suffix.isNotEmpty()) "$base/$slug-episode-$n-$suffix/" else "$base/$slug-episode-$n/"
+            ModEpisode("Episode $n", url)
         }
-        Log.d(TAG, "getEpisodes: slug=$slug suffix=$suffix ep[0]=${episodes.firstOrNull()?.url}")
+        Log.d(TAG, "getEpisodes: slug=$slug suffix='$suffix' ep[0]=${episodes.firstOrNull()?.url}")
         return episodes
     }
 
@@ -85,6 +104,6 @@ class ModEntry : ModSiteParser {
 
     companion object {
         private const val TAG = "AniWatchMod"
-        private val EPISODE_SEGMENT = Regex("""-episode-\d+-""")
+        private val EPISODE_SEGMENT = Regex("""-episode-(\d+)""")
     }
 }
