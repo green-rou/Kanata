@@ -6,7 +6,7 @@
     "version": 1,
     "minAppVersion": 1,
     "parserClass": "com.kanata.mod.example.ModEntry",
-    "apkUrl": "https://github.com/green-rou/Kanata/releases/download/mods-v1/source-example__com.kanata.mod.example.ModEntry.apk",
+    "apkUrl": "https://github.com/green-rou/Kanata/releases/download/mods-dev/source-example__com.kanata.mod.example.ModEntry.apk",
     "description": "Example source mod — replace with a real implementation."
   },
   {
@@ -16,7 +16,7 @@
     "version": 1,
     "minAppVersion": 1,
     "parserClass": "com.kanata.mod.aniwatch.ModEntry",
-    "apkUrl": "https://github.com/green-rou/Kanata/releases/download/mods-v1/source-aniwatch__com.kanata.mod.aniwatch.ModEntry.apk",
+    "apkUrl": "https://github.com/green-rou/Kanata/releases/download/mods-dev/source-aniwatch__com.kanata.mod.aniwatch.ModEntry.apk",
     "description": "English-subbed anime from KayoAnime (ww2.aniwatch.fit)."
   }
 ]
