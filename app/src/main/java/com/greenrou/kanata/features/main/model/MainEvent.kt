@@ -25,6 +25,7 @@ sealed interface MainEvent {
     data class ToggleSource(val type: VideoSourceType) : MainEvent
     data object ToggleAdBlocker : MainEvent
     data object ToggleWebBackNavTopBar : MainEvent
+    data class SetActiveInfoProvider(val id: String?) : MainEvent
     data object ToggleAnalytics : MainEvent
     data object AcceptAnalytics : MainEvent
     data object DenyAnalytics : MainEvent

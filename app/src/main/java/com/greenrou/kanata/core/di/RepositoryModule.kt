@@ -1,6 +1,7 @@
 package com.greenrou.kanata.core.di
 
 import com.greenrou.kanata.BuildConfig
+import com.greenrou.kanata.data.mod.InfoProviderRegistry
 import com.greenrou.kanata.data.mod.ModLoader
 import com.greenrou.kanata.data.mod.ParserRegistry
 import com.greenrou.kanata.data.parsers.AnimegongoSiteParser
@@ -49,6 +50,7 @@ val repositoryModule = module {
         )
         ParserRegistry(builtIn, get(), get())
     }
+    single { InfoProviderRegistry(get(), get()) }
     single<ModRepository> {
         ModRepositoryImpl(
             dao = get(),

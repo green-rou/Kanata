@@ -41,6 +41,8 @@
     <string name="detail_no_streams">No streams found</string>
     <string name="detail_tap_source">Tap a source to browse episodes</string>
     <string name="detail_synopsis">Synopsis</string>
+    <string name="detail_synopsis_via">via %s</string>
+    <string name="detail_studios">Studios</string>
     <string name="detail_source_ann">Source: Anime News Network</string>
     <string name="detail_cd_copy">Copy</string>
     <string name="detail_cd_copied">Copied</string>
@@ -173,6 +175,11 @@
     <string name="settings_adult_off_subtitle">Show only non-adult titles</string>
     <string name="settings_section_sources">Sources</string>
     <string name="settings_sources_select">Select active sources</string>
+    <string name="settings_section_extensions">Extensions</string>
+    <string name="settings_extensions_manage_title">Manage Extensions</string>
+    <string name="settings_extensions_manage_subtitle">Install or remove source mods</string>
+    <string name="settings_info_provider_select">Anime info source</string>
+    <string name="settings_info_provider_none">None (AniList only)</string>
     <string name="settings_section_downloads">Downloads</string>
     <string name="settings_download_folder_title">Download folder</string>
     <string name="settings_download_folder_default">Default (app external storage)</string>

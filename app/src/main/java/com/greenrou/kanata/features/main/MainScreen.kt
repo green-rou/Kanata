@@ -108,6 +108,7 @@ fun MainScreen(
     val favoriteIds by viewModel.favoriteIds.collectAsStateWithLifecycle()
     val regularSources by viewModel.regularSources.collectAsStateWithLifecycle()
     val adultSources by viewModel.adultSources.collectAsStateWithLifecycle()
+    val infoProviders by viewModel.infoProviders.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val downloadsViewModel: DownloadManagerViewModel = koinViewModel()
     val updateViewModel: UpdateViewModel = koinViewModel()
@@ -270,11 +271,10 @@ fun MainScreen(
                                     )
                                 } else {
                                     Text(when (selectedTab) {
-                                        BottomNavItem.AnimeList -> stringResource(R.string.tab_anime)
                                         BottomNavItem.Favorites -> stringResource(R.string.tab_favorites)
-                                        BottomNavItem.Discover -> stringResource(R.string.tab_discover)
                                         BottomNavItem.Downloads -> stringResource(R.string.tab_downloads)
                                         BottomNavItem.Settings -> stringResource(R.string.tab_settings)
+                                        else -> ""
                                     })
                                 }
                             },
@@ -505,6 +505,9 @@ fun MainScreen(
                         isCheckingUpdate = updateState.isChecking,
                         onCheckUpdate = { updateViewModel.handleEvent(UpdateEvent.CheckUpdate) },
                         onNavigateToMods = onNavigateToMods,
+                        infoProviders = infoProviders,
+                        activeInfoProviderId = state.activeInfoProviderId,
+                        onSetInfoProvider = { viewModel.handleEvent(MainEvent.SetActiveInfoProvider(it)) },
                         bottomPadding = contentPadding.calculateBottomPadding(),
                         modifier = Modifier
                             .fillMaxSize()

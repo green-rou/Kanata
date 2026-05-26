@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.greenrou.kanata.core.analytics.AnalyticsManager
 import com.greenrou.kanata.core.analytics.reportToCrashlytics
 import com.greenrou.kanata.core.network.NetworkMonitor
+import com.greenrou.kanata.data.mod.InfoProviderRegistry
 import com.greenrou.kanata.data.mod.ParserRegistry
 import com.greenrou.kanata.domain.model.AnimeFilter
 import com.greenrou.kanata.domain.model.VideoSourceType
@@ -12,7 +13,6 @@ import com.greenrou.kanata.domain.repository.SettingsManager
 import com.greenrou.kanata.domain.usecase.AddFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.GetAnimeListUseCase
 import com.greenrou.kanata.domain.usecase.GetFavoritesUseCase
-import com.greenrou.kanata.domain.usecase.IsFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.RemoveFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.SetDownloadFolderUseCase
 import com.greenrou.kanata.features.main.model.MainEvent
@@ -37,13 +37,13 @@ class MainViewModel(
     private val getAnimeList: GetAnimeListUseCase,
     private val addFavorite: AddFavoriteUseCase,
     private val removeFavorite: RemoveFavoriteUseCase,
-    private val isFavorite: IsFavoriteUseCase,
     private val getFavorites: GetFavoritesUseCase,
     private val settingsManager: SettingsManager,
     private val setDownloadFolder: SetDownloadFolderUseCase,
     private val networkMonitor: NetworkMonitor,
     private val analytics: AnalyticsManager,
     parserRegistry: ParserRegistry,
+    infoProviderRegistry: InfoProviderRegistry,
 ) : ViewModel() {
 
     val regularSources: StateFlow<List<Pair<VideoSourceType, String>>> = parserRegistry.parsers
@@ -52,6 +52,10 @@ class MainViewModel(
 
     val adultSources: StateFlow<List<Pair<VideoSourceType, String>>> = parserRegistry.parsers
         .map { list -> list.filter { it.isAdultOnly }.map { it.sourceType to it.label } }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val infoProviders: StateFlow<List<Pair<String, String>>> = infoProviderRegistry.providers
+        .map { list -> list.map { it.id to it.label } }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     private val _state = MutableStateFlow(MainState())
@@ -122,6 +126,9 @@ class MainViewModel(
             .launchIn(viewModelScope)
         settingsManager.analyticsConsentShown
             .onEach { shown -> _state.update { it.copy(analyticsConsentShown = shown) } }
+            .launchIn(viewModelScope)
+        settingsManager.activeInfoProviderId
+            .onEach { id -> _state.update { it.copy(activeInfoProviderId = id) } }
             .launchIn(viewModelScope)
     }
 
@@ -227,6 +234,9 @@ class MainViewModel(
             MainEvent.ToggleAdBlocker -> viewModelScope.launch {
                 settingsManager.setAdBlockerEnabled(!_state.value.adBlockerEnabled)
             }
+            is MainEvent.SetActiveInfoProvider -> viewModelScope.launch {
+                settingsManager.setActiveInfoProviderId(event.id)
+            }
             MainEvent.ToggleWebBackNavTopBar -> viewModelScope.launch {
                 settingsManager.setWebBackNavTopBar(!_state.value.webBackNavTopBar)
             }
@@ -273,8 +283,6 @@ class MainViewModel(
             _state.update { it.copy(isLoading = true, error = null) }
             getAnimeList(page = 1, showAdultContent = showAdultContent, filter = filter)
                 .onSuccess { page ->
-                    if (page.items.isEmpty()) {
-                    }
                     _state.update {
                         it.copy(
                             isLoading = false,

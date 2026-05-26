@@ -28,6 +28,7 @@ data class MainState(
     val webBackNavTopBar: Boolean = false,
     val analyticsEnabled: Boolean = true,
     val analyticsConsentShown: Boolean = false,
+    val activeInfoProviderId: String? = null,
 ) {
     val hasActiveFilters: Boolean get() = selectedGenres.isNotEmpty() || selectedFormats.isNotEmpty()
 }

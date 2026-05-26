@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import com.greenrou.kanata.R
 import com.greenrou.kanata.domain.model.VideoSourceType
 import com.greenrou.kanata.features.settings.content.ColorPickerItem
+import com.greenrou.kanata.features.settings.content.InfoProviderSection
 import com.greenrou.kanata.features.settings.content.LanguagePickerItem
 import com.greenrou.kanata.features.settings.content.SettingsItem
 import com.greenrou.kanata.features.settings.content.SettingsLinkItem
@@ -55,6 +56,7 @@ fun SettingsScreen(
     onToggleTheme: () -> Unit,
     coverFillsTopBar: Boolean,
     onToggleCoverLayout: () -> Unit,
+    modifier: Modifier = Modifier,
     downloadFolder: String = "",
     onSetDownloadFolder: (String) -> Unit = {},
     accentColor: String = "Gray",
@@ -72,8 +74,10 @@ fun SettingsScreen(
     isCheckingUpdate: Boolean = false,
     onCheckUpdate: () -> Unit = {},
     onNavigateToMods: () -> Unit = {},
+    infoProviders: List<Pair<String, String>> = emptyList(),
+    activeInfoProviderId: String? = null,
+    onSetInfoProvider: (String?) -> Unit = {},
     bottomPadding: Dp = 0.dp,
-    modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
@@ -155,12 +159,20 @@ fun SettingsScreen(
             )
         }
 
-        SettingsSection(title = "Extensions") {
+        SettingsSection(title = stringResource(R.string.settings_section_extensions)) {
             SettingsLinkItem(
                 icon = Icons.Rounded.Extension,
-                title = "Manage Extensions",
-                subtitle = "Install or remove source mods",
+                title = stringResource(R.string.settings_extensions_manage_title),
+                subtitle = stringResource(R.string.settings_extensions_manage_subtitle),
                 onClick = onNavigateToMods,
+            )
+        }
+
+        if (infoProviders.isNotEmpty()) {
+            InfoProviderSection(
+                providers = infoProviders,
+                activeProviderId = activeInfoProviderId,
+                onSelect = onSetInfoProvider,
             )
         }
 

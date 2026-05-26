@@ -1,15 +1,5 @@
 [
   {
-    "id": "source-example",
-    "label": "Example Source",
-    "language": "uk",
-    "version": 1,
-    "minAppVersion": 1,
-    "parserClass": "com.kanata.mod.example.ModEntry",
-    "apkUrl": "https://github.com/green-rou/Kanata/releases/download/mods-dev/source-example__com.kanata.mod.example.ModEntry.apk",
-    "description": "Example source mod — replace with a real implementation."
-  },
-  {
     "id": "source-aniwatch",
     "label": "KayoAnime",
     "language": "en",
@@ -18,5 +8,25 @@
     "parserClass": "com.kanata.mod.aniwatch.ModEntry",
     "apkUrl": "https://github.com/green-rou/Kanata/releases/download/mods-dev/source-aniwatch__com.kanata.mod.aniwatch.ModEntry.apk",
     "description": "English-subbed anime from KayoAnime (ww2.aniwatch.fit)."
+  },
+  {
+    "id": "source-anilibria",
+    "label": "AniLibria",
+    "language": "ru",
+    "version": 1,
+    "minAppVersion": 1,
+    "parserClass": "com.kanata.mod.anilibria.ModEntry",
+    "apkUrl": "https://github.com/green-rou/Kanata/releases/download/mods-dev/source-anilibria__com.kanata.mod.anilibria.ModEntry.apk",
+    "description": "Russian-dubbed anime from AniLibria (anilibria.top) with HLS streams."
+  },
+  {
+    "id": "info-shikimori",
+    "label": "Shikimori",
+    "language": "ru",
+    "version": 1,
+    "minAppVersion": 1,
+    "parserClass": "com.kanata.mod.shikimori.ModEntry",
+    "apkUrl": "https://github.com/green-rou/Kanata/releases/download/mods-dev/source-shikimori__com.kanata.mod.shikimori.ModEntry.apk",
+    "description": "Enriches anime details with Russian synopsis, Shikimori score, and studio info."
   }
 ]

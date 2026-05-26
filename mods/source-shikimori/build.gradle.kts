@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.kanata.mod.example"
+    namespace = "com.kanata.mod.shikimori"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.kanata.mod.example"
+        applicationId = "com.kanata.mod.shikimori"
         minSdk = 28
         targetSdk = 36
         versionCode = 1
@@ -35,4 +35,5 @@ kotlin {
 
 dependencies {
     compileOnly(project(":mod-api"))
+    compileOnly(libs.jsoup)
 }

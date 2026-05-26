@@ -126,6 +126,7 @@ fun AnimeDetailsScreen(
                     coverFillsTopBar = state.coverFillsTopBar,
                     downloadedEpisodeCount = state.downloadedEpisodeCount,
                     onWatchOffline = { viewModel.handleEvent(AnimeDetailsEvent.WatchOffline) },
+                    enrichment = state.enrichment,
                 )
                 state.isOffline -> OfflineState(
                     onRetry = { viewModel.handleEvent(AnimeDetailsEvent.LoadAnime(animeId)) },

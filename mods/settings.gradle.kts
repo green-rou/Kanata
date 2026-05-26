@@ -30,5 +30,6 @@ project(":mod-api").projectDir = File("../mod-api")
 
 rootProject.name = "KanataMods"
 
-include(":source-example")
 include(":source-aniwatch")
+include(":source-anilibria")
+include(":source-shikimori")

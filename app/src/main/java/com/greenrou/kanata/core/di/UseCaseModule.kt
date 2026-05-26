@@ -8,6 +8,7 @@ import com.greenrou.kanata.domain.usecase.EnqueueDownloadUseCase
 import com.greenrou.kanata.domain.usecase.FetchRemoteModsUseCase
 import com.greenrou.kanata.domain.usecase.GetAnimeByIdUseCase
 import com.greenrou.kanata.domain.usecase.GetAnimeByMoodUseCase
+import com.greenrou.kanata.domain.usecase.GetAnimeEnrichmentUseCase
 import com.greenrou.kanata.domain.usecase.GetAnimeListUseCase
 import com.greenrou.kanata.domain.usecase.GetAnimegongoTranslationsUseCase
 import com.greenrou.kanata.domain.usecase.GetCompletedDownloadsUseCase
@@ -46,6 +47,7 @@ val useCaseModule = module {
     factory { GetRandomImageUseCase(get()) }
     factory { GetVideoStreamUseCase(get()) }
     factory { SearchExternalAnimeUseCase(get()) }
+    factory { GetAnimeEnrichmentUseCase(get(), get()) }
     factory { GetEpisodeListUseCase(get()) }
     factory { GetAnimegongoTranslationsUseCase(get()) }
     factory { EnqueueDownloadUseCase(get()) }

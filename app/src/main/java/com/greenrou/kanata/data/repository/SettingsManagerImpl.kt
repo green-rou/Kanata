@@ -26,6 +26,7 @@ class SettingsManagerImpl(private val context: Context) : SettingsManager {
         val ANALYTICS_ENABLED = booleanPreferencesKey("analytics_enabled")
         val ANALYTICS_CONSENT_SHOWN = booleanPreferencesKey("analytics_consent_shown")
         val SKIPPED_VERSION = stringPreferencesKey("skipped_version")
+        val ACTIVE_INFO_PROVIDER_ID = stringPreferencesKey("active_info_provider_id")
     }
 
     override val showAdultContent: Flow<Boolean> = context.dataStore.data
@@ -147,6 +148,16 @@ class SettingsManagerImpl(private val context: Context) : SettingsManager {
     override suspend fun setSkippedVersion(version: String) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.SKIPPED_VERSION] = version
+        }
+    }
+
+    override val activeInfoProviderId: Flow<String?> = context.dataStore.data
+        .map { preferences -> preferences[PreferencesKeys.ACTIVE_INFO_PROVIDER_ID] }
+
+    override suspend fun setActiveInfoProviderId(id: String?) {
+        context.dataStore.edit { preferences ->
+            if (id == null) preferences.remove(PreferencesKeys.ACTIVE_INFO_PROVIDER_ID)
+            else preferences[PreferencesKeys.ACTIVE_INFO_PROVIDER_ID] = id
         }
     }
 }

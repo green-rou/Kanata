@@ -8,8 +8,8 @@ import com.greenrou.kanata.domain.model.Anime
 import com.greenrou.kanata.domain.repository.SettingsManager
 import com.greenrou.kanata.domain.usecase.AddFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.GetAnimeByIdUseCase
+import com.greenrou.kanata.domain.usecase.GetAnimeEnrichmentUseCase
 import com.greenrou.kanata.domain.usecase.GetCompletedDownloadsUseCase
-import com.greenrou.kanata.domain.usecase.GetVideoStreamUseCase
 import com.greenrou.kanata.domain.usecase.IsFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.RemoveFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.SearchExternalAnimeUseCase
@@ -31,11 +31,11 @@ class AnimeDetailsViewModel(
     private val isFavoriteUseCase: IsFavoriteUseCase,
     private val removeFavorite: RemoveFavoriteUseCase,
     private val searchExternalAnime: SearchExternalAnimeUseCase,
-    private val getVideoStreamUseCase: GetVideoStreamUseCase,
-    private val settingsManager: SettingsManager,
+    settingsManager: SettingsManager,
     private val getCompletedDownloads: GetCompletedDownloadsUseCase,
     private val networkMonitor: NetworkMonitor,
     private val analytics: AnalyticsManager,
+    private val getAnimeEnrichment: GetAnimeEnrichmentUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AnimeDetailsState())
@@ -112,6 +112,7 @@ class AnimeDetailsViewModel(
                     _state.update { it.copy(isLoading = false, anime = anime) }
                     searchOnExternal(anime)
                     observeDownloadedCount(anime.title)
+                    fetchEnrichment(anime)
                 }
                 .onFailure { e ->
 
@@ -145,6 +146,20 @@ class AnimeDetailsViewModel(
             )
             val sources = searchExternalAnime(titles)
             _state.update { it.copy(isSearching = false, videoSources = sources) }
+        }
+    }
+
+    private fun fetchEnrichment(anime: Anime) {
+        viewModelScope.launch {
+            val titles = listOfNotNull(
+                anime.titleRomaji.takeIf { it.isNotBlank() },
+                anime.titleEnglish.takeIf { it.isNotBlank() },
+                anime.title.takeIf { it.isNotBlank() },
+            )
+            val enrichment = getAnimeEnrichment(titles)
+            if (enrichment != null) {
+                _state.update { it.copy(enrichment = enrichment) }
+            }
         }
     }
 }

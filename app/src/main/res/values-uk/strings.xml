@@ -41,6 +41,8 @@
     <string name="detail_no_streams">Джерел не знайдено</string>
     <string name="detail_tap_source">Натисніть на джерело, щоб переглянути епізоди</string>
     <string name="detail_synopsis">Синопсис</string>
+    <string name="detail_synopsis_via">через %s</string>
+    <string name="detail_studios">Студії</string>
     <string name="detail_source_ann">Джерело: Anime News Network</string>
     <string name="detail_cd_copy">Копіювати</string>
     <string name="detail_cd_copied">Скопійовано</string>
@@ -175,6 +177,11 @@
     <string name="settings_adult_off_subtitle">Показувати лише тайтли без 18+</string>
     <string name="settings_section_sources">Джерела</string>
     <string name="settings_sources_select">Оберіть активні джерела</string>
+    <string name="settings_section_extensions">Розширення</string>
+    <string name="settings_extensions_manage_title">Керування розширеннями</string>
+    <string name="settings_extensions_manage_subtitle">Встановлення або видалення модів</string>
+    <string name="settings_info_provider_select">Джерело інформації про аніме</string>
+    <string name="settings_info_provider_none">Не вибрано (тільки AniList)</string>
     <string name="settings_section_downloads">Завантаження</string>
     <string name="settings_download_folder_title">Папка завантажень</string>
     <string name="settings_download_folder_default">За замовчуванням (зовнішнє сховище)</string>
