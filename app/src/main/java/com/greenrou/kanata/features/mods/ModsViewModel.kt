@@ -122,7 +122,7 @@ class ModsViewModel(
             installMod(dto) { progress ->
                 _state.update { it.copy(downloadProgress = it.downloadProgress + (mod.id to progress)) }
             }.onSuccess {
-                _events.send(ModsEvent.ShowSnackbar("${mod.label} installed. Restart the app to activate."))
+                _events.send(ModsEvent.ShowSnackbar("${mod.label} installed."))
             }.onFailure { e ->
                 _events.send(ModsEvent.ShowSnackbar("Failed to install ${mod.label}: ${e.message}"))
             }
@@ -139,7 +139,7 @@ class ModsViewModel(
         viewModelScope.launch {
             uninstallMod(modId)
                 .onSuccess {
-                    _events.send(ModsEvent.ShowSnackbar("Extension removed. Restart the app to apply."))
+                    _events.send(ModsEvent.ShowSnackbar("Extension removed."))
                 }
                 .onFailure { e ->
                     _events.send(ModsEvent.ShowSnackbar("Failed to remove extension: ${e.message}"))
@@ -150,7 +150,7 @@ class ModsViewModel(
     private fun handleToggle(modId: String, enabled: Boolean) {
         viewModelScope.launch {
             toggleMod(modId, enabled)
-            _events.send(ModsEvent.ShowSnackbar("Changes will apply after restart."))
+            _events.send(ModsEvent.ShowSnackbar(if (enabled) "Extension enabled." else "Extension disabled."))
         }
     }
 }

@@ -5,9 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.greenrou.kanata.core.analytics.AnalyticsManager
 import com.greenrou.kanata.core.analytics.reportToCrashlytics
 import com.greenrou.kanata.core.network.NetworkMonitor
+import com.greenrou.kanata.data.mod.ParserRegistry
 import com.greenrou.kanata.domain.model.AnimeFilter
 import com.greenrou.kanata.domain.model.VideoSourceType
-import com.greenrou.kanata.domain.parser.SiteParser
 import com.greenrou.kanata.domain.repository.SettingsManager
 import com.greenrou.kanata.domain.usecase.AddFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.GetAnimeListUseCase
@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -42,16 +43,16 @@ class MainViewModel(
     private val setDownloadFolder: SetDownloadFolderUseCase,
     private val networkMonitor: NetworkMonitor,
     private val analytics: AnalyticsManager,
-    parsers: List<SiteParser>,
+    parserRegistry: ParserRegistry,
 ) : ViewModel() {
 
-    val regularSources: List<Pair<VideoSourceType, String>> = parsers
-        .filter { !it.isAdultOnly }
-        .map { it.sourceType to it.label }
+    val regularSources: StateFlow<List<Pair<VideoSourceType, String>>> = parserRegistry.parsers
+        .map { list -> list.filter { !it.isAdultOnly }.map { it.sourceType to it.label } }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    val adultSources: List<Pair<VideoSourceType, String>> = parsers
-        .filter { it.isAdultOnly }
-        .map { it.sourceType to it.label }
+    val adultSources: StateFlow<List<Pair<VideoSourceType, String>>> = parserRegistry.parsers
+        .map { list -> list.filter { it.isAdultOnly }.map { it.sourceType to it.label } }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     private val _state = MutableStateFlow(MainState())
     val state = _state.asStateFlow()

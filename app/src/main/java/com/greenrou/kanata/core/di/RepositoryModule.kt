@@ -2,6 +2,7 @@ package com.greenrou.kanata.core.di
 
 import com.greenrou.kanata.BuildConfig
 import com.greenrou.kanata.data.mod.ModLoader
+import com.greenrou.kanata.data.mod.ParserRegistry
 import com.greenrou.kanata.data.parsers.AnimegongoSiteParser
 import com.greenrou.kanata.data.parsers.ArchiveOrgSiteParser
 import com.greenrou.kanata.data.parsers.AstarSiteParser
@@ -20,7 +21,6 @@ import com.greenrou.kanata.data.repository.SearchRepositoryImpl
 import com.greenrou.kanata.data.repository.SettingsManagerImpl
 import com.greenrou.kanata.data.repository.UpdateRepositoryImpl
 import com.greenrou.kanata.data.repository.VideoRepositoryImpl
-import com.greenrou.kanata.domain.parser.SiteParser
 import com.greenrou.kanata.domain.repository.AnimeRepository
 import com.greenrou.kanata.domain.repository.DownloadRepository
 import com.greenrou.kanata.domain.repository.EpisodeListRepository
@@ -35,7 +35,7 @@ import org.koin.dsl.module
 val repositoryModule = module {
     single { ModLoader(get()) }
 
-    single<List<SiteParser>> {
+    single {
         val builtIn = listOf(
             YummyAnimeSiteParser(),
             MikaiSiteParser(),
@@ -47,7 +47,7 @@ val repositoryModule = module {
             HentasisSiteParser(),
             HentaizSiteParser(),
         )
-        builtIn + get<ModLoader>().loadAll()
+        ParserRegistry(builtIn, get(), get())
     }
     single<ModRepository> {
         ModRepositoryImpl(

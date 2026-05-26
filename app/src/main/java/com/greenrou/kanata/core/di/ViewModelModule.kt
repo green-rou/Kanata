@@ -1,6 +1,6 @@
 package com.greenrou.kanata.core.di
 
-import com.greenrou.kanata.domain.parser.SiteParser
+import com.greenrou.kanata.data.mod.ParserRegistry
 import com.greenrou.kanata.domain.usecase.CheckUpdateUseCase
 import com.greenrou.kanata.features.details.AnimeDetailsViewModel
 import com.greenrou.kanata.features.downloads.DownloadManagerViewModel
@@ -18,7 +18,7 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val viewModelModule = module {
-    viewModel { MainViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get<List<SiteParser>>()) }
+    viewModel { MainViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get<ParserRegistry>()) }
     viewModel { AnimeDetailsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     viewModel { FavoritesViewModel(get(), get(), get(), get()) }
     viewModel { MoodViewModel(get(), get(), get()) }

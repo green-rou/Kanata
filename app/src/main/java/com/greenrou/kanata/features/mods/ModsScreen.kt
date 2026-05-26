@@ -253,23 +253,28 @@ private fun ModCard(
 
             Spacer(Modifier.height(12.dp))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                if (mod.isInstalled) {
+            if (mod.isInstalled) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     Text(
                         text = if (mod.isEnabled) "Enabled" else "Disabled",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                    Spacer(Modifier.width(8.dp))
                     Switch(
                         checked = mod.isEnabled,
                         onCheckedChange = onToggle,
                     )
-                    Spacer(Modifier.width(8.dp))
+                }
+                Spacer(Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     if (mod.hasUpdate) {
                         Button(
                             onClick = onInstall,
@@ -277,9 +282,11 @@ private fun ModCard(
                         ) {
                             Text("Update to v${mod.version}")
                         }
-                        Spacer(Modifier.width(8.dp))
                     }
                     if (showConfirmUninstall) {
+                        OutlinedButton(onClick = { showConfirmUninstall = false }) {
+                            Text("Cancel")
+                        }
                         Button(
                             onClick = {
                                 showConfirmUninstall = false
@@ -289,18 +296,19 @@ private fun ModCard(
                                 containerColor = MaterialTheme.colorScheme.error,
                             ),
                         ) {
-                            Text("Confirm remove")
-                        }
-                        Spacer(Modifier.width(8.dp))
-                        OutlinedButton(onClick = { showConfirmUninstall = false }) {
-                            Text("Cancel")
+                            Text("Remove")
                         }
                     } else {
                         OutlinedButton(onClick = { showConfirmUninstall = true }) {
                             Text("Remove")
                         }
                     }
-                } else {
+                }
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                ) {
                     Button(
                         onClick = onInstall,
                         enabled = !isDownloading && mod.apkUrl.isNotEmpty(),

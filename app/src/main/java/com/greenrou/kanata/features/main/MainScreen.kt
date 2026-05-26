@@ -106,6 +106,8 @@ fun MainScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val favoriteIds by viewModel.favoriteIds.collectAsStateWithLifecycle()
+    val regularSources by viewModel.regularSources.collectAsStateWithLifecycle()
+    val adultSources by viewModel.adultSources.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val downloadsViewModel: DownloadManagerViewModel = koinViewModel()
     val updateViewModel: UpdateViewModel = koinViewModel()
@@ -491,8 +493,8 @@ fun MainScreen(
                         accentColor = state.accentColor,
                         onSetAccentColor = { viewModel.handleEvent(MainEvent.SetAccentColor(it)) },
                         disabledSources = state.disabledSources,
-                        regularSources = viewModel.regularSources,
-                        adultSources = viewModel.adultSources,
+                        regularSources = regularSources,
+                        adultSources = adultSources,
                         onToggleSource = { viewModel.handleEvent(MainEvent.ToggleSource(it)) },
                         adBlockerEnabled = state.adBlockerEnabled,
                         onToggleAdBlocker = { viewModel.handleEvent(MainEvent.ToggleAdBlocker) },

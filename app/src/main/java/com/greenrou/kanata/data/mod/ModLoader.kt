@@ -12,8 +12,8 @@ class ModLoader(private val context: Context) {
     val modsDir: File
         get() = File(context.filesDir, "mods").also { it.mkdirs() }
 
-    fun loadAll(): List<SiteParser> =
-        modsDir.listFiles { f -> f.extension == "apk" }
+    fun loadAll(enabledFileNames: Set<String>): List<SiteParser> =
+        modsDir.listFiles { f -> f.extension == "apk" && f.name in enabledFileNames }
             ?.mapNotNull { apk ->
                 runCatching { loadFromApk(apk) }
                     .onFailure { Log.e("ModLoader", "Failed to load ${apk.name}", it) }
