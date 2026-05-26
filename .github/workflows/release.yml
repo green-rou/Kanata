@@ -41,7 +41,7 @@ jobs:
 
   build-mods:
     name: Build mods
-    if: "github.ref == 'refs/heads/dev'"
+    if: "startsWith(github.ref, 'refs/heads/dev')"
     runs-on: ubuntu-latest
 
     steps:
