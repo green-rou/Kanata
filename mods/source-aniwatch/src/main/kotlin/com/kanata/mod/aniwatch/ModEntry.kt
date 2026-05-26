@@ -92,7 +92,10 @@ class ModEntry : ModSiteParser {
         }
 
         val episodes = (1..totalEpisodes).map { n ->
-            val url = if (suffix.isNotEmpty()) "$base/$slug-episode-$n-$suffix/" else "$base/$slug-episode-$n/"
+            val url = if (suffix.isNotEmpty())
+                "$base/$slug-episode-$n-$suffix/"
+            else
+                "$base/$slug-episode-$n/"
             ModEpisode("Episode $n", url)
         }
         Log.d(TAG, "getEpisodes: slug=$slug suffix='$suffix' ep[0]=${episodes.firstOrNull()?.url}")

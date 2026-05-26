@@ -3,6 +3,7 @@ package com.greenrou.kanata.data.repository
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Base64
+import android.util.Log
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
@@ -22,10 +23,12 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.schabi.newpipe.extractor.ServiceList
 import org.schabi.newpipe.extractor.stream.StreamInfo
-import org.schabi.newpipe.extractor.stream.VideoStream as NewPipeVideoStream
 import java.net.InetAddress
 import java.net.URL
 import java.net.URLDecoder
+import org.schabi.newpipe.extractor.stream.VideoStream as NewPipeVideoStream
+
+private const val TAG = "VideoRepo"
 
 private val KODIK_GVI_CANDIDATES = listOf(
     "https://kodikplayer.com/ftor",
@@ -98,82 +101,99 @@ class VideoRepositoryImpl(
 
     override suspend fun getVideoStream(siteUrl: String): Result<VideoStream> = withContext(Dispatchers.IO) {
         runCatching {
+            Log.d(TAG, "getVideoStream: $siteUrl")
 
             if (isDirectStreamUrl(siteUrl)) {
+                Log.d(TAG, "→ direct stream")
                 return@runCatching VideoStream(siteUrl)
             }
 
             if (isYouTubeUrl(siteUrl)) {
+                Log.d(TAG, "→ youtube")
                 return@runCatching VideoStream(extractYouTubeStream(siteUrl))
             }
 
             if (isHanimeUrl(siteUrl)) {
+                Log.d(TAG, "→ hanime")
                 return@runCatching VideoStream(extractHanimeStream(siteUrl))
             }
 
             if (isArchiveOrgDetailsUrl(siteUrl)) {
+                Log.d(TAG, "→ archive.org")
                 return@runCatching VideoStream(extractArchiveOrgStream(siteUrl))
             }
 
             if (isKodikUrl(siteUrl)) {
+                Log.d(TAG, "→ kodik direct")
                 val params = parseQueryParams(siteUrl)
                 val yref = params["yref"] ?: siteUrl
                 return@runCatching VideoStream(extractKodikStream(yref, siteUrl.substringBefore("?")))
             }
 
             if (isAnimegongoUrl(siteUrl)) {
+                Log.d(TAG, "→ animegongo")
                 return@runCatching extractAnimegongoStream(siteUrl)
             }
 
             if (isKisskhUrl(siteUrl)) {
+                Log.d(TAG, "→ kisskh")
                 return@runCatching extractKisskhStream(siteUrl)
             }
 
+            Log.d(TAG, "→ generic page fetch")
             val document = Jsoup.connect(siteUrl.substringBefore("?")).userAgent(userAgent).get()
+            Log.d(TAG, "page fetched: title=${document.title()}")
 
             val standardIframeUrl = document
                 .select("iframe[src*=/serial/], iframe[src*=/video/], iframe[src*=kodik]")
                 .firstOrNull()?.attr("src")?.let { resolveUrl(siteUrl, it) }
             if (standardIframeUrl != null) {
+                Log.d(TAG, "found kodik/serial iframe: $standardIframeUrl")
                 return@runCatching VideoStream(tryExtractStream(siteUrl, standardIframeUrl), mapOf("Referer" to standardIframeUrl))
             }
 
             val litespeedSrc = document.select("iframe[data-litespeed-src]").firstOrNull()?.attr("data-litespeed-src")
             if (litespeedSrc != null) {
+                Log.d(TAG, "found litespeed iframe: $litespeedSrc")
                 return@runCatching VideoStream(tryExtractStream(siteUrl, litespeedSrc), mapOf("Referer" to litespeedSrc))
             }
 
             val videoSrc = document.select("video source, video").firstOrNull()?.attr("src")
             if (videoSrc != null) {
+                Log.d(TAG, "found <video> src: $videoSrc")
                 return@runCatching VideoStream(videoSrc, mapOf("Referer" to siteUrl))
             }
 
             val inlineStream = Regex("""https?://[^\s"']+\.(m3u8|mp4)[^\s"']*""").find(document.html())?.value
             if (inlineStream != null) {
+                Log.d(TAG, "found inline stream: $inlineStream")
                 return@runCatching VideoStream(inlineStream, mapOf("Referer" to siteUrl))
             }
 
-            val astarEpisode = parseQueryParams(siteUrl)["astarEpisode"]
-            val genericIframe = document.select("iframe[src]")
+            val allIframes = document.select("iframe[src]")
                 .map { it.attr("src").trim() }
                 .filter { src -> src.isNotBlank() && !src.startsWith("about:") && "adblock" !in src && "banner" !in src }
-                .map { src -> resolveUrl(siteUrl, src) }
-                .firstOrNull()
+            Log.d(TAG, "all iframes (${allIframes.size}): ${allIframes.take(5)}")
+
+            val astarEpisode = parseQueryParams(siteUrl)["astarEpisode"]
+            val genericIframe = allIframes.map { src -> resolveUrl(siteUrl, src) }.firstOrNull()
             if (genericIframe != null) {
                 val iframeWithEpisode = if (astarEpisode != null && ("/player" in genericIframe || "videoas" in genericIframe)) {
                     "$genericIframe&episode=$astarEpisode"
                 } else {
                     genericIframe
                 }
+                Log.d(TAG, "using generic iframe: $iframeWithEpisode")
                 return@runCatching VideoStream(tryExtractStream(siteUrl, iframeWithEpisode), mapOf("Referer" to iframeWithEpisode))
             }
 
             val xfplayer = document
                 .select(".tabs-block__content:not(.d-none):not(.hidden) .xfplayer[data-params], .xfplayer[data-params]")
-                .firstOrNull() ?: error("No video player found on page")
+                .firstOrNull() ?: error("No video player found on page: ${document.title()}")
 
             val base = URL(siteUrl)
             val ajaxUrl = "${base.protocol}://${base.host}/engine/ajax/controller.php?${xfplayer.attr("data-params")}"
+            Log.d(TAG, "xfplayer ajax: $ajaxUrl")
 
             val json = Jsoup.connect(ajaxUrl)
                 .userAgent(userAgent)
@@ -184,19 +204,24 @@ class VideoRepositoryImpl(
 
             val playerUrl = JSONObject(json).optString("data")
             if (playerUrl.isBlank()) error("Player returned empty URL")
+            Log.d(TAG, "xfplayer data url: $playerUrl")
 
             VideoStream(tryExtractStream(siteUrl, playerUrl), mapOf("Referer" to playerUrl))
         }.onFailure { e ->
+            Log.e(TAG, "getVideoStream failed: $siteUrl", e)
         }
     }
 
     private fun tryExtractStream(referer: String, playerUrl: String): String {
+        Log.d(TAG, "tryExtractStream: $playerUrl  (referer=$referer)")
 
         if ("dramavideo.se" in playerUrl) {
+            Log.d(TAG, "→ dramavideo")
             return extractDramaVideoStream(referer, playerUrl)
         }
 
         if (isYouTubeUrl(playerUrl)) {
+            Log.d(TAG, "→ youtube embed")
             val watchUrl = Regex("""youtube\.com/embed/([a-zA-Z0-9_-]+)""")
                 .find(playerUrl)
                 ?.let { "https://www.youtube.com/watch?v=${it.groupValues[1]}" }
@@ -205,6 +230,7 @@ class VideoRepositoryImpl(
         }
 
         if ("videoas_p2p" in playerUrl || ("videoas" in playerUrl && "astar.bz" in playerUrl)) {
+            Log.d(TAG, "→ astar videoas")
             val episodeNum = parseQueryParams(playerUrl)["episode"] ?: "1"
             return extractAstarEpisodeStream(playerUrl, referer, episodeNum)
         }
@@ -212,15 +238,19 @@ class VideoRepositoryImpl(
         val hasExplicitEpisode = parseQueryParams(referer).containsKey("kodikEpisode")
 
         if (isKodikUrl(playerUrl)) {
+            Log.d(TAG, "→ kodik iframe")
             val result = runCatching { extractKodikStream(referer, playerUrl) }
             result.onSuccess { stream ->
+                Log.d(TAG, "kodik stream: $stream")
                 return stream
             }
             result.onFailure { e ->
+                Log.w(TAG, "kodik extraction failed: ${e.message}")
                 if (hasExplicitEpisode) throw e
             }
         }
 
+        Log.d(TAG, "fetching player page: $playerUrl")
         val playerDoc = runCatching {
             Jsoup.connect(playerUrl)
                 .userAgent(userAgent)
@@ -229,6 +259,7 @@ class VideoRepositoryImpl(
         }.getOrElse {
             error("Failed to fetch player page $playerUrl: ${it.message}")
         }
+        Log.d(TAG, "player page title: ${playerDoc.title()}")
 
         val pageDecoders: List<(Document) -> String?> = if (hasExplicitEpisode) {
             listOf(
@@ -246,14 +277,19 @@ class VideoRepositoryImpl(
         }
 
         val errors = mutableListOf<String>()
-        for (decoder in pageDecoders) {
+        for ((idx, decoder) in pageDecoders.withIndex()) {
             runCatching { decoder(playerDoc) }
                 .onSuccess { result ->
                     if (result != null) {
+                        Log.d(TAG, "decoder[$idx] → $result")
                         return result
                     }
+                    Log.d(TAG, "decoder[$idx] → null")
                 }
-                .onFailure { errors += it.message ?: "?" }
+                .onFailure { e ->
+                    Log.d(TAG, "decoder[$idx] threw: ${e.message}")
+                    errors += e.message ?: "?"
+                }
         }
 
         error("No playable stream found on $playerUrl. Errors: ${errors.joinToString("; ")}")
