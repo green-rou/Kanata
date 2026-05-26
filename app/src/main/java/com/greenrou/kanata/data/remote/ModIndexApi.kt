@@ -5,7 +5,6 @@ import retrofit2.http.GET
 import retrofit2.http.Url
 
 interface ModIndexApi {
-    // Full URL is passed at runtime so debug/release can point to different branches.
     @GET
     suspend fun getModIndex(@Url url: String): List<ModIndexDto>
 

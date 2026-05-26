@@ -12,11 +12,6 @@ class ModLoader(private val context: Context) {
     val modsDir: File
         get() = File(context.filesDir, "mods").also { it.mkdirs() }
 
-    /**
-     * Scans [modsDir] for `<id>__<className>.apk` files and loads each one.
-     * File naming convention: `source-animedub__com.kanata.mod.animedub.ModEntry.apk`
-     * This way no separate metadata file is needed — the class name is in the file name.
-     */
     fun loadAll(): List<SiteParser> =
         modsDir.listFiles { f -> f.extension == "apk" }
             ?.mapNotNull { apk ->
