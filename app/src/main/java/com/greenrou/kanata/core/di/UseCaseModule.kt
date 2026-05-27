@@ -22,6 +22,7 @@ import com.greenrou.kanata.domain.usecase.GetRandomAnimeUseCase
 import com.greenrou.kanata.domain.usecase.GetRandomImageUseCase
 import com.greenrou.kanata.domain.usecase.GetSavedPagesUseCase
 import com.greenrou.kanata.domain.usecase.GetVideoStreamUseCase
+import com.greenrou.kanata.domain.usecase.InstallModFromFileUseCase
 import com.greenrou.kanata.domain.usecase.InstallModUseCase
 import com.greenrou.kanata.domain.usecase.IsFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.RemoveFavoriteUseCase
@@ -33,6 +34,7 @@ import com.greenrou.kanata.domain.usecase.SetDownloadFolderUseCase
 import com.greenrou.kanata.domain.usecase.StartEpisodeDownloadUseCase
 import com.greenrou.kanata.domain.usecase.ToggleModUseCase
 import com.greenrou.kanata.domain.usecase.UninstallModUseCase
+import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
 val useCaseModule = module {
@@ -67,6 +69,7 @@ val useCaseModule = module {
     factory { FetchRemoteModsUseCase(get()) }
     factory { GetInstalledModsUseCase(get()) }
     factory { InstallModUseCase(get()) }
+    factory { InstallModFromFileUseCase(androidContext(), get(), get()) }
     factory { UninstallModUseCase(get()) }
     factory { ToggleModUseCase(get()) }
 }

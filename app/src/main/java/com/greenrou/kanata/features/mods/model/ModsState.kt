@@ -8,4 +8,5 @@ data class ModsState(
     val indexError: String? = null,
     val downloadingIds: Set<String> = emptySet(),
     val downloadProgress: Map<String, Int> = emptyMap(),
+    val isInstallingFromFile: Boolean = false,
 )

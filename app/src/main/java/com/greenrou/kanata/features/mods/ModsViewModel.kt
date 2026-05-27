@@ -1,5 +1,7 @@
 package com.greenrou.kanata.features.mods
 
+import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.greenrou.kanata.data.local.InstalledModEntity
@@ -7,6 +9,7 @@ import com.greenrou.kanata.data.remote.dto.ModIndexDto
 import com.greenrou.kanata.domain.model.ModInfo
 import com.greenrou.kanata.domain.usecase.FetchRemoteModsUseCase
 import com.greenrou.kanata.domain.usecase.GetInstalledModsUseCase
+import com.greenrou.kanata.domain.usecase.InstallModFromFileUseCase
 import com.greenrou.kanata.domain.usecase.InstallModUseCase
 import com.greenrou.kanata.domain.usecase.ToggleModUseCase
 import com.greenrou.kanata.domain.usecase.UninstallModUseCase
@@ -25,6 +28,7 @@ class ModsViewModel(
     private val fetchRemoteMods: FetchRemoteModsUseCase,
     private val getInstalled: GetInstalledModsUseCase,
     private val installMod: InstallModUseCase,
+    private val installModFromFile: InstallModFromFileUseCase,
     private val uninstallMod: UninstallModUseCase,
     private val toggleMod: ToggleModUseCase,
 ) : ViewModel() {
@@ -46,6 +50,7 @@ class ModsViewModel(
     fun handleEvent(event: ModsEvent) {
         when (event) {
             is ModsEvent.Install -> handleInstall(event.mod)
+            is ModsEvent.InstallFromFile -> handleInstallFromFile(event.uri)
             is ModsEvent.Uninstall -> handleUninstall(event.modId)
             is ModsEvent.Toggle -> handleToggle(event.modId, event.enabled)
             ModsEvent.RefreshIndex -> loadIndex()
@@ -62,6 +67,7 @@ class ModsViewModel(
                     mergeAndUpdateState()
                 }
                 .onFailure { e ->
+                    Log.e(TAG, "loadIndex failed", e)
                     _state.update { it.copy(indexError = e.message ?: "Failed to load extensions") }
                 }
             _state.update { it.copy(isLoadingIndex = false) }
@@ -124,6 +130,7 @@ class ModsViewModel(
             }.onSuccess {
                 _events.send(ModsEvent.ShowSnackbar("${mod.label} installed."))
             }.onFailure { e ->
+                Log.e(TAG, "handleInstall failed for ${mod.id}", e)
                 _events.send(ModsEvent.ShowSnackbar("Failed to install ${mod.label}: ${e.message}"))
             }
             _state.update {
@@ -132,6 +139,21 @@ class ModsViewModel(
                     downloadProgress = it.downloadProgress - mod.id,
                 )
             }
+        }
+    }
+
+    private fun handleInstallFromFile(uri: Uri) {
+        viewModelScope.launch {
+            _state.update { it.copy(isInstallingFromFile = true) }
+            installModFromFile(uri)
+                .onSuccess {
+                    _events.send(ModsEvent.ShowSnackbar("Extension installed from file."))
+                }
+                .onFailure { e ->
+                    Log.e(TAG, "handleInstallFromFile failed", e)
+                    _events.send(ModsEvent.ShowSnackbar("Failed to install: ${e.message}"))
+                }
+            _state.update { it.copy(isInstallingFromFile = false) }
         }
     }
 
@@ -152,5 +174,9 @@ class ModsViewModel(
             toggleMod(modId, enabled)
             _events.send(ModsEvent.ShowSnackbar(if (enabled) "Extension enabled." else "Extension disabled."))
         }
+    }
+
+    private companion object {
+        const val TAG = "ModsViewModel"
     }
 }

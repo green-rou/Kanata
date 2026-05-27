@@ -120,6 +120,7 @@ fun AnimeDetailsScreen(
                     anime = state.anime!!,
                     videoSources = state.videoSources,
                     isSearching = state.isSearching,
+                    hasStreamSources = state.hasStreamSources,
                     onSourceClick = { viewModel.handleEvent(AnimeDetailsEvent.OpenEpisodeList(it)) },
                     topPadding = padding.calculateTopPadding(),
                     bottomPadding = padding.calculateBottomPadding(),

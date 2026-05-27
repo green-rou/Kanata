@@ -4,15 +4,6 @@ import com.greenrou.kanata.BuildConfig
 import com.greenrou.kanata.data.mod.InfoProviderRegistry
 import com.greenrou.kanata.data.mod.ModLoader
 import com.greenrou.kanata.data.mod.ParserRegistry
-import com.greenrou.kanata.data.parsers.AnimegongoSiteParser
-import com.greenrou.kanata.data.parsers.ArchiveOrgSiteParser
-import com.greenrou.kanata.data.parsers.AstarSiteParser
-import com.greenrou.kanata.data.parsers.HentaizSiteParser
-import com.greenrou.kanata.data.parsers.HentasisSiteParser
-import com.greenrou.kanata.data.parsers.KisskhSiteParser
-import com.greenrou.kanata.data.parsers.MikaiSiteParser
-import com.greenrou.kanata.data.parsers.YouTubeSiteParser
-import com.greenrou.kanata.data.parsers.YummyAnimeSiteParser
 import com.greenrou.kanata.data.repository.AnimeRepositoryImpl
 import com.greenrou.kanata.data.repository.DownloadRepositoryImpl
 import com.greenrou.kanata.data.repository.EpisodeListRepositoryImpl
@@ -37,18 +28,7 @@ val repositoryModule = module {
     single { ModLoader(get()) }
 
     single {
-        val builtIn = listOf(
-            YummyAnimeSiteParser(),
-            MikaiSiteParser(),
-            AstarSiteParser(),
-            AnimegongoSiteParser(),
-            KisskhSiteParser(),
-            YouTubeSiteParser(),
-            ArchiveOrgSiteParser(),
-            HentasisSiteParser(),
-            HentaizSiteParser(),
-        )
-        ParserRegistry(builtIn, get(), get())
+        ParserRegistry(emptyList(), get(), get())
     }
     single { InfoProviderRegistry(get(), get()) }
     single<ModRepository> {
