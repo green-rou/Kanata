@@ -1,5 +1,7 @@
 package com.greenrou.kanata.features.mods
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,6 +20,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.rounded.Extension
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.WifiOff
@@ -64,6 +67,10 @@ fun ModsScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
+    val filePicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri?.let { viewModel.handleEvent(ModsEvent.InstallFromFile(it)) }
+    }
+
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             if (event is ModsEvent.ShowSnackbar) {
@@ -82,6 +89,18 @@ fun ModsScreen(
                     }
                 },
                 actions = {
+                    if (state.isInstallingFromFile) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .padding(end = 12.dp)
+                                .size(20.dp),
+                            strokeWidth = 2.dp,
+                        )
+                    } else {
+                        IconButton(onClick = { filePicker.launch(arrayOf("*/*")) }) {
+                            Icon(Icons.Outlined.FolderOpen, contentDescription = "Install from file")
+                        }
+                    }
                     if (state.isLoadingIndex) {
                         CircularProgressIndicator(
                             modifier = Modifier

@@ -11,6 +11,7 @@ data class AnimeDetailsState(
     val isFavorite: Boolean = false,
     val videoSources: List<VideoSource> = emptyList(),
     val isSearching: Boolean = false,
+    val hasStreamSources: Boolean = true,
     val error: String? = null,
     val coverFillsTopBar: Boolean = true,
     val downloadedEpisodeCount: Int = 0,

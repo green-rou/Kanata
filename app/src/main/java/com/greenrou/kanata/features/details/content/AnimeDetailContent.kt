@@ -1,5 +1,10 @@
 package com.greenrou.kanata.features.details.content
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -64,6 +69,7 @@ internal fun AnimeDetailContent(
     anime: Anime,
     videoSources: List<VideoSource>,
     isSearching: Boolean,
+    hasStreamSources: Boolean,
     onSourceClick: (VideoSource) -> Unit,
     topPadding: Dp,
     bottomPadding: Dp = 0.dp,
@@ -248,40 +254,63 @@ internal fun AnimeDetailContent(
                 }
             }
 
-            Spacer(Modifier.height(16.dp))
-            Text(
-                text = stringResource(R.string.detail_available_streams),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-            )
-            Spacer(Modifier.height(8.dp))
-            when {
-                isSearching -> LinearProgressIndicator(
-                    modifier = Modifier.fillMaxWidth(),
-                    strokeCap = StrokeCap.Round,
-                    color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
+            if (hasStreamSources) {
+                var showHint by remember { mutableStateOf(false) }
+                LaunchedEffect(isSearching) {
+                    if (isSearching) {
+                        delay(10_000)
+                        showHint = true
+                    } else {
+                        showHint = false
+                    }
+                }
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    text = stringResource(R.string.detail_available_streams),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
                 )
-                videoSources.isEmpty() -> Text(
-                    text = stringResource(R.string.detail_no_streams),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                else -> Column {
-                    Text(
-                        text = stringResource(R.string.detail_tap_source),
+                Spacer(Modifier.height(8.dp))
+                when {
+                    isSearching -> LinearProgressIndicator(
+                        modifier = Modifier.fillMaxWidth(),
+                        strokeCap = StrokeCap.Round,
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    )
+                    videoSources.isEmpty() -> Text(
+                        text = stringResource(R.string.detail_no_streams),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                    Spacer(Modifier.height(8.dp))
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        videoSources.forEach { source ->
-                            VideoSourceChip(
-                                source = source,
-                                onClick = { onSourceClick(source) },
-                            )
+                    else -> Column {
+                        Text(
+                            text = stringResource(R.string.detail_tap_source),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            videoSources.forEach { source ->
+                                VideoSourceChip(
+                                    source = source,
+                                    onClick = { onSourceClick(source) },
+                                )
+                            }
                         }
                     }
+                }
+                AnimatedVisibility(
+                    visible = showHint,
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically(),
+                ) {
+                    Text(
+                        text = stringResource(R.string.detail_slow_search_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 8.dp),
+                    )
                 }
             }
 

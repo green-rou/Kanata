@@ -39,6 +39,7 @@
     <string name="detail_offline_picker_title">Downloaded episodes</string>
     <string name="detail_available_streams">Available streams</string>
     <string name="detail_no_streams">No streams found</string>
+    <string name="detail_slow_search_hint">To speed up loading, you can disable some sources in settings</string>
     <string name="detail_tap_source">Tap a source to browse episodes</string>
     <string name="detail_synopsis">Synopsis</string>
     <string name="detail_synopsis_via">via %s</string>

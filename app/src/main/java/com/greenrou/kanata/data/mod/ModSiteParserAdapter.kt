@@ -1,6 +1,7 @@
 package com.greenrou.kanata.data.mod
 
 import com.greenrou.kanata.domain.model.Episode
+import com.greenrou.kanata.domain.model.Translation
 import com.greenrou.kanata.domain.parser.SiteParser
 import com.greenrou.kanata.modapi.ModSiteParser
 
@@ -12,4 +13,7 @@ class ModSiteParserAdapter(private val mod: ModSiteParser) : SiteParser {
     override suspend fun search(query: String) = mod.search(query)
     override suspend fun getEpisodes(pageUrl: String) =
         mod.getEpisodes(pageUrl).map { Episode(it.title, it.url) }
+    override suspend fun getTranslations(episodePageUrl: String) =
+        mod.getTranslations(episodePageUrl)
+            .map { Translation(it.id, it.title, it.type, it.mediaId, it.mediaHash, it.mediaType) }
 }

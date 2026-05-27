@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.greenrou.kanata.core.analytics.AnalyticsManager
 import com.greenrou.kanata.core.network.NetworkMonitor
+import com.greenrou.kanata.data.mod.ParserRegistry
 import com.greenrou.kanata.domain.model.Anime
 import com.greenrou.kanata.domain.repository.SettingsManager
 import com.greenrou.kanata.domain.usecase.AddFavoriteUseCase
@@ -38,6 +39,7 @@ class AnimeDetailsViewModel(
     private val networkMonitor: NetworkMonitor,
     private val analytics: AnalyticsManager,
     private val getAnimeEnrichment: GetAnimeEnrichmentUseCase,
+    private val parserRegistry: ParserRegistry,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AnimeDetailsState())
@@ -59,6 +61,9 @@ class AnimeDetailsViewModel(
                 val anime = _state.value.anime ?: return@onEach
                 fetchEnrichment(anime)
             }
+            .launchIn(viewModelScope)
+        parserRegistry.parsers
+            .onEach { parsers -> _state.update { it.copy(hasStreamSources = parsers.isNotEmpty()) } }
             .launchIn(viewModelScope)
     }
 
@@ -119,7 +124,7 @@ class AnimeDetailsViewModel(
             getAnimeById(animeId)
                 .onSuccess { anime ->
                     _state.update { it.copy(isLoading = false, anime = anime) }
-                    searchOnExternal(anime)
+                    if (parserRegistry.parsers.value.isNotEmpty()) searchOnExternal(anime)
                     observeDownloadedCount(anime.title)
                     fetchEnrichment(anime)
                 }

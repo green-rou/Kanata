@@ -8,4 +8,5 @@ interface ModSiteParser {
     fun supports(host: String): Boolean
     suspend fun search(query: String): Result<String>
     suspend fun getEpisodes(pageUrl: String): List<ModEpisode>
+    suspend fun getTranslations(episodePageUrl: String): List<ModTranslation> = emptyList()
 }

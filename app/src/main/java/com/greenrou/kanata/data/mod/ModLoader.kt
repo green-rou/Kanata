@@ -14,15 +14,27 @@ class ModLoader(private val context: Context) {
     val modsDir: File
         get() = File(context.filesDir, "mods").also { it.mkdirs() }
 
-    fun loadAll(enabledFileNames: Set<String>): List<SiteParser> =
-        enabledApks(enabledFileNames).mapNotNull { apk ->
+    fun loadAll(enabledFileNames: Set<String>): List<SiteParser> {
+        Log.d(TAG, "loadAll: enabled=$enabledFileNames, modsDir=${modsDir.absolutePath}")
+        val allFiles = modsDir.listFiles()?.map { it.name } ?: emptyList()
+        Log.d(TAG, "loadAll: files on disk=$allFiles")
+        val apks = enabledApks(enabledFileNames)
+        Log.d(TAG, "loadAll: matched APKs=${apks.map { it.name }}")
+        return apks.mapNotNull { apk ->
             runCatching {
                 val instance = instantiate(apk)
-                if (instance is ModSiteParser) ModSiteParserAdapter(instance) else null
+                if (instance is ModSiteParser) {
+                    Log.d(TAG, "loadAll: loaded parser ${apk.name} → ${instance.label}")
+                    ModSiteParserAdapter(instance)
+                } else {
+                    Log.w(TAG, "loadAll: ${apk.name} is not ModSiteParser (${instance.javaClass.name})")
+                    null
+                }
             }
-                .onFailure { Log.e(TAG, "Failed to load parser ${apk.name}", it) }
+                .onFailure { Log.e(TAG, "loadAll: failed to load ${apk.name}", it) }
                 .getOrNull()
         }
+    }
 
     fun loadInfoProviders(enabledFileNames: Set<String>): List<InfoProvider> =
         enabledApks(enabledFileNames).mapNotNull { apk ->
@@ -39,6 +51,10 @@ class ModLoader(private val context: Context) {
     private fun enabledApks(enabledFileNames: Set<String>): List<File> =
         modsDir.listFiles { f -> f.extension == "apk" && f.name in enabledFileNames }?.toList()
             ?: emptyList()
+
+    fun tryInstantiate(apk: File): Any? = runCatching { instantiate(apk) }
+        .onFailure { Log.e(TAG, "tryInstantiate failed for ${apk.name}", it) }
+        .getOrNull()
 
     private fun instantiate(apk: File): Any {
         val className = apk.nameWithoutExtension.substringAfter("__")

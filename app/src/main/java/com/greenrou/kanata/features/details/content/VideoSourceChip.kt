@@ -3,8 +3,6 @@ package com.greenrou.kanata.features.details.content
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Archive
-import androidx.compose.material.icons.outlined.Language
-import androidx.compose.material.icons.outlined.PlayCircle
 import androidx.compose.material.icons.outlined.SmartDisplay
 import androidx.compose.material.icons.outlined.Tv
 import androidx.compose.material3.Icon
@@ -38,16 +36,5 @@ internal fun VideoSourceChip(
 private fun VideoSourceType.toIcon(): ImageVector = when (this) {
     VideoSourceType.ARCHIVE_ORG -> Icons.Outlined.Archive
     VideoSourceType.YOUTUBE -> Icons.Outlined.SmartDisplay
-    VideoSourceType.HANIME -> Icons.Outlined.PlayCircle
-    VideoSourceType.ANITUBE -> Icons.Outlined.Tv
-    VideoSourceType.ANIWAVE -> Icons.Outlined.Tv
-    VideoSourceType.MIKAI -> Icons.Outlined.Tv
-    VideoSourceType.YUMMY_ANIME -> Icons.Outlined.Tv
-    VideoSourceType.ASTAR -> Icons.Outlined.Tv
-    VideoSourceType.ANIMEGO_NGO -> Icons.Outlined.Tv
-    VideoSourceType.KISSKH -> Icons.Outlined.Tv
-    VideoSourceType.HENTAI_HUB -> Icons.Outlined.PlayCircle
-    VideoSourceType.HENTASIS -> Icons.Outlined.PlayCircle
-    VideoSourceType.HENTAIZ -> Icons.Outlined.PlayCircle
-    VideoSourceType.UNKNOWN -> Icons.Outlined.Language
+    else -> Icons.Outlined.Tv
 }

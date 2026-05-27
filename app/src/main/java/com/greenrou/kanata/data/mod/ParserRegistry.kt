@@ -1,5 +1,6 @@
 package com.greenrou.kanata.data.mod
 
+import android.util.Log
 import com.greenrou.kanata.data.local.InstalledModDao
 import com.greenrou.kanata.domain.parser.SiteParser
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -25,6 +26,7 @@ class ParserRegistry(
     init {
         dao.observeAll()
             .map { installed ->
+                Log.d(TAG, "DB mods: total=${installed.size}, enabled=${installed.count { it.isEnabled }} — ${installed.map { "${it.id}(enabled=${it.isEnabled})" }}")
                 val enabledFiles = installed
                     .filter { it.isEnabled }
                     .map { it.apkFileName }
@@ -32,7 +34,14 @@ class ParserRegistry(
                 builtIn + modLoader.loadAll(enabledFiles)
             }
             .flowOn(Dispatchers.IO)
-            .onEach { _parsers.value = it }
+            .onEach { parsers ->
+                Log.d(TAG, "Parsers updated: ${parsers.map { it.label }}")
+                _parsers.value = parsers
+            }
             .launchIn(GlobalScope)
+    }
+
+    private companion object {
+        const val TAG = "ParserRegistry"
     }
 }

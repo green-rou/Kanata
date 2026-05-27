@@ -23,8 +23,8 @@ android {
         applicationId = "com.greenrou.kanata"
         minSdk = 28
         targetSdk = 36
-        versionCode = 6
-        versionName = System.getenv("VERSION_NAME")?.removePrefix("v") ?: "0.2.4"
+        versionCode = 7
+        versionName = System.getenv("VERSION_NAME")?.removePrefix("v") ?: "0.3.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -60,7 +60,7 @@ android {
         debug {
             buildConfigField(
                 "String", "MOD_INDEX_URL",
-                "\"https://raw.githubusercontent.com/green-rou/Kanata/dev_0.3.0/mods/index.json\""
+                "\"https://raw.githubusercontent.com/green-rou/KanataExt/master/index.json\""
             )
         }
         release {
@@ -76,7 +76,7 @@ android {
             )
             buildConfigField(
                 "String", "MOD_INDEX_URL",
-                "\"https://raw.githubusercontent.com/green-rou/Kanata/master/mods/index.json\""
+                "\"https://raw.githubusercontent.com/green-rou/KanataExt/master/index.json\""
             )
         }
     }
