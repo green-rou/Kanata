@@ -3,7 +3,6 @@ package com.greenrou.kanata.data.repository
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Base64
-import android.util.Log
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
@@ -27,8 +26,6 @@ import java.net.InetAddress
 import java.net.URL
 import java.net.URLDecoder
 import org.schabi.newpipe.extractor.stream.VideoStream as NewPipeVideoStream
-
-private const val TAG = "VideoRepo"
 
 private val KODIK_GVI_CANDIDATES = listOf(
     "https://kodikplayer.com/ftor",
@@ -92,88 +89,56 @@ class VideoRepositoryImpl(
                 }
                 null
             }.getOrNull()
-            if (ip != null) {
-                return ip
-            }
+            if (ip != null) return ip
         }
         return null
     }
 
     override suspend fun getVideoStream(siteUrl: String): Result<VideoStream> = withContext(Dispatchers.IO) {
         runCatching {
-            Log.d(TAG, "getVideoStream: $siteUrl")
-
-            if (isDirectStreamUrl(siteUrl)) {
-                Log.d(TAG, "→ direct stream")
-                return@runCatching VideoStream(siteUrl)
-            }
-
-            if (isYouTubeUrl(siteUrl)) {
-                Log.d(TAG, "→ youtube")
-                return@runCatching VideoStream(extractYouTubeStream(siteUrl))
-            }
-
-            if (isHanimeUrl(siteUrl)) {
-                Log.d(TAG, "→ hanime")
-                return@runCatching VideoStream(extractHanimeStream(siteUrl))
-            }
-
-            if (isArchiveOrgDetailsUrl(siteUrl)) {
-                Log.d(TAG, "→ archive.org")
-                return@runCatching VideoStream(extractArchiveOrgStream(siteUrl))
-            }
+            if (isDirectStreamUrl(siteUrl)) return@runCatching VideoStream(siteUrl)
+            if (isYouTubeUrl(siteUrl)) return@runCatching VideoStream(extractYouTubeStream(siteUrl))
+            if (isHanimeUrl(siteUrl)) return@runCatching VideoStream(extractHanimeStream(siteUrl))
+            if (isArchiveOrgDetailsUrl(siteUrl)) return@runCatching VideoStream(extractArchiveOrgStream(siteUrl))
 
             if (isKodikUrl(siteUrl)) {
-                Log.d(TAG, "→ kodik direct")
                 val params = parseQueryParams(siteUrl)
                 val yref = params["yref"] ?: siteUrl
                 return@runCatching VideoStream(extractKodikStream(yref, siteUrl.substringBefore("?")))
             }
 
-            if (isAnimegongoUrl(siteUrl)) {
-                Log.d(TAG, "→ animegongo")
-                return@runCatching extractAnimegongoStream(siteUrl)
-            }
+            if (isAnimegongoUrl(siteUrl)) return@runCatching extractAnimegongoStream(siteUrl)
+            if (isKisskhUrl(siteUrl)) return@runCatching extractKisskhStream(siteUrl)
 
-            if (isKisskhUrl(siteUrl)) {
-                Log.d(TAG, "→ kisskh")
-                return@runCatching extractKisskhStream(siteUrl)
-            }
-
-            Log.d(TAG, "→ generic page fetch")
             val document = Jsoup.connect(siteUrl.substringBefore("?")).userAgent(userAgent).get()
-            Log.d(TAG, "page fetched: title=${document.title()}")
 
             val standardIframeUrl = document
                 .select("iframe[src*=/serial/], iframe[src*=/video/], iframe[src*=kodik]")
                 .firstOrNull()?.attr("src")?.let { resolveUrl(siteUrl, it) }
             if (standardIframeUrl != null) {
-                Log.d(TAG, "found kodik/serial iframe: $standardIframeUrl")
                 return@runCatching VideoStream(tryExtractStream(siteUrl, standardIframeUrl), mapOf("Referer" to standardIframeUrl))
             }
 
-            val litespeedSrc = document.select("iframe[data-litespeed-src]").firstOrNull()?.attr("data-litespeed-src")
-            if (litespeedSrc != null) {
-                Log.d(TAG, "found litespeed iframe: $litespeedSrc")
-                return@runCatching VideoStream(tryExtractStream(siteUrl, litespeedSrc), mapOf("Referer" to litespeedSrc))
+            val litespeedSrcs = document.select("iframe[data-litespeed-src]")
+                .mapNotNull { it.attr("data-litespeed-src").takeIf(String::isNotBlank) }
+            for (litespeedSrc in litespeedSrcs) {
+                val result = runCatching { tryExtractStream(siteUrl, litespeedSrc) }.getOrNull()
+                if (result != null) return@runCatching VideoStream(result, mapOf("Referer" to litespeedSrc))
+
+                val webViewResult = runCatching { findAndExtractMegaPlay(siteUrl, litespeedSrc) }.getOrNull()
+                if (webViewResult != null) return@runCatching webViewResult
             }
+            if (litespeedSrcs.isNotEmpty()) error("All ${litespeedSrcs.size} litespeed server(s) failed for $siteUrl")
 
             val videoSrc = document.select("video source, video").firstOrNull()?.attr("src")
-            if (videoSrc != null) {
-                Log.d(TAG, "found <video> src: $videoSrc")
-                return@runCatching VideoStream(videoSrc, mapOf("Referer" to siteUrl))
-            }
+            if (videoSrc != null) return@runCatching VideoStream(videoSrc, mapOf("Referer" to siteUrl))
 
             val inlineStream = Regex("""https?://[^\s"']+\.(m3u8|mp4)[^\s"']*""").find(document.html())?.value
-            if (inlineStream != null) {
-                Log.d(TAG, "found inline stream: $inlineStream")
-                return@runCatching VideoStream(inlineStream, mapOf("Referer" to siteUrl))
-            }
+            if (inlineStream != null) return@runCatching VideoStream(inlineStream, mapOf("Referer" to siteUrl))
 
             val allIframes = document.select("iframe[src]")
                 .map { it.attr("src").trim() }
                 .filter { src -> src.isNotBlank() && !src.startsWith("about:") && "adblock" !in src && "banner" !in src }
-            Log.d(TAG, "all iframes (${allIframes.size}): ${allIframes.take(5)}")
 
             val astarEpisode = parseQueryParams(siteUrl)["astarEpisode"]
             val genericIframe = allIframes.map { src -> resolveUrl(siteUrl, src) }.firstOrNull()
@@ -183,7 +148,6 @@ class VideoRepositoryImpl(
                 } else {
                     genericIframe
                 }
-                Log.d(TAG, "using generic iframe: $iframeWithEpisode")
                 return@runCatching VideoStream(tryExtractStream(siteUrl, iframeWithEpisode), mapOf("Referer" to iframeWithEpisode))
             }
 
@@ -193,7 +157,6 @@ class VideoRepositoryImpl(
 
             val base = URL(siteUrl)
             val ajaxUrl = "${base.protocol}://${base.host}/engine/ajax/controller.php?${xfplayer.attr("data-params")}"
-            Log.d(TAG, "xfplayer ajax: $ajaxUrl")
 
             val json = Jsoup.connect(ajaxUrl)
                 .userAgent(userAgent)
@@ -204,24 +167,15 @@ class VideoRepositoryImpl(
 
             val playerUrl = JSONObject(json).optString("data")
             if (playerUrl.isBlank()) error("Player returned empty URL")
-            Log.d(TAG, "xfplayer data url: $playerUrl")
 
             VideoStream(tryExtractStream(siteUrl, playerUrl), mapOf("Referer" to playerUrl))
-        }.onFailure { e ->
-            Log.e(TAG, "getVideoStream failed: $siteUrl", e)
         }
     }
 
     private fun tryExtractStream(referer: String, playerUrl: String): String {
-        Log.d(TAG, "tryExtractStream: $playerUrl  (referer=$referer)")
-
-        if ("dramavideo.se" in playerUrl) {
-            Log.d(TAG, "→ dramavideo")
-            return extractDramaVideoStream(referer, playerUrl)
-        }
+        if ("dramavideo.se" in playerUrl) return extractDramaVideoStream(referer, playerUrl)
 
         if (isYouTubeUrl(playerUrl)) {
-            Log.d(TAG, "→ youtube embed")
             val watchUrl = Regex("""youtube\.com/embed/([a-zA-Z0-9_-]+)""")
                 .find(playerUrl)
                 ?.let { "https://www.youtube.com/watch?v=${it.groupValues[1]}" }
@@ -230,7 +184,6 @@ class VideoRepositoryImpl(
         }
 
         if ("videoas_p2p" in playerUrl || ("videoas" in playerUrl && "astar.bz" in playerUrl)) {
-            Log.d(TAG, "→ astar videoas")
             val episodeNum = parseQueryParams(playerUrl)["episode"] ?: "1"
             return extractAstarEpisodeStream(playerUrl, referer, episodeNum)
         }
@@ -238,19 +191,11 @@ class VideoRepositoryImpl(
         val hasExplicitEpisode = parseQueryParams(referer).containsKey("kodikEpisode")
 
         if (isKodikUrl(playerUrl)) {
-            Log.d(TAG, "→ kodik iframe")
             val result = runCatching { extractKodikStream(referer, playerUrl) }
-            result.onSuccess { stream ->
-                Log.d(TAG, "kodik stream: $stream")
-                return stream
-            }
-            result.onFailure { e ->
-                Log.w(TAG, "kodik extraction failed: ${e.message}")
-                if (hasExplicitEpisode) throw e
-            }
+            result.onSuccess { return it }
+            result.onFailure { e -> if (hasExplicitEpisode) throw e }
         }
 
-        Log.d(TAG, "fetching player page: $playerUrl")
         val playerDoc = runCatching {
             Jsoup.connect(playerUrl)
                 .userAgent(userAgent)
@@ -259,7 +204,6 @@ class VideoRepositoryImpl(
         }.getOrElse {
             error("Failed to fetch player page $playerUrl: ${it.message}")
         }
-        Log.d(TAG, "player page title: ${playerDoc.title()}")
 
         val pageDecoders: List<(Document) -> String?> = if (hasExplicitEpisode) {
             listOf(
@@ -279,17 +223,8 @@ class VideoRepositoryImpl(
         val errors = mutableListOf<String>()
         for ((idx, decoder) in pageDecoders.withIndex()) {
             runCatching { decoder(playerDoc) }
-                .onSuccess { result ->
-                    if (result != null) {
-                        Log.d(TAG, "decoder[$idx] → $result")
-                        return result
-                    }
-                    Log.d(TAG, "decoder[$idx] → null")
-                }
-                .onFailure { e ->
-                    Log.d(TAG, "decoder[$idx] threw: ${e.message}")
-                    errors += e.message ?: "?"
-                }
+                .onSuccess { result -> if (result != null) return result }
+                .onFailure { e -> errors += e.message ?: "?" }
         }
 
         error("No playable stream found on $playerUrl. Errors: ${errors.joinToString("; ")}")
@@ -325,8 +260,78 @@ class VideoRepositoryImpl(
         Regex("""https?://[^\s"']+\.(m3u8|mp4)[^\s"']*""").find(doc.html())?.value
 
     private fun decodeFromNestedIframe(referer: String, playerUrl: String, doc: Document): String? {
-        val nested = doc.select("iframe[src]").firstOrNull()?.attr("src") ?: return null
-        return tryExtractStream(referer, resolveUrl(playerUrl, nested))
+        val iframes = doc.select("iframe[src]")
+        for (el in iframes) {
+            val src = el.attr("src").takeIf(String::isNotBlank) ?: continue
+            val resolved = resolveUrl(playerUrl, src)
+            runCatching { tryExtractStream(referer, resolved) }.getOrNull()?.let { return it }
+        }
+        return null
+    }
+
+    private suspend fun findAndExtractMegaPlay(referer: String, playerUrl: String): VideoStream? {
+        val doc = withContext(Dispatchers.IO) {
+            runCatching {
+                Jsoup.connect(playerUrl).userAgent(userAgent)
+                    .header("Referer", referer).get()
+            }.getOrNull()
+        } ?: return null
+
+        for (iframe in doc.select("iframe")) {
+            val src = iframe.attr("src").takeIf(String::isNotBlank)
+                ?: iframe.attr("data-litespeed-src").takeIf(String::isNotBlank)
+                ?: continue
+            if ("megaplay" !in src) continue
+            val megaplayUrl = resolveUrl(playerUrl, src)
+            val (streamUrl, streamHeaders) = runCatching { extractMegaPlayStream(megaplayUrl, playerUrl) }.getOrNull()
+                ?: continue
+            return VideoStream(streamUrl, streamHeaders)
+        }
+        return null
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    private suspend fun extractMegaPlayStream(pageUrl: String, referer: String): Pair<String, Map<String, String>> {
+        val deferred = CompletableDeferred<Pair<String, Map<String, String>>>()
+        var webViewRef: WebView? = null
+
+        withContext(Dispatchers.Main) {
+            val webView = WebView(context)
+            webViewRef = webView
+            webView.settings.apply {
+                javaScriptEnabled = true
+                domStorageEnabled = true
+                userAgentString = "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+                mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+            }
+
+            webView.webViewClient = object : WebViewClient() {
+                override fun shouldInterceptRequest(
+                    view: WebView,
+                    request: WebResourceRequest,
+                ): WebResourceResponse? {
+                    val url = request.url.toString()
+                    if (!deferred.isCompleted &&
+                        (".m3u8" in url || (".mp4" in url && "megaplay" !in url && "cdn" in url))
+                    ) {
+                        val headers = request.requestHeaders.toMutableMap()
+                        val cdnOrigin = runCatching {
+                            url.let { java.net.URL(it).let { u -> "${u.protocol}://${u.host}" } }
+                        }.getOrDefault("")
+                        val cookies = android.webkit.CookieManager.getInstance().getCookie(cdnOrigin) ?: ""
+                        if (cookies.isNotBlank()) headers["Cookie"] = cookies
+                        deferred.complete(Pair(url, headers))
+                    }
+                    return null
+                }
+            }
+
+            webView.loadUrl(pageUrl, mapOf("Referer" to referer))
+        }
+
+        val result = withTimeoutOrNull(30_000) { deferred.await() }
+        withContext(Dispatchers.Main) { webViewRef?.destroy() }
+        return result ?: error("MegaPlay WebView timeout for $pageUrl")
     }
 
     private fun decodeFromInputData(referer: String, doc: Document): String? {
@@ -403,8 +408,7 @@ class VideoRepositoryImpl(
                     .filter { it.content?.isNotBlank() == true }
                     .maxByOrNull { parseYouTubeResolution(it.resolution) }
 
-        val result = best?.content ?: error("No video streams found for: $videoUrl")
-        return result
+        return best?.content ?: error("No video streams found for: $videoUrl")
     }
 
     private fun parseYouTubeResolution(resolution: String?): Int =
@@ -484,9 +488,7 @@ class VideoRepositoryImpl(
                 @android.webkit.JavascriptInterface
                 fun onResult(body: String) {
                     val videoUrl = parseKisskhVideoUrl(body)
-                    if (videoUrl != null && !deferred.isCompleted) {
-                        deferred.complete(videoUrl)
-                    }
+                    if (videoUrl != null && !deferred.isCompleted) deferred.complete(videoUrl)
                 }
                 @android.webkit.JavascriptInterface
                 fun onError(error: String) { }
@@ -516,9 +518,7 @@ class VideoRepositoryImpl(
                             ).execute()
                             val body = okResp.body?.string() ?: ""
                             val videoUrl = parseKisskhVideoUrl(body)
-                            if (videoUrl != null && !deferred.isCompleted) {
-                                deferred.complete(videoUrl)
-                            }
+                            if (videoUrl != null && !deferred.isCompleted) deferred.complete(videoUrl)
                             WebResourceResponse(
                                 okResp.header("Content-Type") ?: "application/json",
                                 "UTF-8",
@@ -626,15 +626,13 @@ class VideoRepositoryImpl(
             val name = file.optString("name")
             val nameLower = name.lowercase()
             if (nameLower.endsWith(".mp4") && ARCHIVE_DERIVATIVE_SUFFIXES.none { nameLower.contains(it) }) {
-                val streamUrl = "https://archive.org/download/$identifier/$name"
-                return streamUrl
+                return "https://archive.org/download/$identifier/$name"
             }
         }
         for (i in 0 until files.length()) {
             val name = files.getJSONObject(i).optString("name")
             if (name.lowercase().endsWith(".mp4")) {
-                val streamUrl = "https://archive.org/download/$identifier/$name"
-                return streamUrl
+                return "https://archive.org/download/$identifier/$name"
             }
         }
         error("No MP4 found in Archive.org item $identifier")
@@ -660,11 +658,8 @@ class VideoRepositoryImpl(
                     .header("Referer", "https://hanime.tv/")
                     .ignoreContentType(true).execute()
                 if (r.statusCode() == 200) {
-                    hanimeManifestStream(JSONObject(r.body()), slug)?.let {
-                        return it
-                    }
+                    hanimeManifestStream(JSONObject(r.body()), slug)?.let { return it }
                 }
-            }.onFailure { e ->
             }
         }
 
@@ -738,9 +733,7 @@ class VideoRepositoryImpl(
                     val isStream = ".m3u8" in url
                         || (".mp4" in url && ("hanime" in url || "cdn" in url))
                         || ("hanime-cdn.com/videos" in url)
-                    if (isStream) {
-                        deferred.complete(url)
-                    }
+                    if (isStream) deferred.complete(url)
                     return null
                 }
 
@@ -779,9 +772,7 @@ class VideoRepositoryImpl(
                                     """(function(){var v=document.querySelector('video');if(!v)return'no-video';if(v.currentSrc&&v.currentSrc.length>10)return v.currentSrc;return'empty';})()""",
                                 ) { result ->
                                     val src = result?.trim('"')?.takeIf { it.length > 10 && it != "no-video" && it != "empty" }
-                                    if (src != null && !deferred.isCompleted) {
-                                        deferred.complete(src)
-                                    }
+                                    if (src != null && !deferred.isCompleted) deferred.complete(src)
                                 }
                             }
                         }
@@ -790,27 +781,16 @@ class VideoRepositoryImpl(
             }
 
             webView.webChromeClient = android.webkit.WebChromeClient()
-
             webView.loadUrl(pageUrl)
         }
 
         val stream = withTimeoutOrNull(90_000) { deferred.await() }
-
-        withContext(Dispatchers.Main) {
-            webViewRef?.destroy()
-        }
-
-        if (stream != null) {
-        } else {
-        }
+        withContext(Dispatchers.Main) { webViewRef?.destroy() }
         return stream ?: error("WebView timeout: no stream URL intercepted for $pageUrl")
     }
 
     private fun hanimeManifestStream(json: JSONObject, slug: String): String? {
-        val servers = json.optJSONObject("videos_manifest")?.optJSONArray("servers")
-        if (servers == null) {
-            return null
-        }
+        val servers = json.optJSONObject("videos_manifest")?.optJSONArray("servers") ?: return null
         var bestUrl = ""; var bestHeight = 0
         for (i in 0 until servers.length()) {
             val streams = servers.getJSONObject(i).optJSONArray("streams") ?: continue
@@ -961,8 +941,7 @@ class VideoRepositoryImpl(
         val streamUrl = parseKodikResponse(responseBody)
             ?: error("Kodik: no playable URL in response: $responseBody")
 
-        val finalUrl = if (streamUrl.startsWith("//")) "https:$streamUrl" else streamUrl
-        return finalUrl
+        return if (streamUrl.startsWith("//")) "https:$streamUrl" else streamUrl
     }
 
     private fun parseKodikResponse(body: String): String? {
