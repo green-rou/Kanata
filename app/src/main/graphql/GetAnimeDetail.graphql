@@ -1,5 +1,5 @@
-query GetAnimeDetail($id: Int!) {
-  Media(id: $id, type: ANIME) {
+query GetAnimeDetail($id: Int!, $type: MediaType!) {
+  Media(id: $id, type: $type) {
     id
     title {
       userPreferred
@@ -13,6 +13,8 @@ query GetAnimeDetail($id: Int!) {
     format
     status
     episodes
+    chapters
+    volumes
     genres
     averageScore
     meanScore

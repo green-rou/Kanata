@@ -15,6 +15,7 @@ interface SettingsManager {
     val analyticsConsentShown: Flow<Boolean>
     val skippedVersion: Flow<String>
     val activeInfoProviderId: Flow<String?>
+    val isMangaMode: Flow<Boolean>
 
     suspend fun setShowAdultContent(show: Boolean)
     suspend fun setDarkTheme(isDark: Boolean)
@@ -28,4 +29,5 @@ interface SettingsManager {
     suspend fun setAnalyticsConsentShown(shown: Boolean)
     suspend fun setSkippedVersion(version: String)
     suspend fun setActiveInfoProviderId(id: String?)
+    suspend fun setMangaMode(enabled: Boolean)
 }

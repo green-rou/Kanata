@@ -105,10 +105,18 @@ fun MainScreen(
     viewModel: MainViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val isDownloadFeatureEnabled by viewModel.isDownloadFeatureEnabled.collectAsStateWithLifecycle()
     val favoriteIds by viewModel.favoriteIds.collectAsStateWithLifecycle()
     val regularSources by viewModel.regularSources.collectAsStateWithLifecycle()
     val adultSources by viewModel.adultSources.collectAsStateWithLifecycle()
     val infoProviders by viewModel.infoProviders.collectAsStateWithLifecycle()
+    val mangaModResources by viewModel.mangaModResources.collectAsStateWithLifecycle()
+    val mangaModeOnTitle = mangaModResources?.getString("mod_mode_on_title")
+        ?: stringResource(R.string.settings_content_type_manga)
+    val mangaModeOffTitle = mangaModResources?.getString("mod_mode_off_title")
+        ?: stringResource(R.string.settings_content_type_anime)
+    val mangaModeSubtitle = mangaModResources?.getString("mod_mode_subtitle")
+        ?: stringResource(R.string.settings_content_type_subtitle)
     val snackbarHostState = remember { SnackbarHostState() }
     val downloadsViewModel: DownloadManagerViewModel = koinViewModel()
     val updateViewModel: UpdateViewModel = koinViewModel()
@@ -152,6 +160,12 @@ fun MainScreen(
         }
     }
 
+    LaunchedEffect(isDownloadFeatureEnabled) {
+        if (!isDownloadFeatureEnabled && selectedTab == BottomNavItem.Downloads) {
+            onTabSelected(BottomNavItem.AnimeList.name)
+        }
+    }
+
     val fabAllowedOnTab = selectedTab == BottomNavItem.AnimeList || selectedTab == BottomNavItem.Favorites
 
     var fabScrollVisible by remember { mutableStateOf(true) }
@@ -174,7 +188,7 @@ fun MainScreen(
             }
     }
 
-    val isFabVisible = fabAllowedOnTab && fabScrollVisible
+    val isFabVisible = fabAllowedOnTab && fabScrollVisible && isDownloadFeatureEnabled
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
@@ -503,6 +517,12 @@ fun MainScreen(
                         onToggleWebBackNavTopBar = { viewModel.handleEvent(MainEvent.ToggleWebBackNavTopBar) },
                         analyticsEnabled = state.analyticsEnabled,
                         onToggleAnalytics = { viewModel.handleEvent(MainEvent.ToggleAnalytics) },
+                        isMangaModInstalled = state.isMangaModInstalled,
+                        isMangaMode = state.isMangaMode,
+                        onToggleMangaMode = { viewModel.handleEvent(MainEvent.ToggleMangaMode) },
+                        mangaModeOnTitle = mangaModeOnTitle,
+                        mangaModeOffTitle = mangaModeOffTitle,
+                        mangaModeSubtitle = mangaModeSubtitle,
                         isCheckingUpdate = updateState.isChecking,
                         onCheckUpdate = { updateViewModel.handleEvent(UpdateEvent.CheckUpdate) },
                         onNavigateToMods = onNavigateToMods,
@@ -542,6 +562,11 @@ fun MainScreen(
             AnimatedBottomNavBar(
                 selectedTab = selectedTab,
                 onTabSelected = { onTabSelected(it.name) },
+                visibleItems = if (isDownloadFeatureEnabled) {
+                    BottomNavItem.entries.toSet()
+                } else {
+                    BottomNavItem.entries.filter { it != BottomNavItem.Downloads }.toSet()
+                },
             )
             Spacer(
                 modifier = Modifier

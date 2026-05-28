@@ -2,6 +2,7 @@ package com.greenrou.kanata.features.details.model
 
 import com.greenrou.kanata.domain.model.Anime
 import com.greenrou.kanata.domain.model.AnimeEnrichment
+import com.greenrou.kanata.domain.model.ContentSource
 import com.greenrou.kanata.domain.model.DownloadItem
 import com.greenrou.kanata.domain.model.VideoSource
 
@@ -10,6 +11,7 @@ data class AnimeDetailsState(
     val anime: Anime? = null,
     val isFavorite: Boolean = false,
     val videoSources: List<VideoSource> = emptyList(),
+    val contentSources: List<ContentSource> = emptyList(),
     val isSearching: Boolean = false,
     val hasStreamSources: Boolean = true,
     val error: String? = null,

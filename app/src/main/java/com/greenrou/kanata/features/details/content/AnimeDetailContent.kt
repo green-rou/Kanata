@@ -60,6 +60,7 @@ import com.greenrou.kanata.R
 import com.greenrou.kanata.core.util.UiConstants
 import com.greenrou.kanata.domain.model.Anime
 import com.greenrou.kanata.domain.model.AnimeEnrichment
+import com.greenrou.kanata.domain.model.ContentSource
 import com.greenrou.kanata.domain.model.VideoSource
 import kotlinx.coroutines.delay
 
@@ -77,6 +78,8 @@ internal fun AnimeDetailContent(
     downloadedEpisodeCount: Int = 0,
     onWatchOffline: () -> Unit = {},
     enrichment: AnimeEnrichment? = null,
+    contentSources: List<ContentSource> = emptyList(),
+    onContentSourceClick: (ContentSource) -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -175,6 +178,20 @@ internal fun AnimeDetailContent(
                 if (anime.episodes > 0) {
                     Text(
                         text = stringResource(R.string.detail_episodes_count, anime.episodes),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                if (anime.chapters > 0) {
+                    Text(
+                        text = stringResource(R.string.detail_chapters_count, anime.chapters),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                if (anime.volumes > 0) {
+                    Text(
+                        text = stringResource(R.string.detail_volumes_count, anime.volumes),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -311,6 +328,30 @@ internal fun AnimeDetailContent(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(top = 8.dp),
                     )
+                }
+            }
+
+            if (contentSources.isNotEmpty()) {
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    text = stringResource(R.string.detail_chapter_sources),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = stringResource(R.string.detail_tap_chapter_source),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(8.dp))
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    contentSources.forEach { source ->
+                        ContentSourceChip(
+                            source = source,
+                            onClick = { onContentSourceClick(source) },
+                        )
+                    }
                 }
             }
 

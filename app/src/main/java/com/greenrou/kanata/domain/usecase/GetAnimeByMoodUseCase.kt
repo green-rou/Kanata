@@ -11,7 +11,8 @@ class GetAnimeByMoodUseCase(
         perPage: Int = 20,
         genres: List<String>? = null,
         tags: List<String>? = null,
-        showAdultContent: Boolean = false
+        showAdultContent: Boolean = false,
+        mediaType: String = "ANIME",
     ): Result<AnimeListPage> =
-        repository.getAnimeByMood(page, perPage, genres, tags, showAdultContent)
+        repository.getAnimeByMood(page, perPage, genres, tags, showAdultContent, mediaType)
 }

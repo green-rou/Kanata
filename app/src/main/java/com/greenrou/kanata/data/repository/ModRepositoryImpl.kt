@@ -1,6 +1,5 @@
 package com.greenrou.kanata.data.repository
 
-import android.util.Log
 import com.greenrou.kanata.data.local.InstalledModDao
 import com.greenrou.kanata.data.local.InstalledModEntity
 import com.greenrou.kanata.data.remote.ModIndexApi
@@ -24,21 +23,14 @@ class ModRepositoryImpl(
     override fun observeInstalled(): Flow<List<InstalledModEntity>> = dao.observeAll()
 
     override suspend fun fetchRemoteIndex(): Result<List<ModIndexDto>> =
-        runCatching {
-            Log.d(TAG, "Fetching mod index from: $modIndexUrl")
-            val result = api.getModIndex(modIndexUrl)
-            Log.d(TAG, "Index loaded: ${result.size} mods — URLs: ${result.map { it.apkUrl }}")
-            result
-        }.onFailure { Log.e(TAG, "fetchRemoteIndex failed", it) }
+        runCatching { api.getModIndex(modIndexUrl) }
 
     override suspend fun install(mod: ModIndexDto, onProgress: (Int) -> Unit): Result<Unit> =
         runCatching {
-            Log.d(TAG, "install: starting ${mod.id} from ${mod.apkUrl}")
             withContext(Dispatchers.IO) {
                 val fileName = "${mod.id}__${mod.parserClass}.apk"
                 val dest = File(modsDir, fileName)
                 downloadFile(mod.apkUrl, dest, onProgress)
-                Log.d(TAG, "install: saved to DB as $fileName")
                 dao.insert(
                     InstalledModEntity(
                         id = mod.id,
@@ -49,7 +41,7 @@ class ModRepositoryImpl(
                     )
                 )
             }
-        }.onFailure { Log.e(TAG, "install failed for ${mod.id}", it) }
+        }
 
     override suspend fun uninstall(modId: String): Result<Unit> =
         runCatching {
@@ -62,10 +54,8 @@ class ModRepositoryImpl(
         dao.setEnabled(modId, enabled)
 
     private fun downloadFile(url: String, dest: File, onProgress: (Int) -> Unit) {
-        Log.d(TAG, "Downloading mod APK from: $url")
         val request = Request.Builder().url(url).build()
         okHttpClient.newCall(request).execute().use { response ->
-            Log.d(TAG, "Response: ${response.code} ${response.message} — url=${response.request.url}")
             check(response.isSuccessful) { "HTTP ${response.code}: ${response.message}" }
             val body = response.body ?: error("Empty response body")
             val total = body.contentLength()
@@ -84,7 +74,4 @@ class ModRepositoryImpl(
         }
     }
 
-    companion object {
-        private const val TAG = "ModRepository"
-    }
 }

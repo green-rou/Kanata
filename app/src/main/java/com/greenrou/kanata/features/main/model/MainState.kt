@@ -28,6 +28,8 @@ data class MainState(
     val analyticsEnabled: Boolean = true,
     val analyticsConsentShown: Boolean = false,
     val activeInfoProviderId: String? = null,
+    val isMangaModInstalled: Boolean = false,
+    val isMangaMode: Boolean = false,
 ) {
     val hasActiveFilters: Boolean get() = selectedGenres.isNotEmpty() || selectedFormats.isNotEmpty()
 }

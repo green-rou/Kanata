@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.greenrou.kanata.core.analytics.AnalyticsManager
 import com.greenrou.kanata.core.analytics.reportToCrashlytics
 import com.greenrou.kanata.core.network.NetworkMonitor
+import com.greenrou.kanata.data.mod.DownloadFeatureRegistry
 import com.greenrou.kanata.data.mod.InfoProviderRegistry
+import com.greenrou.kanata.data.mod.MangaModRegistry
 import com.greenrou.kanata.data.mod.ParserRegistry
 import com.greenrou.kanata.domain.model.AnimeFilter
 import com.greenrou.kanata.domain.repository.SettingsManager
@@ -43,7 +45,12 @@ class MainViewModel(
     private val analytics: AnalyticsManager,
     parserRegistry: ParserRegistry,
     infoProviderRegistry: InfoProviderRegistry,
+    downloadFeatureRegistry: DownloadFeatureRegistry,
+    private val mangaModRegistry: MangaModRegistry,
 ) : ViewModel() {
+
+    val isDownloadFeatureEnabled: StateFlow<Boolean> = downloadFeatureRegistry.isEnabled
+    val mangaModResources = mangaModRegistry.modResources
 
     val regularSources: StateFlow<List<String>> = parserRegistry.parsers
         .map { list -> list.filter { !it.isAdultOnly }.map { it.label } }
@@ -83,7 +90,23 @@ class MainViewModel(
     init {
         observeSettings()
         observeNetwork()
+        observeMangaMod()
         loadAnime()
+    }
+
+    private fun currentMediaType() =
+        if (_state.value.isMangaMode) mangaModRegistry.activeProvider.value?.mediaType ?: "ANIME"
+        else "ANIME"
+
+    private fun observeMangaMod() {
+        mangaModRegistry.isInstalled
+            .onEach { installed ->
+                _state.update { it.copy(isMangaModInstalled = installed) }
+                if (!installed && _state.value.isMangaMode) {
+                    settingsManager.setMangaMode(false)
+                }
+            }
+            .launchIn(viewModelScope)
     }
 
     private fun observeSettings() {
@@ -128,6 +151,14 @@ class MainViewModel(
             .launchIn(viewModelScope)
         settingsManager.activeInfoProviderId
             .onEach { id -> _state.update { it.copy(activeInfoProviderId = id) } }
+            .launchIn(viewModelScope)
+
+        settingsManager.isMangaMode
+            .onEach { isManga ->
+                val changed = _state.value.isMangaMode != isManga
+                _state.update { it.copy(isMangaMode = isManga, animeList = if (changed) emptyList() else it.animeList, selectedFormats = if (changed) emptySet() else it.selectedFormats) }
+                if (changed) loadAnime()
+            }
             .launchIn(viewModelScope)
     }
 
@@ -233,6 +264,9 @@ class MainViewModel(
             MainEvent.ToggleAdBlocker -> viewModelScope.launch {
                 settingsManager.setAdBlockerEnabled(!_state.value.adBlockerEnabled)
             }
+            MainEvent.ToggleMangaMode -> viewModelScope.launch {
+                settingsManager.setMangaMode(!_state.value.isMangaMode)
+            }
             is MainEvent.SetActiveInfoProvider -> viewModelScope.launch {
                 settingsManager.setActiveInfoProviderId(event.id)
             }
@@ -263,6 +297,7 @@ class MainViewModel(
                 genres = s.selectedGenres.toList(),
                 formats = s.selectedFormats.toList(),
             ),
+            mediaType = currentMediaType(),
         )
     }
 
@@ -277,10 +312,11 @@ class MainViewModel(
     private fun loadAnime(
         showAdultContent: Boolean = _state.value.showAdultContent,
         filter: AnimeFilter = currentFilter(),
+        mediaType: String = currentMediaType(),
     ) {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
-            getAnimeList(page = 1, showAdultContent = showAdultContent, filter = filter)
+            getAnimeList(page = 1, showAdultContent = showAdultContent, filter = filter, mediaType = mediaType)
                 .onSuccess { page ->
                     _state.update {
                         it.copy(
@@ -304,7 +340,7 @@ class MainViewModel(
     private fun refreshAnime() {
         viewModelScope.launch {
             _state.update { it.copy(isRefreshing = true, error = null) }
-            getAnimeList(page = 1, showAdultContent = _state.value.showAdultContent, filter = currentFilter())
+            getAnimeList(page = 1, showAdultContent = _state.value.showAdultContent, filter = currentFilter(), mediaType = currentMediaType())
                 .onSuccess { page ->
                     _state.update {
                         it.copy(
@@ -334,6 +370,7 @@ class MainViewModel(
                 page = current.currentPage + 1,
                 showAdultContent = current.showAdultContent,
                 filter = currentFilter(),
+                mediaType = currentMediaType(),
             )
                 .onSuccess { page ->
                     _state.update {

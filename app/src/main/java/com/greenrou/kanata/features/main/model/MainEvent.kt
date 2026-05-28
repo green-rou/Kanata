@@ -23,6 +23,7 @@ sealed interface MainEvent {
     data class SetAccentColor(val name: String) : MainEvent
     data class ToggleSource(val label: String) : MainEvent
     data object ToggleAdBlocker : MainEvent
+    data object ToggleMangaMode : MainEvent
     data object ToggleWebBackNavTopBar : MainEvent
     data class SetActiveInfoProvider(val id: String?) : MainEvent
     data object ToggleAnalytics : MainEvent

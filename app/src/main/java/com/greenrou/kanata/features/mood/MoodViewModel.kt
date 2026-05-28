@@ -3,6 +3,7 @@ package com.greenrou.kanata.features.mood
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.greenrou.kanata.core.analytics.AnalyticsManager
+import com.greenrou.kanata.data.mod.MangaModRegistry
 import com.greenrou.kanata.domain.repository.SettingsManager
 import com.greenrou.kanata.domain.usecase.GetAnimeByMoodUseCase
 import com.greenrou.kanata.features.mood.model.Mood
@@ -20,6 +21,7 @@ class MoodViewModel(
     private val getAnimeByMood: GetAnimeByMoodUseCase,
     private val settingsManager: SettingsManager,
     private val analytics: AnalyticsManager,
+    private val mangaModRegistry: MangaModRegistry,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(MoodState())
@@ -55,10 +57,16 @@ class MoodViewModel(
     private fun loadAnimeByMood(mood: Mood) {
         viewModelScope.launch {
             val showAdult = settingsManager.showAdultContent.first()
+            val mediaType = if (settingsManager.isMangaMode.first()) {
+                mangaModRegistry.activeProvider.value?.mediaType ?: "ANIME"
+            } else {
+                "ANIME"
+            }
             getAnimeByMood(
                 genres = mood.genres,
                 tags = mood.tags,
                 showAdultContent = showAdult,
+                mediaType = mediaType,
             ).onSuccess { page ->
                 _state.update { it.copy(isLoading = false, animeList = page.items) }
             }.onFailure { e ->

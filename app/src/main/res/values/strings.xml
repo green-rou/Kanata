@@ -35,10 +35,14 @@
     <string name="detail_title_fallback">Anime Detail</string>
     <string name="detail_error">Error: %s</string>
     <string name="detail_episodes_count">%d episodes</string>
+    <string name="detail_chapters_count">%d chapters</string>
+    <string name="detail_volumes_count">%d volumes</string>
     <string name="detail_watch_offline">Watch offline</string>
     <string name="detail_offline_picker_title">Downloaded episodes</string>
     <string name="detail_available_streams">Available streams</string>
     <string name="detail_no_streams">No streams found</string>
+    <string name="detail_chapter_sources">Chapter sources</string>
+    <string name="detail_tap_chapter_source">Tap a source to browse chapters</string>
     <string name="detail_slow_search_hint">To speed up loading, you can disable some sources in settings</string>
     <string name="detail_tap_source">Tap a source to browse episodes</string>
     <string name="detail_synopsis">Synopsis</string>
@@ -64,6 +68,18 @@
     <string name="translation_sheet_title">Select dubbing</string>
     <string name="translation_type_voice">Voice acting</string>
     <string name="translation_type_subtitles">Subtitles</string>
+
+    <!-- Chapter list -->
+    <string name="chapter_list_count">%d chapters</string>
+    <string name="chapter_empty_title">No chapters found</string>
+    <string name="chapter_empty_subtitle">This source has no chapters available</string>
+    <string name="chapter_cd_read">Read chapter %d</string>
+
+    <!-- Page reader -->
+    <string name="reader_page_of">%1$d / %2$d</string>
+    <string name="reader_cd_prev">Previous chapter</string>
+    <string name="reader_cd_next">Next chapter</string>
+    <string name="reader_error_empty">No pages found for this chapter</string>
 
     <!-- Favorites -->
     <string name="favorites_empty_title">No favorites yet</string>
@@ -174,6 +190,9 @@
     <string name="settings_adult_off_title">Adult Content</string>
     <string name="settings_adult_on_subtitle">Showing only 18+ titles</string>
     <string name="settings_adult_off_subtitle">Show only non-adult titles</string>
+    <string name="settings_content_type_anime">Anime Mode</string>
+    <string name="settings_content_type_manga">Manga Mode</string>
+    <string name="settings_content_type_subtitle">Switch between anime and manga</string>
     <string name="settings_section_sources">Sources</string>
     <string name="settings_sources_select">Select active sources</string>
     <string name="settings_section_extensions">Extensions</string>

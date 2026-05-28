@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.AutoStories
 import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.Code
@@ -26,6 +27,7 @@ import androidx.compose.material.icons.rounded.LightMode
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.LockOpen
 import androidx.compose.material.icons.rounded.SystemUpdate
+import androidx.compose.material.icons.rounded.Tv
 import androidx.compose.material.icons.rounded.VolunteerActivism
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -70,6 +72,12 @@ fun SettingsScreen(
     onToggleWebBackNavTopBar: () -> Unit = {},
     analyticsEnabled: Boolean = true,
     onToggleAnalytics: () -> Unit = {},
+    isMangaModInstalled: Boolean = false,
+    isMangaMode: Boolean = false,
+    onToggleMangaMode: () -> Unit = {},
+    mangaModeOnTitle: String = stringResource(R.string.settings_content_type_manga),
+    mangaModeOffTitle: String = stringResource(R.string.settings_content_type_anime),
+    mangaModeSubtitle: String = stringResource(R.string.settings_content_type_subtitle),
     isCheckingUpdate: Boolean = false,
     onCheckUpdate: () -> Unit = {},
     onNavigateToMods: () -> Unit = {},
@@ -139,6 +147,15 @@ fun SettingsScreen(
                 checked = showAdultContent,
                 onCheckedChange = { onToggleAdultContent() },
             )
+            if (isMangaModInstalled) {
+                SettingsItem(
+                    icon = if (isMangaMode) Icons.Rounded.AutoStories else Icons.Rounded.Tv,
+                    title = if (isMangaMode) mangaModeOnTitle else mangaModeOffTitle,
+                    subtitle = mangaModeSubtitle,
+                    checked = isMangaMode,
+                    onCheckedChange = { onToggleMangaMode() },
+                )
+            }
         }
 
         SourcesSection(
