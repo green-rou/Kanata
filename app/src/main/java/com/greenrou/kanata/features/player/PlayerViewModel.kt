@@ -1,6 +1,5 @@
 package com.greenrou.kanata.features.player
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.greenrou.kanata.core.analytics.AnalyticsManager
@@ -18,8 +17,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
-private const val TAG = "PlayerVM"
 
 class PlayerViewModel(
     private val getVideoStream: GetVideoStreamUseCase,
@@ -69,7 +66,6 @@ class PlayerViewModel(
             PlayerEvent.Retry -> loadStream()
             is PlayerEvent.PlaybackError -> {
                 val url = _state.value.streamUrl ?: "unknown"
-                Log.e(TAG, "PlaybackError: ${event.message}  streamUrl=$url")
                 analytics.recordError(
                     RuntimeException("PlaybackError: ${event.message}"),
                     "player_playback_error",
@@ -128,10 +124,8 @@ class PlayerViewModel(
 
     private fun loadStream() {
         val url = episodeUrls.getOrNull(currentIndex) ?: return
-        Log.i(TAG, "loadStream: episodeUrl=$url")
         if (url.startsWith("file://") || isDirectStreamUrl(url)) {
             val headers = initialHeaderKeys.zip(initialHeaderValues).toMap()
-            Log.i(TAG, "Direct stream, skipping extraction → streamUrl=$url  headers=$headers")
             _state.update { it.copy(isLoading = false, streamUrl = url, streamHeaders = headers, isChangingEpisode = false) }
             return
         }
@@ -140,11 +134,9 @@ class PlayerViewModel(
             _state.update { it.copy(isLoading = true, error = null) }
             getVideoStream(url)
                 .onSuccess { stream ->
-                    Log.i(TAG, "Stream loaded → url=${stream.url}  headers=${stream.headers}")
                     _state.update { it.copy(isLoading = false, streamUrl = stream.url, streamHeaders = stream.headers, isChangingEpisode = false) }
                 }
                 .onFailure { e ->
-                    Log.e(TAG, "Stream load failed for episodeUrl=$url", e)
                     analytics.recordError(e, "player_load_stream", mapOf("episode_url" to url, "anime" to animeTitle, "source" to sourceName))
                     _state.update { it.copy(isLoading = false, error = e.message, isChangingEpisode = false) }
                 }

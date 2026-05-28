@@ -10,13 +10,15 @@ interface AniListRepository {
         perPage: Int = 20,
         showAdultContent: Boolean = false,
         filter: AnimeFilter = AnimeFilter(),
+        mediaType: String = "ANIME",
     ): Result<AnimeListPage>
-    suspend fun getAnimeById(id: Int): Result<Anime>
+    suspend fun getAnimeById(id: Int, mediaType: String = "ANIME"): Result<Anime>
     suspend fun getAnimeByMood(
         page: Int = 1,
         perPage: Int = 20,
         genres: List<String>? = null,
         tags: List<String>? = null,
-        showAdultContent: Boolean = false
+        showAdultContent: Boolean = false,
+        mediaType: String = "ANIME",
     ): Result<AnimeListPage>
 }

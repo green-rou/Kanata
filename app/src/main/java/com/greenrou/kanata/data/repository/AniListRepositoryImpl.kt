@@ -6,6 +6,7 @@ import com.greenrou.kanata.data.remote.anilist.GetAnimeByMoodQuery
 import com.greenrou.kanata.data.remote.anilist.GetAnimeDetailQuery
 import com.greenrou.kanata.data.remote.anilist.GetAnimeListQuery
 import com.greenrou.kanata.data.remote.anilist.type.MediaFormat
+import com.greenrou.kanata.data.remote.anilist.type.MediaType
 import com.greenrou.kanata.data.remote.dto.stripHtml
 import com.greenrou.kanata.domain.model.Anime
 import com.greenrou.kanata.domain.model.AnimeFilter
@@ -16,13 +17,21 @@ class AniListRepositoryImpl(
     private val apolloClient: ApolloClient,
 ) : AniListRepository {
 
-    override suspend fun getAnimeList(page: Int, perPage: Int, showAdultContent: Boolean, filter: AnimeFilter): Result<AnimeListPage> = runCatching {
+    override suspend fun getAnimeList(
+        page: Int,
+        perPage: Int,
+        showAdultContent: Boolean,
+        filter: AnimeFilter,
+        mediaType: String,
+    ): Result<AnimeListPage> = runCatching {
         val isAdult = if (showAdultContent) Optional.Present(true) else Optional.Present(false)
         val apolloFormats = filter.formats.map { MediaFormat.valueOf(it.name) }
+        val type = if (mediaType == "MANGA") MediaType.MANGA else MediaType.ANIME
         val response = apolloClient
             .query(GetAnimeListQuery(
                 page = page,
                 perPage = perPage,
+                type = type,
                 isAdult = isAdult,
                 search = Optional.presentIfNotNull(filter.search.takeIf { it.isNotBlank() }),
                 genres = Optional.presentIfNotNull(filter.genres.ifEmpty { null }),
@@ -35,8 +44,6 @@ class AniListRepositoryImpl(
         }
         val pageData = response.data?.Page
         val media = pageData?.media?.filterNotNull() ?: emptyList()
-        if (media.isEmpty()) {
-        }
         AnimeListPage(
             items = media.map { it.toListItemDomain() },
             hasNextPage = pageData?.pageInfo?.hasNextPage ?: false,
@@ -45,9 +52,10 @@ class AniListRepositoryImpl(
     }.onFailure { e ->
     }
 
-    override suspend fun getAnimeById(id: Int): Result<Anime> = runCatching {
+    override suspend fun getAnimeById(id: Int, mediaType: String): Result<Anime> = runCatching {
+        val type = if (mediaType == "MANGA") MediaType.MANGA else MediaType.ANIME
         val response = apolloClient
-            .query(GetAnimeDetailQuery(id = id))
+            .query(GetAnimeDetailQuery(id = id, type = type))
             .execute()
         if (!response.errors.isNullOrEmpty()) {
             error(response.errors!!.first().message ?: "GraphQL error")
@@ -61,16 +69,19 @@ class AniListRepositoryImpl(
         perPage: Int,
         genres: List<String>?,
         tags: List<String>?,
-        showAdultContent: Boolean
+        showAdultContent: Boolean,
+        mediaType: String,
     ): Result<AnimeListPage> = runCatching {
         val isAdult = if (showAdultContent) Optional.Present(true) else Optional.Present(false)
+        val type = if (mediaType == "MANGA") MediaType.MANGA else MediaType.ANIME
         val response = apolloClient
             .query(GetAnimeByMoodQuery(
                 page = page,
                 perPage = perPage,
+                type = type,
                 genres = Optional.presentIfNotNull(genres?.ifEmpty { null }),
                 tags = Optional.presentIfNotNull(tags?.ifEmpty { null }),
-                isAdult = isAdult
+                isAdult = isAdult,
             ))
             .execute()
         if (!response.errors.isNullOrEmpty()) {
@@ -94,6 +105,8 @@ class AniListRepositoryImpl(
         synopsis = "",
         genres = genres?.filterNotNull() ?: emptyList(),
         episodes = episodes ?: 0,
+        chapters = chapters ?: 0,
+        volumes = volumes ?: 0,
     )
 
     private fun GetAnimeByMoodQuery.Medium.toMoodListItemDomain() = Anime(
@@ -105,6 +118,8 @@ class AniListRepositoryImpl(
         synopsis = "",
         genres = genres?.filterNotNull() ?: emptyList(),
         episodes = episodes ?: 0,
+        chapters = chapters ?: 0,
+        volumes = volumes ?: 0,
     )
 
     private fun GetAnimeDetailQuery.Media.toDetailDomain() = Anime(
@@ -118,5 +133,7 @@ class AniListRepositoryImpl(
         synopsis = description.orEmpty().stripHtml(),
         genres = genres?.filterNotNull() ?: emptyList(),
         episodes = episodes ?: 0,
+        chapters = chapters ?: 0,
+        volumes = volumes ?: 0,
     )
 }

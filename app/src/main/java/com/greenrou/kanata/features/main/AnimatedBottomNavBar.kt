@@ -2,6 +2,11 @@ package com.greenrou.kanata.features.main
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -34,11 +39,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.greenrou.kanata.R
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 
 private val NavBarShape = RoundedCornerShape(28.dp)
 private val ItemShape = RoundedCornerShape(22.dp)
@@ -47,6 +47,7 @@ private val ItemShape = RoundedCornerShape(22.dp)
 fun AnimatedBottomNavBar(
     selectedTab: BottomNavItem,
     onTabSelected: (BottomNavItem) -> Unit,
+    visibleItems: Set<BottomNavItem> = BottomNavItem.entries.toSet(),
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -70,7 +71,7 @@ fun AnimatedBottomNavBar(
             .padding(5.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        BottomNavItem.entries.forEach { item ->
+        BottomNavItem.entries.filter { it in visibleItems }.forEach { item ->
             val isSelected = item == selectedTab
             val weight by animateFloatAsState(
                 targetValue = if (isSelected) 2.2f else 1f,

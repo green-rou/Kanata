@@ -5,7 +5,6 @@ import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.webkit.JavascriptInterface
 import android.webkit.RenderProcessGoneDetail
 import android.webkit.WebResourceRequest
@@ -80,7 +79,6 @@ import com.greenrou.kanata.features.webplayer.content.WebPlayerGuide
 import com.greenrou.kanata.features.webplayer.model.WebPlayerEvent
 import org.koin.androidx.compose.koinViewModel
 
-private const val TAG = "WebPlayer"
 
 private val VIDEO_URL_REGEX = Regex("""\.(m3u8|mp4|mkv|webm)(\?.*)?$""", RegexOption.IGNORE_CASE)
 
@@ -140,7 +138,6 @@ fun WebPlayerScreen(
         viewModel.events.collect { event ->
             when (event) {
                 is WebPlayerEvent.NavigateToPlayer -> {
-                    Log.i(TAG, "Opening in player → streamUrl=${event.streamUrl}  referer=${event.referer}")
                     onNavigateToPlayer(event.streamUrl, event.referer)
                 }
                 WebPlayerEvent.NavigateBack -> onNavigateBack()
@@ -155,10 +152,7 @@ fun WebPlayerScreen(
     val onStreamDetected: (String, String) -> Unit = remember(viewModel) {
         { url, referer ->
             val isAd = adBlockerEnabled.get() && AdBlocker.isAdStream(url)
-            if (isAd) {
-                Log.d(TAG, "Stream BLOCKED by AdBlocker: $url")
-            } else {
-                Log.i(TAG, "Stream detected → url=$url  referer=$referer")
+            if (!isAd) {
                 Handler(Looper.getMainLooper()).post {
                     viewModel.handleEvent(WebPlayerEvent.StreamDetected(url, referer))
                 }
@@ -207,12 +201,10 @@ fun WebPlayerScreen(
                 ): WebResourceResponse? {
                     val url = request.url.toString()
                     if (adBlockerEnabled.get() && AdBlocker.shouldBlock(url)) {
-                        Log.d(TAG, "Request BLOCKED: $url")
                         return AdBlocker.emptyResponse()
                     }
                     if (VIDEO_URL_REGEX.containsMatchIn(url) && reportedNetworkUrls.add(url)) {
                         val referer = request.requestHeaders["Referer"].orEmpty()
-                        Log.i(TAG, "Video request intercepted [network]: $url  (referer=$referer)")
                         Handler(Looper.getMainLooper()).post {
                             onStreamDetected(url, referer)
                         }
@@ -221,14 +213,12 @@ fun WebPlayerScreen(
                 }
 
                 override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
-                    Log.d(TAG, "Page started: $url")
                     reportedNetworkUrls.clear()
                     onLoadingChanged(true)
                     onPageNavigated(url)
                 }
 
                 override fun onPageFinished(view: WebView, url: String) {
-                    Log.d(TAG, "Page finished: $url")
                     canGoBackState.value = view.canGoBack()
                     onLoadingChanged(false)
                     view.evaluateJavascript(JS_INJECTION, null)
@@ -241,7 +231,6 @@ fun WebPlayerScreen(
 
                 override fun onRenderProcessGone(view: WebView, detail: RenderProcessGoneDetail): Boolean {
                     val url = view.url?.takeIf { it.isNotBlank() }
-                    Log.w(TAG, "Renderer gone (crashed=${detail.didCrash()}), reloading url=$url")
                     reportedNetworkUrls.clear()
                     Handler(Looper.getMainLooper()).post {
                         if (url != null) view.loadUrl(url) else view.reload()
@@ -460,7 +449,6 @@ private fun String.toSuggestedName(): String = runCatching {
 private class StreamJsBridge(private val onStream: (url: String, referer: String) -> Unit) {
     @JavascriptInterface
     fun onStream(url: String, referer: String) {
-        Log.i(TAG, "Video request intercepted [JS]: $url  (referer=$referer)")
         Handler(Looper.getMainLooper()).post { onStream(url, referer) }
     }
 }

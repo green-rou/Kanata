@@ -26,6 +26,7 @@ class SettingsManagerImpl(private val context: Context) : SettingsManager {
         val ANALYTICS_CONSENT_SHOWN = booleanPreferencesKey("analytics_consent_shown")
         val SKIPPED_VERSION = stringPreferencesKey("skipped_version")
         val ACTIVE_INFO_PROVIDER_ID = stringPreferencesKey("active_info_provider_id")
+        val IS_MANGA_MODE = booleanPreferencesKey("is_manga_mode")
     }
 
     override val showAdultContent: Flow<Boolean> = context.dataStore.data
@@ -156,6 +157,15 @@ class SettingsManagerImpl(private val context: Context) : SettingsManager {
         context.dataStore.edit { preferences ->
             if (id == null) preferences.remove(PreferencesKeys.ACTIVE_INFO_PROVIDER_ID)
             else preferences[PreferencesKeys.ACTIVE_INFO_PROVIDER_ID] = id
+        }
+    }
+
+    override val isMangaMode: Flow<Boolean> = context.dataStore.data
+        .map { preferences -> preferences[PreferencesKeys.IS_MANGA_MODE] ?: false }
+
+    override suspend fun setMangaMode(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.IS_MANGA_MODE] = enabled
         }
     }
 }

@@ -10,11 +10,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import com.greenrou.kanata.features.chapters.ChapterListScreen
 import com.greenrou.kanata.features.details.AnimeDetailsScreen
 import com.greenrou.kanata.features.episodes.EpisodeListScreen
 import com.greenrou.kanata.features.main.BottomNavItem
 import com.greenrou.kanata.features.main.MainScreen
 import com.greenrou.kanata.features.mods.ModsScreen
+import com.greenrou.kanata.features.pagereader.PageReaderScreen
 import com.greenrou.kanata.features.player.PlayerScreen
 import com.greenrou.kanata.features.webplayer.WebPlayerScreen
 
@@ -53,6 +55,9 @@ fun NavGraph(backStack: SnapshotStateList<Any>) {
             onNavigateBack = { backStack.removeAt(backStack.size - 1) },
             onNavigateToEpisodeList = { source, animeTitle, episodeCount ->
                 backStack.add(EpisodeListRoute(source.animePageUrl, source.label, animeTitle, current.animeId, episodeCount))
+            },
+            onNavigateToChapterList = { source, title ->
+                backStack.add(ChapterListRoute(source.pageUrl, source.label, title))
             },
             onNavigateToOfflinePlayer = { localFilePaths, titles, startIndex ->
                 backStack.add(
@@ -115,5 +120,24 @@ fun NavGraph(backStack: SnapshotStateList<Any>) {
         is ModsRoute -> ModsScreen(
             onNavigateBack = { backStack.removeAt(backStack.size - 1) },
         )
+        is ChapterListRoute -> key(current) {
+            ChapterListScreen(
+                pageUrl = current.pageUrl,
+                label = current.label,
+                title = current.title,
+                onNavigateBack = { backStack.removeAt(backStack.size - 1) },
+                onChapterClick = { urls, titles, index ->
+                    backStack.add(PageReaderRoute(urls, titles, index))
+                },
+            )
+        }
+        is PageReaderRoute -> key(current) {
+            PageReaderScreen(
+                chapterUrls = current.chapterUrls,
+                chapterTitles = current.chapterTitles,
+                startIndex = current.startIndex,
+                onNavigateBack = { backStack.removeAt(backStack.size - 1) },
+            )
+        }
     }
 }

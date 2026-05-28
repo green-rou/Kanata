@@ -1,7 +1,6 @@
 package com.greenrou.kanata.features.mods
 
 import android.net.Uri
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.greenrou.kanata.data.local.InstalledModEntity
@@ -67,7 +66,6 @@ class ModsViewModel(
                     mergeAndUpdateState()
                 }
                 .onFailure { e ->
-                    Log.e(TAG, "loadIndex failed", e)
                     _state.update { it.copy(indexError = e.message ?: "Failed to load extensions") }
                 }
             _state.update { it.copy(isLoadingIndex = false) }
@@ -130,7 +128,6 @@ class ModsViewModel(
             }.onSuccess {
                 _events.send(ModsEvent.ShowSnackbar("${mod.label} installed."))
             }.onFailure { e ->
-                Log.e(TAG, "handleInstall failed for ${mod.id}", e)
                 _events.send(ModsEvent.ShowSnackbar("Failed to install ${mod.label}: ${e.message}"))
             }
             _state.update {
@@ -150,7 +147,6 @@ class ModsViewModel(
                     _events.send(ModsEvent.ShowSnackbar("Extension installed from file."))
                 }
                 .onFailure { e ->
-                    Log.e(TAG, "handleInstallFromFile failed", e)
                     _events.send(ModsEvent.ShowSnackbar("Failed to install: ${e.message}"))
                 }
             _state.update { it.copy(isInstallingFromFile = false) }
@@ -176,7 +172,4 @@ class ModsViewModel(
         }
     }
 
-    private companion object {
-        const val TAG = "ModsViewModel"
-    }
 }

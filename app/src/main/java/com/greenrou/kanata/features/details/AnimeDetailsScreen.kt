@@ -32,6 +32,7 @@ import com.greenrou.kanata.core.composable.FavoriteIconTopBar
 import com.greenrou.kanata.core.composable.KanataLoader
 import com.greenrou.kanata.core.composable.KanataSnackbarHost
 import com.greenrou.kanata.core.composable.OfflineState
+import com.greenrou.kanata.domain.model.ContentSource
 import com.greenrou.kanata.domain.model.VideoSource
 import com.greenrou.kanata.features.details.content.AnimeDetailContent
 import com.greenrou.kanata.features.details.content.OfflineEpisodePickerBottomSheet
@@ -44,6 +45,7 @@ fun AnimeDetailsScreen(
     animeId: Int,
     onNavigateBack: () -> Unit,
     onNavigateToEpisodeList: (VideoSource, animeTitle: String, episodeCount: Int) -> Unit,
+    onNavigateToChapterList: (ContentSource, title: String) -> Unit,
     onNavigateToOfflinePlayer: (localFilePaths: List<String>, titles: List<String>, startIndex: Int) -> Unit,
     viewModel: AnimeDetailsViewModel = koinViewModel(key = animeId.toString()),
 ) {
@@ -61,6 +63,8 @@ fun AnimeDetailsScreen(
                 is AnimeDetailsEvent.ShowError -> snackbarHostState.showSnackbar(event.message)
                 is AnimeDetailsEvent.NavigateToEpisodeList ->
                     onNavigateToEpisodeList(event.source, event.animeTitle, event.episodeCount)
+                is AnimeDetailsEvent.NavigateToChapterList ->
+                    onNavigateToChapterList(event.source, event.title)
                 is AnimeDetailsEvent.NavigateToOfflinePlayer -> {
                     val paths = event.items.mapNotNull { it.localFilePath }.map { "file://$it" }
                     val titles = event.items.map { it.episodeTitle }
@@ -128,6 +132,8 @@ fun AnimeDetailsScreen(
                     downloadedEpisodeCount = state.downloadedEpisodeCount,
                     onWatchOffline = { viewModel.handleEvent(AnimeDetailsEvent.WatchOffline) },
                     enrichment = state.enrichment,
+                    contentSources = state.contentSources,
+                    onContentSourceClick = { viewModel.handleEvent(AnimeDetailsEvent.OpenChapterList(it)) },
                 )
                 state.isOffline -> OfflineState(
                     onRetry = { viewModel.handleEvent(AnimeDetailsEvent.LoadAnime(animeId)) },

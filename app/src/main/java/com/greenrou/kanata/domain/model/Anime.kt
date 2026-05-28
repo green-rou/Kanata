@@ -14,4 +14,6 @@ data class Anime(
     val synopsis: String,
     val genres: List<String>,
     val episodes: Int,
+    val chapters: Int = 0,
+    val volumes: Int = 0,
 )

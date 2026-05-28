@@ -6,6 +6,8 @@ import android.provider.OpenableColumns
 import com.greenrou.kanata.data.local.InstalledModDao
 import com.greenrou.kanata.data.local.InstalledModEntity
 import com.greenrou.kanata.data.mod.ModLoader
+import com.greenrou.kanata.modapi.ModContentProvider
+import com.greenrou.kanata.modapi.ModDownloadFeature
 import com.greenrou.kanata.modapi.ModInfoProvider
 import com.greenrou.kanata.modapi.ModSiteParser
 import kotlinx.coroutines.Dispatchers
@@ -41,6 +43,20 @@ class InstallModFromFileUseCase(
                     apkFileName = fileName,
                 )
                 is ModInfoProvider -> InstalledModEntity(
+                    id = instance.id,
+                    label = instance.label,
+                    language = "*",
+                    version = 0,
+                    apkFileName = fileName,
+                )
+                is ModDownloadFeature -> InstalledModEntity(
+                    id = instance.id,
+                    label = instance.label,
+                    language = "*",
+                    version = 0,
+                    apkFileName = fileName,
+                )
+                is ModContentProvider -> InstalledModEntity(
                     id = instance.id,
                     label = instance.label,
                     language = "*",

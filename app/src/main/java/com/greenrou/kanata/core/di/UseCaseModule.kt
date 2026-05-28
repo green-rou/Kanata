@@ -11,7 +11,9 @@ import com.greenrou.kanata.domain.usecase.GetAnimeByMoodUseCase
 import com.greenrou.kanata.domain.usecase.GetAnimeEnrichmentUseCase
 import com.greenrou.kanata.domain.usecase.GetAnimeListUseCase
 import com.greenrou.kanata.domain.usecase.GetAnimegongoTranslationsUseCase
+import com.greenrou.kanata.domain.usecase.GetChapterListUseCase
 import com.greenrou.kanata.domain.usecase.GetCompletedDownloadsUseCase
+import com.greenrou.kanata.domain.usecase.GetContentPagesUseCase
 import com.greenrou.kanata.domain.usecase.GetDownloadFolderUseCase
 import com.greenrou.kanata.domain.usecase.GetDownloadQueueUseCase
 import com.greenrou.kanata.domain.usecase.GetEpisodeDownloadStatusUseCase
@@ -29,6 +31,7 @@ import com.greenrou.kanata.domain.usecase.RemoveFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.ReorderDownloadQueueUseCase
 import com.greenrou.kanata.domain.usecase.RetryDownloadUseCase
 import com.greenrou.kanata.domain.usecase.SavePageUseCase
+import com.greenrou.kanata.domain.usecase.SearchContentSourcesUseCase
 import com.greenrou.kanata.domain.usecase.SearchExternalAnimeUseCase
 import com.greenrou.kanata.domain.usecase.SetDownloadFolderUseCase
 import com.greenrou.kanata.domain.usecase.StartEpisodeDownloadUseCase
@@ -51,6 +54,9 @@ val useCaseModule = module {
     factory { SearchExternalAnimeUseCase(get()) }
     factory { GetAnimeEnrichmentUseCase(get(), get()) }
     factory { GetEpisodeListUseCase(get()) }
+    factory { GetChapterListUseCase(get()) }
+    factory { GetContentPagesUseCase(get()) }
+    factory { SearchContentSourcesUseCase(get()) }
     factory { GetAnimegongoTranslationsUseCase(get()) }
     factory { EnqueueDownloadUseCase(get()) }
     factory { CancelDownloadUseCase(get(), get()) }

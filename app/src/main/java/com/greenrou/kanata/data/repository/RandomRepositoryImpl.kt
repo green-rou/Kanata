@@ -11,9 +11,9 @@ class RandomRepositoryImpl(
     private val nekosiaApi: NekosiaApi
 ) : RandomRepository {
 
-    override suspend fun getRandomAnime(): Result<Anime> = runCatching {
+    override suspend fun getRandomAnime(mediaType: String): Result<Anime> = runCatching {
         val randomPage = Random.nextInt(1, 51)
-        val result = aniListRepository.getAnimeList(page = randomPage, perPage = 20)
+        val result = aniListRepository.getAnimeList(page = randomPage, perPage = 20, mediaType = mediaType)
         val list = result.getOrThrow().items
         if (list.isEmpty()) error("No anime found")
         list.random()

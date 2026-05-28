@@ -33,3 +33,17 @@ data class WebPlayerRoute(val initialUrl: String = "")
 
 @Serializable
 data object ModsRoute
+
+@Serializable
+data class ChapterListRoute(
+    val pageUrl: String,
+    val label: String,
+    val title: String = "",
+)
+
+@Serializable
+data class PageReaderRoute(
+    val chapterUrls: List<String>,
+    val chapterTitles: List<String>,
+    val startIndex: Int,
+)

@@ -38,6 +38,8 @@ type Media {
   description(asHtml: Boolean): String
   startDate: FuzzyDate
   episodes: Int
+  chapters: Int
+  volumes: Int
   coverImage: MediaCoverImage
   genres: [String]
   averageScore: Int

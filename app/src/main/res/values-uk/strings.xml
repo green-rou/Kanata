@@ -35,6 +35,8 @@
     <string name="detail_title_fallback">Деталі аніме</string>
     <string name="detail_error">Помилка: %s</string>
     <string name="detail_episodes_count">%d епізодів</string>
+    <string name="detail_chapters_count">%d розділів</string>
+    <string name="detail_volumes_count">%d томів</string>
     <string name="detail_watch_offline">Дивитись офлайн</string>
     <string name="detail_offline_picker_title">Завантажені епізоди</string>
     <string name="detail_available_streams">Доступні джерела</string>
@@ -176,6 +178,9 @@
     <string name="settings_adult_off_title">Дорослий контент</string>
     <string name="settings_adult_on_subtitle">Показуються лише тайтли 18+</string>
     <string name="settings_adult_off_subtitle">Показувати лише тайтли без 18+</string>
+    <string name="settings_content_type_anime">Режим аніме</string>
+    <string name="settings_content_type_manga">Режим манги</string>
+    <string name="settings_content_type_subtitle">Переключення між аніме та мангою</string>
     <string name="settings_section_sources">Джерела</string>
     <string name="settings_sources_select">Оберіть активні джерела</string>
     <string name="settings_section_extensions">Розширення</string>

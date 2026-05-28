@@ -1,6 +1,5 @@
 package com.greenrou.kanata.data.mod
 
-import android.util.Log
 import com.greenrou.kanata.data.local.InstalledModDao
 import com.greenrou.kanata.domain.parser.InfoProvider
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -25,22 +24,11 @@ class InfoProviderRegistry(
     init {
         dao.observeAll()
             .map { installed ->
-                Log.d(TAG, "DB update: ${installed.size} mods total, ${installed.count { it.isEnabled }} enabled")
-                val enabledFiles = installed
-                    .filter { it.isEnabled }
-                    .map { it.apkFileName }
-                    .toSet()
-                Log.d(TAG, "Loading info providers from files: $enabledFiles")
-                val loaded = modLoader.loadInfoProviders(enabledFiles)
-                Log.d(TAG, "Loaded ${loaded.size} info provider(s): ${loaded.map { it.id }}")
-                loaded
+                val enabledFiles = installed.filter { it.isEnabled }.map { it.apkFileName }.toSet()
+                modLoader.loadInfoProviders(enabledFiles)
             }
             .flowOn(Dispatchers.IO)
             .onEach { _providers.value = it }
             .launchIn(GlobalScope)
-    }
-
-    private companion object {
-        const val TAG = "InfoProviderRegistry"
     }
 }
