@@ -7,7 +7,6 @@ sealed interface FavoritesEvent {
     data class SavedPageClicked(val url: String) : FavoritesEvent
     data class DeleteSavedPage(val id: Long) : FavoritesEvent
 
-    // navigation — sent via Channel
     data class NavigateToDetails(val animeId: Int) : FavoritesEvent
     data class NavigateToWebPlayer(val url: String) : FavoritesEvent
 }

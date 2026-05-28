@@ -1,7 +1,7 @@
 package com.greenrou.kanata.data.repository
 
+import com.greenrou.kanata.data.mod.ParserRegistry
 import com.greenrou.kanata.domain.model.VideoSource
-import com.greenrou.kanata.domain.parser.SiteParser
 import com.greenrou.kanata.domain.repository.SearchRepository
 import com.greenrou.kanata.domain.repository.SettingsManager
 import kotlinx.coroutines.Dispatchers
@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 
 class SearchRepositoryImpl(
-    private val parsers: List<SiteParser>,
+    private val parserRegistry: ParserRegistry,
     private val settingsManager: SettingsManager,
 ) : SearchRepository {
 
@@ -17,9 +17,9 @@ class SearchRepositoryImpl(
         val showAdult = settingsManager.showAdultContent.first()
         val disabled = settingsManager.disabledSources.first()
         val sources = mutableListOf<VideoSource>()
-        parsers
+        parserRegistry.parsers.value
             .filter { parser -> !parser.isAdultOnly || showAdult }
-            .filter { parser -> parser.sourceType !in disabled }
+            .filter { parser -> parser.label !in disabled }
             .forEach { parser ->
                 for (title in titles) {
                     val result = parser.search(title)

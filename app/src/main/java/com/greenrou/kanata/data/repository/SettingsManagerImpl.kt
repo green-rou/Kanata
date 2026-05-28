@@ -5,7 +5,6 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.greenrou.kanata.domain.model.VideoSourceType
 import com.greenrou.kanata.domain.repository.SettingsManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -26,6 +25,8 @@ class SettingsManagerImpl(private val context: Context) : SettingsManager {
         val ANALYTICS_ENABLED = booleanPreferencesKey("analytics_enabled")
         val ANALYTICS_CONSENT_SHOWN = booleanPreferencesKey("analytics_consent_shown")
         val SKIPPED_VERSION = stringPreferencesKey("skipped_version")
+        val ACTIVE_INFO_PROVIDER_ID = stringPreferencesKey("active_info_provider_id")
+        val IS_MANGA_MODE = booleanPreferencesKey("is_manga_mode")
     }
 
     override val showAdultContent: Flow<Boolean> = context.dataStore.data
@@ -53,12 +54,11 @@ class SettingsManagerImpl(private val context: Context) : SettingsManager {
             preferences[PreferencesKeys.ACCENT_COLOR] ?: "Gray"
         }
 
-    override val disabledSources: Flow<Set<VideoSourceType>> = context.dataStore.data
+    override val disabledSources: Flow<Set<String>> = context.dataStore.data
         .map { preferences ->
             preferences[PreferencesKeys.DISABLED_SOURCES]
                 ?.split(",")
                 ?.filter { it.isNotBlank() }
-                ?.mapNotNull { name -> runCatching { VideoSourceType.valueOf(name) }.getOrNull() }
                 ?.toSet()
                 ?: emptySet()
         }
@@ -93,9 +93,9 @@ class SettingsManagerImpl(private val context: Context) : SettingsManager {
         }
     }
 
-    override suspend fun setDisabledSources(sources: Set<VideoSourceType>) {
+    override suspend fun setDisabledSources(sources: Set<String>) {
         context.dataStore.edit { preferences ->
-            preferences[PreferencesKeys.DISABLED_SOURCES] = sources.joinToString(",") { it.name }
+            preferences[PreferencesKeys.DISABLED_SOURCES] = sources.joinToString(",")
         }
     }
 
@@ -147,6 +147,25 @@ class SettingsManagerImpl(private val context: Context) : SettingsManager {
     override suspend fun setSkippedVersion(version: String) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.SKIPPED_VERSION] = version
+        }
+    }
+
+    override val activeInfoProviderId: Flow<String?> = context.dataStore.data
+        .map { preferences -> preferences[PreferencesKeys.ACTIVE_INFO_PROVIDER_ID] }
+
+    override suspend fun setActiveInfoProviderId(id: String?) {
+        context.dataStore.edit { preferences ->
+            if (id == null) preferences.remove(PreferencesKeys.ACTIVE_INFO_PROVIDER_ID)
+            else preferences[PreferencesKeys.ACTIVE_INFO_PROVIDER_ID] = id
+        }
+    }
+
+    override val isMangaMode: Flow<Boolean> = context.dataStore.data
+        .map { preferences -> preferences[PreferencesKeys.IS_MANGA_MODE] ?: false }
+
+    override suspend fun setMangaMode(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.IS_MANGA_MODE] = enabled
         }
     }
 }

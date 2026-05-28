@@ -14,6 +14,5 @@ sealed interface WebPlayerEvent {
     data object DismissSaveDialog : WebPlayerEvent
     data class SavePage(val name: String, val url: String) : WebPlayerEvent
     data object NavigateBack : WebPlayerEvent
-    // navigation-only, sent via Channel
     data class NavigateToPlayer(val streamUrl: String, val referer: String) : WebPlayerEvent
 }

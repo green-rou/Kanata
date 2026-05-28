@@ -12,6 +12,7 @@ class GetAnimeListUseCase(
         perPage: Int = 20,
         showAdultContent: Boolean = false,
         filter: AnimeFilter = AnimeFilter(),
+        mediaType: String = "ANIME",
     ): Result<AnimeListPage> =
-        repository.getAnimeList(page, perPage, showAdultContent, filter)
+        repository.getAnimeList(page, perPage, showAdultContent, filter, mediaType)
 }

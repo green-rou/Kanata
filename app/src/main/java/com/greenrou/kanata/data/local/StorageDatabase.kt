@@ -7,8 +7,8 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
-    entities = [StorageEntity::class, FavoriteEntity::class, DownloadEntity::class, SavedPageEntity::class],
-    version = 6,
+    entities = [StorageEntity::class, FavoriteEntity::class, DownloadEntity::class, SavedPageEntity::class, InstalledModEntity::class],
+    version = 7,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -18,8 +18,26 @@ abstract class StorageDatabase : RoomDatabase() {
     abstract fun favoritesDao(): FavoritesDao
     abstract fun downloadDao(): DownloadDao
     abstract fun savedPagesDao(): SavedPagesDao
+    abstract fun installedModDao(): InstalledModDao
 
     companion object {
+        val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS installed_mods (
+                        id TEXT NOT NULL PRIMARY KEY,
+                        label TEXT NOT NULL,
+                        language TEXT NOT NULL,
+                        version INTEGER NOT NULL,
+                        apkFileName TEXT NOT NULL,
+                        isEnabled INTEGER NOT NULL DEFAULT 1
+                    )
+                    """.trimIndent()
+                )
+            }
+        }
+
         val MIGRATION_5_6 = object : Migration(5, 6) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL(

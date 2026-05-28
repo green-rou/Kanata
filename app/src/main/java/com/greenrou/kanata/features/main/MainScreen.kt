@@ -101,10 +101,22 @@ fun MainScreen(
     onNavigateToAnimeDetails: (animeId: Int) -> Unit = {},
     onOpenWebPlayer: () -> Unit = {},
     onNavigateToWebPlayer: (url: String) -> Unit = {},
+    onNavigateToMods: () -> Unit = {},
     viewModel: MainViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val isDownloadFeatureEnabled by viewModel.isDownloadFeatureEnabled.collectAsStateWithLifecycle()
     val favoriteIds by viewModel.favoriteIds.collectAsStateWithLifecycle()
+    val regularSources by viewModel.regularSources.collectAsStateWithLifecycle()
+    val adultSources by viewModel.adultSources.collectAsStateWithLifecycle()
+    val infoProviders by viewModel.infoProviders.collectAsStateWithLifecycle()
+    val mangaModResources by viewModel.mangaModResources.collectAsStateWithLifecycle()
+    val mangaModeOnTitle = mangaModResources?.getString("mod_mode_on_title")
+        ?: stringResource(R.string.settings_content_type_manga)
+    val mangaModeOffTitle = mangaModResources?.getString("mod_mode_off_title")
+        ?: stringResource(R.string.settings_content_type_anime)
+    val mangaModeSubtitle = mangaModResources?.getString("mod_mode_subtitle")
+        ?: stringResource(R.string.settings_content_type_subtitle)
     val snackbarHostState = remember { SnackbarHostState() }
     val downloadsViewModel: DownloadManagerViewModel = koinViewModel()
     val updateViewModel: UpdateViewModel = koinViewModel()
@@ -148,6 +160,12 @@ fun MainScreen(
         }
     }
 
+    LaunchedEffect(isDownloadFeatureEnabled) {
+        if (!isDownloadFeatureEnabled && selectedTab == BottomNavItem.Downloads) {
+            onTabSelected(BottomNavItem.AnimeList.name)
+        }
+    }
+
     val fabAllowedOnTab = selectedTab == BottomNavItem.AnimeList || selectedTab == BottomNavItem.Favorites
 
     var fabScrollVisible by remember { mutableStateOf(true) }
@@ -170,7 +188,7 @@ fun MainScreen(
             }
     }
 
-    val isFabVisible = fabAllowedOnTab && fabScrollVisible
+    val isFabVisible = fabAllowedOnTab && fabScrollVisible && isDownloadFeatureEnabled
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
@@ -184,9 +202,10 @@ fun MainScreen(
 
     val systemNavBarBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val floatingNavBottom = NavBarHeight + systemNavBarBottom
-    val snackbarBottomPadding by animateDpAsState(
-        targetValue = if (isFabVisible) floatingNavBottom + 72.dp else floatingNavBottom,
-        label = "snackbar_bottom",
+    val isSnackbarVisible = snackbarHostState.currentSnackbarData != null
+    val fabBottomPadding by animateDpAsState(
+        targetValue = floatingNavBottom + 12.dp + if (isFabVisible && isSnackbarVisible) 60.dp else 0.dp,
+        label = "fab_bottom",
     )
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -267,11 +286,10 @@ fun MainScreen(
                                     )
                                 } else {
                                     Text(when (selectedTab) {
-                                        BottomNavItem.AnimeList -> stringResource(R.string.tab_anime)
                                         BottomNavItem.Favorites -> stringResource(R.string.tab_favorites)
-                                        BottomNavItem.Discover -> stringResource(R.string.tab_discover)
                                         BottomNavItem.Downloads -> stringResource(R.string.tab_downloads)
                                         BottomNavItem.Settings -> stringResource(R.string.tab_settings)
+                                        else -> ""
                                     })
                                 }
                             },
@@ -343,7 +361,7 @@ fun MainScreen(
             snackbarHost = {
                 KanataSnackbarHost(
                     hostState = snackbarHostState,
-                    modifier = Modifier.padding(bottom = snackbarBottomPadding),
+                    modifier = Modifier.padding(bottom = floatingNavBottom),
                 )
             },
         ) { scaffoldPadding ->
@@ -490,8 +508,8 @@ fun MainScreen(
                         accentColor = state.accentColor,
                         onSetAccentColor = { viewModel.handleEvent(MainEvent.SetAccentColor(it)) },
                         disabledSources = state.disabledSources,
-                        regularSources = viewModel.regularSources,
-                        adultSources = viewModel.adultSources,
+                        regularSources = regularSources,
+                        adultSources = adultSources,
                         onToggleSource = { viewModel.handleEvent(MainEvent.ToggleSource(it)) },
                         adBlockerEnabled = state.adBlockerEnabled,
                         onToggleAdBlocker = { viewModel.handleEvent(MainEvent.ToggleAdBlocker) },
@@ -499,8 +517,18 @@ fun MainScreen(
                         onToggleWebBackNavTopBar = { viewModel.handleEvent(MainEvent.ToggleWebBackNavTopBar) },
                         analyticsEnabled = state.analyticsEnabled,
                         onToggleAnalytics = { viewModel.handleEvent(MainEvent.ToggleAnalytics) },
+                        isMangaModInstalled = state.isMangaModInstalled,
+                        isMangaMode = state.isMangaMode,
+                        onToggleMangaMode = { viewModel.handleEvent(MainEvent.ToggleMangaMode) },
+                        mangaModeOnTitle = mangaModeOnTitle,
+                        mangaModeOffTitle = mangaModeOffTitle,
+                        mangaModeSubtitle = mangaModeSubtitle,
                         isCheckingUpdate = updateState.isChecking,
                         onCheckUpdate = { updateViewModel.handleEvent(UpdateEvent.CheckUpdate) },
+                        onNavigateToMods = onNavigateToMods,
+                        infoProviders = infoProviders,
+                        activeInfoProviderId = state.activeInfoProviderId,
+                        onSetInfoProvider = { viewModel.handleEvent(MainEvent.SetActiveInfoProvider(it)) },
                         bottomPadding = contentPadding.calculateBottomPadding(),
                         modifier = Modifier
                             .fillMaxSize()
@@ -514,7 +542,7 @@ fun MainScreen(
             visible = isFabVisible,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(end = 16.dp, bottom = floatingNavBottom + 12.dp),
+                .padding(end = 16.dp, bottom = fabBottomPadding),
             enter = scaleIn() + fadeIn(),
             exit = scaleOut() + fadeOut(),
         ) {
@@ -534,6 +562,11 @@ fun MainScreen(
             AnimatedBottomNavBar(
                 selectedTab = selectedTab,
                 onTabSelected = { onTabSelected(it.name) },
+                visibleItems = if (isDownloadFeatureEnabled) {
+                    BottomNavItem.entries.toSet()
+                } else {
+                    BottomNavItem.entries.filter { it != BottomNavItem.Downloads }.toSet()
+                },
             )
             Spacer(
                 modifier = Modifier

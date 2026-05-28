@@ -1,8 +1,10 @@
 package com.greenrou.kanata.features.random
 
 import androidx.lifecycle.ViewModel
-import com.greenrou.kanata.core.analytics.reportToCrashlytics
 import androidx.lifecycle.viewModelScope
+import com.greenrou.kanata.core.analytics.reportToCrashlytics
+import com.greenrou.kanata.data.mod.MangaModRegistry
+import com.greenrou.kanata.domain.repository.SettingsManager
 import com.greenrou.kanata.domain.usecase.AddFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.GetRandomAnimeUseCase
 import com.greenrou.kanata.domain.usecase.GetRandomImageUseCase
@@ -14,6 +16,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -24,6 +27,8 @@ class RandomImageViewModel(
     private val addFavorite: AddFavoriteUseCase,
     private val removeFavorite: RemoveFavoriteUseCase,
     private val isFavorite: IsFavoriteUseCase,
+    private val settingsManager: SettingsManager,
+    private val mangaModRegistry: MangaModRegistry,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(RandomImageState())
@@ -55,7 +60,12 @@ class RandomImageViewModel(
         viewModelScope.launch {
             favoriteObserverJob?.cancel()
             _state.update { it.copy(isAnimeLoading = true, animeError = null, isAnimeFavorite = false) }
-            getRandomAnime()
+            val mediaType = if (settingsManager.isMangaMode.first()) {
+                mangaModRegistry.activeProvider.value?.mediaType ?: "ANIME"
+            } else {
+                "ANIME"
+            }
+            getRandomAnime(mediaType)
                 .onSuccess { anime ->
                     _state.update { it.copy(isAnimeLoading = false, randomAnime = anime) }
                     favoriteObserverJob = launch { observeFavoriteStatus(anime.id) }

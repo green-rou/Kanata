@@ -4,20 +4,24 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.greenrou.kanata.core.analytics.AnalyticsManager
 import com.greenrou.kanata.core.network.NetworkMonitor
+import com.greenrou.kanata.data.mod.MangaModRegistry
+import com.greenrou.kanata.data.mod.ParserRegistry
 import com.greenrou.kanata.domain.model.Anime
 import com.greenrou.kanata.domain.repository.SettingsManager
 import com.greenrou.kanata.domain.usecase.AddFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.GetAnimeByIdUseCase
+import com.greenrou.kanata.domain.usecase.GetAnimeEnrichmentUseCase
 import com.greenrou.kanata.domain.usecase.GetCompletedDownloadsUseCase
-import com.greenrou.kanata.domain.usecase.GetVideoStreamUseCase
 import com.greenrou.kanata.domain.usecase.IsFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.RemoveFavoriteUseCase
+import com.greenrou.kanata.domain.usecase.SearchContentSourcesUseCase
 import com.greenrou.kanata.domain.usecase.SearchExternalAnimeUseCase
 import com.greenrou.kanata.features.details.model.AnimeDetailsEvent
 import com.greenrou.kanata.features.details.model.AnimeDetailsState
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -31,11 +35,14 @@ class AnimeDetailsViewModel(
     private val isFavoriteUseCase: IsFavoriteUseCase,
     private val removeFavorite: RemoveFavoriteUseCase,
     private val searchExternalAnime: SearchExternalAnimeUseCase,
-    private val getVideoStreamUseCase: GetVideoStreamUseCase,
     private val settingsManager: SettingsManager,
     private val getCompletedDownloads: GetCompletedDownloadsUseCase,
     private val networkMonitor: NetworkMonitor,
     private val analytics: AnalyticsManager,
+    private val getAnimeEnrichment: GetAnimeEnrichmentUseCase,
+    private val parserRegistry: ParserRegistry,
+    private val mangaModRegistry: MangaModRegistry,
+    private val searchContentSources: SearchContentSourcesUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AnimeDetailsState())
@@ -50,6 +57,16 @@ class AnimeDetailsViewModel(
         analytics.setScreen("anime_details")
         settingsManager.coverFillsTopBar
             .onEach { enabled -> _state.update { it.copy(coverFillsTopBar = enabled) } }
+            .launchIn(viewModelScope)
+        settingsManager.activeInfoProviderId
+            .distinctUntilChanged()
+            .onEach { _ ->
+                val anime = _state.value.anime ?: return@onEach
+                fetchEnrichment(anime)
+            }
+            .launchIn(viewModelScope)
+        parserRegistry.parsers
+            .onEach { parsers -> _state.update { it.copy(hasStreamSources = parsers.isNotEmpty()) } }
             .launchIn(viewModelScope)
     }
 
@@ -67,6 +84,9 @@ class AnimeDetailsViewModel(
                 val animeTitle = _state.value.anime?.title.orEmpty()
                 val episodeCount = _state.value.anime?.episodes ?: 0
                 _events.send(AnimeDetailsEvent.NavigateToEpisodeList(event.source, animeTitle, episodeCount))
+            }
+            is AnimeDetailsEvent.OpenChapterList -> viewModelScope.launch {
+                _events.send(AnimeDetailsEvent.NavigateToChapterList(event.source, _state.value.anime?.title.orEmpty()))
             }
             AnimeDetailsEvent.WatchOffline -> viewModelScope.launch {
                 val animeTitle = _state.value.anime?.title.orEmpty()
@@ -107,11 +127,15 @@ class AnimeDetailsViewModel(
         loadedAnimeId = animeId
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null, anime = null, videoSources = emptyList(), isSearching = false) }
-            getAnimeById(animeId)
+            val isMangaMode = settingsManager.isMangaMode.first()
+            val mediaType = if (isMangaMode) mangaModRegistry.activeProvider.value?.mediaType ?: "ANIME" else "ANIME"
+            getAnimeById(animeId, mediaType = mediaType)
                 .onSuccess { anime ->
                     _state.update { it.copy(isLoading = false, anime = anime) }
-                    searchOnExternal(anime)
+                    if (_state.value.hasStreamSources) searchOnExternal(anime)
+                    searchContentSourcesForAnime(anime)
                     observeDownloadedCount(anime.title)
+                    fetchEnrichment(anime)
                 }
                 .onFailure { e ->
 
@@ -135,6 +159,18 @@ class AnimeDetailsViewModel(
             .launchIn(viewModelScope)
     }
 
+    private fun searchContentSourcesForAnime(anime: Anime) {
+        viewModelScope.launch {
+            val titles = listOfNotNull(
+                anime.titleEnglish.takeIf { it.isNotBlank() },
+                anime.titleRomaji.takeIf { it.isNotBlank() },
+                anime.title.takeIf { it.isNotBlank() },
+            )
+            val sources = searchContentSources(titles)
+            if (sources.isNotEmpty()) _state.update { it.copy(contentSources = sources) }
+        }
+    }
+
     private fun searchOnExternal(anime: Anime) {
         viewModelScope.launch {
             _state.update { it.copy(isSearching = true) }
@@ -147,4 +183,17 @@ class AnimeDetailsViewModel(
             _state.update { it.copy(isSearching = false, videoSources = sources) }
         }
     }
+
+    private fun fetchEnrichment(anime: Anime) {
+        viewModelScope.launch {
+            val titles = listOfNotNull(
+                anime.titleRomaji.takeIf { it.isNotBlank() },
+                anime.titleEnglish.takeIf { it.isNotBlank() },
+                anime.title.takeIf { it.isNotBlank() },
+            )
+            val enrichment = getAnimeEnrichment(titles)
+            _state.update { it.copy(enrichment = enrichment) }
+        }
+    }
+
 }

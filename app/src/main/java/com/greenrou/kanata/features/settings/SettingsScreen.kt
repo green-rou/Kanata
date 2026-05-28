@@ -13,10 +13,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.AutoStories
 import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.Code
 import androidx.compose.material.icons.rounded.DarkMode
+import androidx.compose.material.icons.rounded.Extension
 import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material.icons.rounded.Fullscreen
 import androidx.compose.material.icons.rounded.FullscreenExit
@@ -25,6 +27,7 @@ import androidx.compose.material.icons.rounded.LightMode
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.LockOpen
 import androidx.compose.material.icons.rounded.SystemUpdate
+import androidx.compose.material.icons.rounded.Tv
 import androidx.compose.material.icons.rounded.VolunteerActivism
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -35,8 +38,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.greenrou.kanata.R
-import com.greenrou.kanata.domain.model.VideoSourceType
 import com.greenrou.kanata.features.settings.content.ColorPickerItem
+import com.greenrou.kanata.features.settings.content.InfoProviderSection
 import com.greenrou.kanata.features.settings.content.LanguagePickerItem
 import com.greenrou.kanata.features.settings.content.SettingsItem
 import com.greenrou.kanata.features.settings.content.SettingsLinkItem
@@ -54,24 +57,34 @@ fun SettingsScreen(
     onToggleTheme: () -> Unit,
     coverFillsTopBar: Boolean,
     onToggleCoverLayout: () -> Unit,
+    modifier: Modifier = Modifier,
     downloadFolder: String = "",
     onSetDownloadFolder: (String) -> Unit = {},
     accentColor: String = "Gray",
     onSetAccentColor: (String) -> Unit = {},
-    disabledSources: Set<VideoSourceType> = emptySet(),
-    regularSources: List<Pair<VideoSourceType, String>> = emptyList(),
-    adultSources: List<Pair<VideoSourceType, String>> = emptyList(),
-    onToggleSource: (VideoSourceType) -> Unit = {},
+    disabledSources: Set<String> = emptySet(),
+    regularSources: List<String> = emptyList(),
+    adultSources: List<String> = emptyList(),
+    onToggleSource: (String) -> Unit = {},
     adBlockerEnabled: Boolean = true,
     onToggleAdBlocker: () -> Unit = {},
     webBackNavTopBar: Boolean = false,
     onToggleWebBackNavTopBar: () -> Unit = {},
     analyticsEnabled: Boolean = true,
     onToggleAnalytics: () -> Unit = {},
+    isMangaModInstalled: Boolean = false,
+    isMangaMode: Boolean = false,
+    onToggleMangaMode: () -> Unit = {},
+    mangaModeOnTitle: String = stringResource(R.string.settings_content_type_manga),
+    mangaModeOffTitle: String = stringResource(R.string.settings_content_type_anime),
+    mangaModeSubtitle: String = stringResource(R.string.settings_content_type_subtitle),
     isCheckingUpdate: Boolean = false,
     onCheckUpdate: () -> Unit = {},
+    onNavigateToMods: () -> Unit = {},
+    infoProviders: List<Pair<String, String>> = emptyList(),
+    activeInfoProviderId: String? = null,
+    onSetInfoProvider: (String?) -> Unit = {},
     bottomPadding: Dp = 0.dp,
-    modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
@@ -134,6 +147,15 @@ fun SettingsScreen(
                 checked = showAdultContent,
                 onCheckedChange = { onToggleAdultContent() },
             )
+            if (isMangaModInstalled) {
+                SettingsItem(
+                    icon = if (isMangaMode) Icons.Rounded.AutoStories else Icons.Rounded.Tv,
+                    title = if (isMangaMode) mangaModeOnTitle else mangaModeOffTitle,
+                    subtitle = mangaModeSubtitle,
+                    checked = isMangaMode,
+                    onCheckedChange = { onToggleMangaMode() },
+                )
+            }
         }
 
         SourcesSection(
@@ -150,6 +172,23 @@ fun SettingsScreen(
                 title = stringResource(R.string.settings_download_folder_title),
                 subtitle = downloadFolder.ifBlank { stringResource(R.string.settings_download_folder_default) },
                 onClick = { folderPickerLauncher.launch(null) },
+            )
+        }
+
+        SettingsSection(title = stringResource(R.string.settings_section_extensions)) {
+            SettingsLinkItem(
+                icon = Icons.Rounded.Extension,
+                title = stringResource(R.string.settings_extensions_manage_title),
+                subtitle = stringResource(R.string.settings_extensions_manage_subtitle),
+                onClick = onNavigateToMods,
+            )
+        }
+
+        if (infoProviders.isNotEmpty()) {
+            InfoProviderSection(
+                providers = infoProviders,
+                activeProviderId = activeInfoProviderId,
+                onSelect = onSetInfoProvider,
             )
         }
 

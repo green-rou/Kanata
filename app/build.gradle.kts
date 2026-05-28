@@ -23,8 +23,8 @@ android {
         applicationId = "com.greenrou.kanata"
         minSdk = 28
         targetSdk = 36
-        versionCode = 6
-        versionName = System.getenv("VERSION_NAME")?.removePrefix("v") ?: "0.2.4"
+        versionCode = 8
+        versionName = System.getenv("VERSION_NAME")?.removePrefix("v") ?: "0.3.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -57,6 +57,12 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField(
+                "String", "MOD_INDEX_URL",
+                "\"https://raw.githubusercontent.com/green-rou/KanataExt/master/index.json\""
+            )
+        }
         release {
             signingConfig = if (hasSigningConfig)
                 signingConfigs.getByName("release")
@@ -67,6 +73,10 @@ android {
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
+            )
+            buildConfigField(
+                "String", "MOD_INDEX_URL",
+                "\"https://raw.githubusercontent.com/green-rou/KanataExt/master/index.json\""
             )
         }
     }
@@ -84,6 +94,8 @@ android {
 }
 
 dependencies {
+    implementation(project(":mod-api"))
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)

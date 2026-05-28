@@ -5,14 +5,15 @@ import androidx.lifecycle.viewModelScope
 import com.greenrou.kanata.core.analytics.AnalyticsManager
 import com.greenrou.kanata.core.analytics.reportToCrashlytics
 import com.greenrou.kanata.core.network.NetworkMonitor
+import com.greenrou.kanata.data.mod.DownloadFeatureRegistry
+import com.greenrou.kanata.data.mod.InfoProviderRegistry
+import com.greenrou.kanata.data.mod.MangaModRegistry
+import com.greenrou.kanata.data.mod.ParserRegistry
 import com.greenrou.kanata.domain.model.AnimeFilter
-import com.greenrou.kanata.domain.model.VideoSourceType
-import com.greenrou.kanata.domain.parser.SiteParser
 import com.greenrou.kanata.domain.repository.SettingsManager
 import com.greenrou.kanata.domain.usecase.AddFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.GetAnimeListUseCase
 import com.greenrou.kanata.domain.usecase.GetFavoritesUseCase
-import com.greenrou.kanata.domain.usecase.IsFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.RemoveFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.SetDownloadFolderUseCase
 import com.greenrou.kanata.features.main.model.MainEvent
@@ -26,6 +27,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -36,22 +38,31 @@ class MainViewModel(
     private val getAnimeList: GetAnimeListUseCase,
     private val addFavorite: AddFavoriteUseCase,
     private val removeFavorite: RemoveFavoriteUseCase,
-    private val isFavorite: IsFavoriteUseCase,
     private val getFavorites: GetFavoritesUseCase,
     private val settingsManager: SettingsManager,
     private val setDownloadFolder: SetDownloadFolderUseCase,
     private val networkMonitor: NetworkMonitor,
     private val analytics: AnalyticsManager,
-    parsers: List<SiteParser>,
+    parserRegistry: ParserRegistry,
+    infoProviderRegistry: InfoProviderRegistry,
+    downloadFeatureRegistry: DownloadFeatureRegistry,
+    private val mangaModRegistry: MangaModRegistry,
 ) : ViewModel() {
 
-    val regularSources: List<Pair<VideoSourceType, String>> = parsers
-        .filter { !it.isAdultOnly }
-        .map { it.sourceType to it.label }
+    val isDownloadFeatureEnabled: StateFlow<Boolean> = downloadFeatureRegistry.isEnabled
+    val mangaModResources = mangaModRegistry.modResources
 
-    val adultSources: List<Pair<VideoSourceType, String>> = parsers
-        .filter { it.isAdultOnly }
-        .map { it.sourceType to it.label }
+    val regularSources: StateFlow<List<String>> = parserRegistry.parsers
+        .map { list -> list.filter { !it.isAdultOnly }.map { it.label } }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val adultSources: StateFlow<List<String>> = parserRegistry.parsers
+        .map { list -> list.filter { it.isAdultOnly }.map { it.label } }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val infoProviders: StateFlow<List<Pair<String, String>>> = infoProviderRegistry.providers
+        .map { list -> list.map { it.id to it.label } }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     private val _state = MutableStateFlow(MainState())
     val state = _state.asStateFlow()
@@ -79,7 +90,23 @@ class MainViewModel(
     init {
         observeSettings()
         observeNetwork()
+        observeMangaMod()
         loadAnime()
+    }
+
+    private fun currentMediaType() =
+        if (_state.value.isMangaMode) mangaModRegistry.activeProvider.value?.mediaType ?: "ANIME"
+        else "ANIME"
+
+    private fun observeMangaMod() {
+        mangaModRegistry.isInstalled
+            .onEach { installed ->
+                _state.update { it.copy(isMangaModInstalled = installed) }
+                if (!installed && _state.value.isMangaMode) {
+                    settingsManager.setMangaMode(false)
+                }
+            }
+            .launchIn(viewModelScope)
     }
 
     private fun observeSettings() {
@@ -121,6 +148,17 @@ class MainViewModel(
             .launchIn(viewModelScope)
         settingsManager.analyticsConsentShown
             .onEach { shown -> _state.update { it.copy(analyticsConsentShown = shown) } }
+            .launchIn(viewModelScope)
+        settingsManager.activeInfoProviderId
+            .onEach { id -> _state.update { it.copy(activeInfoProviderId = id) } }
+            .launchIn(viewModelScope)
+
+        settingsManager.isMangaMode
+            .onEach { isManga ->
+                val changed = _state.value.isMangaMode != isManga
+                _state.update { it.copy(isMangaMode = isManga, animeList = if (changed) emptyList() else it.animeList, selectedFormats = if (changed) emptySet() else it.selectedFormats) }
+                if (changed) loadAnime()
+            }
             .launchIn(viewModelScope)
     }
 
@@ -220,11 +258,17 @@ class MainViewModel(
             }
             is MainEvent.ToggleSource -> viewModelScope.launch {
                 val updated = _state.value.disabledSources.toMutableSet()
-                if (!updated.add(event.type)) updated.remove(event.type)
+                if (!updated.add(event.label)) updated.remove(event.label)
                 settingsManager.setDisabledSources(updated)
             }
             MainEvent.ToggleAdBlocker -> viewModelScope.launch {
                 settingsManager.setAdBlockerEnabled(!_state.value.adBlockerEnabled)
+            }
+            MainEvent.ToggleMangaMode -> viewModelScope.launch {
+                settingsManager.setMangaMode(!_state.value.isMangaMode)
+            }
+            is MainEvent.SetActiveInfoProvider -> viewModelScope.launch {
+                settingsManager.setActiveInfoProviderId(event.id)
             }
             MainEvent.ToggleWebBackNavTopBar -> viewModelScope.launch {
                 settingsManager.setWebBackNavTopBar(!_state.value.webBackNavTopBar)
@@ -253,6 +297,7 @@ class MainViewModel(
                 genres = s.selectedGenres.toList(),
                 formats = s.selectedFormats.toList(),
             ),
+            mediaType = currentMediaType(),
         )
     }
 
@@ -267,13 +312,12 @@ class MainViewModel(
     private fun loadAnime(
         showAdultContent: Boolean = _state.value.showAdultContent,
         filter: AnimeFilter = currentFilter(),
+        mediaType: String = currentMediaType(),
     ) {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
-            getAnimeList(page = 1, showAdultContent = showAdultContent, filter = filter)
+            getAnimeList(page = 1, showAdultContent = showAdultContent, filter = filter, mediaType = mediaType)
                 .onSuccess { page ->
-                    if (page.items.isEmpty()) {
-                    }
                     _state.update {
                         it.copy(
                             isLoading = false,
@@ -296,7 +340,7 @@ class MainViewModel(
     private fun refreshAnime() {
         viewModelScope.launch {
             _state.update { it.copy(isRefreshing = true, error = null) }
-            getAnimeList(page = 1, showAdultContent = _state.value.showAdultContent, filter = currentFilter())
+            getAnimeList(page = 1, showAdultContent = _state.value.showAdultContent, filter = currentFilter(), mediaType = currentMediaType())
                 .onSuccess { page ->
                     _state.update {
                         it.copy(
@@ -326,6 +370,7 @@ class MainViewModel(
                 page = current.currentPage + 1,
                 showAdultContent = current.showAdultContent,
                 filter = currentFilter(),
+                mediaType = currentMediaType(),
             )
                 .onSuccess { page ->
                     _state.update {

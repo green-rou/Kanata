@@ -22,4 +22,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "Kanata"
 include(":app")
+include(":mod-api")
  
