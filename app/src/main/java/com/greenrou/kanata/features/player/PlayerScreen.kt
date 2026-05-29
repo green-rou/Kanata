@@ -89,6 +89,7 @@ fun PlayerScreen(
     ),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val isDownloadFeatureEnabled by viewModel.isDownloadFeatureEnabled.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val activity = context as? Activity
 
@@ -343,7 +344,7 @@ fun PlayerScreen(
                         currentIndex = state.currentIndex,
                         episodeCount = state.episodeCount,
                         downloadStatus = state.currentEpisodeDownloadStatus,
-                        showDownloadButton = episodeUrls.getOrNull(state.currentIndex)?.startsWith("file://") != true,
+                        showDownloadButton = isDownloadFeatureEnabled && episodeUrls.getOrNull(state.currentIndex)?.startsWith("file://") != true,
                         onDownloadClick = {
                             viewModel.handleEvent(
                                 PlayerEvent.DownloadCurrentEpisode(

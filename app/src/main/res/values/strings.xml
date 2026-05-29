@@ -23,13 +23,14 @@
     <!-- Main screen -->
     <string name="main_title">Kanata</string>
     <string name="main_subtitle">Discover anime</string>
-    <string name="main_search_anime_hint">Search anime…</string>
+    <string name="main_search_anime_hint">Search…</string>
     <string name="main_search_downloads_hint">Search downloads…</string>
     <string name="main_cd_close_search">Close search</string>
     <string name="main_cd_search">Search</string>
     <string name="main_cd_filter">Filter</string>
     <string name="main_cd_search_downloads">Search downloads</string>
     <string name="main_no_anime_found">No anime found</string>
+    <string name="main_search_in_mods">Search in mod resources</string>
 
     <!-- Anime details -->
     <string name="detail_title_fallback">Anime Detail</string>
@@ -240,4 +241,8 @@
     <string name="update_skip_hint">If you skip, this dialog won\'t appear again for version %s</string>
     <string name="update_downloading">Downloading…</string>
     <string name="update_no_updates">Already up to date</string>
+    <string name="online_search_button">Search online</string>
+    <string name="online_search_searching">Searching on %s…</string>
+    <string name="online_search_empty">Nothing found on %s</string>
+    <string name="online_search_error">Error on %s</string>
 </resources>

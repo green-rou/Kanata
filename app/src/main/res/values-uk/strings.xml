@@ -23,13 +23,14 @@
     <!-- Main screen -->
     <string name="main_title">Kanata</string>
     <string name="main_subtitle">Відкривай аніме</string>
-    <string name="main_search_anime_hint">Пошук аніме…</string>
+    <string name="main_search_anime_hint">Пошук…</string>
     <string name="main_search_downloads_hint">Пошук завантажень…</string>
     <string name="main_cd_close_search">Закрити пошук</string>
     <string name="main_cd_search">Пошук</string>
     <string name="main_cd_filter">Фільтр</string>
     <string name="main_cd_search_downloads">Пошук завантажень</string>
     <string name="main_no_anime_found">Аніме не знайдено</string>
+    <string name="main_search_in_mods">Шукати в ресурсах модів</string>
 
     <!-- Anime details -->
     <string name="detail_title_fallback">Деталі аніме</string>
@@ -49,6 +50,8 @@
     <string name="detail_source_ann">Джерело: Anime News Network</string>
     <string name="detail_cd_copy">Копіювати</string>
     <string name="detail_cd_copied">Скопійовано</string>
+    <string name="detail_chapter_sources">Джерела глав</string>
+    <string name="detail_tap_chapter_source">Натисніть на джерело для перегляду глав</string>
     <plurals name="detail_downloaded_episodes">
         <item quantity="one">%d епізод завантажено</item>
         <item quantity="few">%d епізоди завантажено</item>
@@ -240,4 +243,8 @@
     <string name="update_skip_hint">Якщо пропустити — це вікно більше не з\'явиться для версії %s</string>
     <string name="update_downloading">Завантаження…</string>
     <string name="update_no_updates">Оновлень немає</string>
+    <string name="online_search_button">Шукати онлайн</string>
+    <string name="online_search_searching">Шукаємо на %s…</string>
+    <string name="online_search_empty">Нічого не знайдено на %s</string>
+    <string name="online_search_error">Помилка на %s</string>
 </resources>

@@ -3,6 +3,7 @@ package com.greenrou.kanata.features.episodes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.greenrou.kanata.core.analytics.AnalyticsManager
+import com.greenrou.kanata.data.mod.DownloadFeatureRegistry
 import com.greenrou.kanata.domain.model.DownloadItem
 import com.greenrou.kanata.domain.model.Translation
 import com.greenrou.kanata.domain.usecase.GetAnimegongoTranslationsUseCase
@@ -14,11 +15,13 @@ import com.greenrou.kanata.features.episodes.model.EpisodeListEvent
 import com.greenrou.kanata.features.episodes.model.EpisodeListState
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.net.URLEncoder
@@ -30,12 +33,16 @@ class EpisodeListViewModel(
     private val getCompletedDownloads: GetCompletedDownloadsUseCase,
     private val getAnimegongoTranslations: GetAnimegongoTranslationsUseCase,
     private val analytics: AnalyticsManager,
+    downloadFeatureRegistry: DownloadFeatureRegistry,
     val animePageUrl: String,
     val label: String,
     val animeTitle: String,
     val animeId: Int = 0,
     val expectedEpisodes: Int = 0,
 ) : ViewModel() {
+
+    val isDownloadFeatureEnabled = downloadFeatureRegistry.isEnabled
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     private val _state = MutableStateFlow(EpisodeListState(isLoading = true))
     val state = _state.asStateFlow()
