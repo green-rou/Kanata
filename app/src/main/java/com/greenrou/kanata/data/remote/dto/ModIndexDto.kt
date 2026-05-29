@@ -10,6 +10,7 @@ data class ModIndexDto(
     val language: String,
     val version: Int,
     @SerialName("minAppVersion") val minAppVersion: Int = 1,
+    @SerialName("isAdultOnly") val isAdultOnly: Boolean = false,
     val parserClass: String,
     val apkUrl: String,
     val description: String = "",

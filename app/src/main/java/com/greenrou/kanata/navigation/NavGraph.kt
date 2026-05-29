@@ -16,6 +16,7 @@ import com.greenrou.kanata.features.episodes.EpisodeListScreen
 import com.greenrou.kanata.features.main.BottomNavItem
 import com.greenrou.kanata.features.main.MainScreen
 import com.greenrou.kanata.features.mods.ModsScreen
+import com.greenrou.kanata.features.onlinesearch.OnlineSearchScreen
 import com.greenrou.kanata.features.pagereader.PageReaderScreen
 import com.greenrou.kanata.features.player.PlayerScreen
 import com.greenrou.kanata.features.webplayer.WebPlayerScreen
@@ -29,6 +30,7 @@ fun NavGraph(backStack: SnapshotStateList<Any>) {
 
     val gridState = rememberLazyGridState()
 
+    @Suppress("UNUSED_VALUE")
     var selectedTabName by rememberSaveable { mutableStateOf(BottomNavItem.AnimeList.name) }
 
     when (val current = backStack.last()) {
@@ -49,6 +51,7 @@ fun NavGraph(backStack: SnapshotStateList<Any>) {
             onOpenWebPlayer = { backStack.add(WebPlayerRoute()) },
             onNavigateToWebPlayer = { url -> backStack.add(WebPlayerRoute(url)) },
             onNavigateToMods = { backStack.add(ModsRoute) },
+            onNavigateToOnlineSearch = { query -> backStack.add(OnlineSearchRoute(query)) },
         )
         is AnimeDetailsRoute -> AnimeDetailsScreen(
             animeId = current.animeId,
@@ -137,6 +140,19 @@ fun NavGraph(backStack: SnapshotStateList<Any>) {
                 chapterTitles = current.chapterTitles,
                 startIndex = current.startIndex,
                 onNavigateBack = { backStack.removeAt(backStack.size - 1) },
+            )
+        }
+        is OnlineSearchRoute -> key(current) {
+            OnlineSearchScreen(
+                query = current.query,
+                onNavigateBack = { backStack.removeAt(backStack.size - 1) },
+                onNavigateToDetails = { animeId -> backStack.add(AnimeDetailsRoute(animeId)) },
+                onNavigateToEpisodeList = { pageUrl, label, title ->
+                    backStack.add(EpisodeListRoute(pageUrl, label, title))
+                },
+                onNavigateToChapterList = { pageUrl, label, title ->
+                    backStack.add(ChapterListRoute(pageUrl, label, title))
+                },
             )
         }
     }

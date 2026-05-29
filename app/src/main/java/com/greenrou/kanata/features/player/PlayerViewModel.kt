@@ -3,6 +3,7 @@ package com.greenrou.kanata.features.player
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.greenrou.kanata.core.analytics.AnalyticsManager
+import com.greenrou.kanata.data.mod.DownloadFeatureRegistry
 import com.greenrou.kanata.domain.usecase.GetEpisodeDownloadStatusUseCase
 import com.greenrou.kanata.domain.usecase.GetVideoStreamUseCase
 import com.greenrou.kanata.domain.usecase.StartEpisodeDownloadUseCase
@@ -11,10 +12,12 @@ import com.greenrou.kanata.features.player.model.PlayerState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -23,6 +26,7 @@ class PlayerViewModel(
     private val startEpisodeDownload: StartEpisodeDownloadUseCase,
     private val getEpisodeDownloadStatus: GetEpisodeDownloadStatusUseCase,
     private val analytics: AnalyticsManager,
+    downloadFeatureRegistry: DownloadFeatureRegistry,
     private val episodeUrls: List<String>,
     private val episodeTitles: List<String>,
     startIndex: Int,
@@ -31,6 +35,9 @@ class PlayerViewModel(
     private val initialHeaderKeys: List<String> = emptyList(),
     private val initialHeaderValues: List<String> = emptyList(),
 ) : ViewModel() {
+
+    val isDownloadFeatureEnabled = downloadFeatureRegistry.isEnabled
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     private val _state = MutableStateFlow(
         PlayerState(

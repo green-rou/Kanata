@@ -31,8 +31,10 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.FilterList
 import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.TravelExplore
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
@@ -102,6 +104,7 @@ fun MainScreen(
     onOpenWebPlayer: () -> Unit = {},
     onNavigateToWebPlayer: (url: String) -> Unit = {},
     onNavigateToMods: () -> Unit = {},
+    onNavigateToOnlineSearch: (query: String) -> Unit = {},
     viewModel: MainViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -296,6 +299,11 @@ fun MainScreen(
                             actions = {
                                 if (selectedTab == BottomNavItem.AnimeList) {
                                     if (state.isSearchActive) {
+                                        if (state.searchQuery.isNotBlank()) {
+                                            IconButton(onClick = { onNavigateToOnlineSearch(state.searchQuery) }) {
+                                                Icon(Icons.Rounded.TravelExplore, contentDescription = stringResource(R.string.online_search_button))
+                                            }
+                                        }
                                         IconButton(onClick = { viewModel.handleEvent(MainEvent.ToggleSearch) }) {
                                             Icon(Icons.Rounded.Close, contentDescription = stringResource(R.string.main_cd_close_search))
                                         }
@@ -416,13 +424,23 @@ fun MainScreen(
                                             .padding(contentPadding),
                                     )
 
-                                    !state.isOffline && state.animeList.isEmpty() && (state.hasActiveFilters || state.searchQuery.isNotEmpty()) -> Text(
-                                        stringResource(R.string.main_no_anime_found),
+                                    !state.isOffline && state.animeList.isEmpty() && (state.hasActiveFilters || state.searchQuery.isNotEmpty()) -> Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.spacedBy(12.dp),
                                         modifier = Modifier
                                             .align(Alignment.Center)
                                             .padding(contentPadding),
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
+                                    ) {
+                                        Text(
+                                            stringResource(R.string.main_no_anime_found),
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                        if (state.searchQuery.isNotEmpty() && (regularSources.isNotEmpty() || adultSources.isNotEmpty())) {
+                                            Button(onClick = { onNavigateToOnlineSearch(state.searchQuery) }) {
+                                                Text(stringResource(R.string.main_search_in_mods))
+                                            }
+                                        }
+                                    }
 
                                     !state.isOffline && state.animeList.isEmpty() -> ErrorState(
                                         onRetry = { viewModel.handleEvent(MainEvent.LoadAnime) },
