@@ -49,6 +49,9 @@ fun NavGraph(backStack: SnapshotStateList<Any>) {
             onOpenWebPlayer = { backStack.add(WebPlayerRoute()) },
             onNavigateToWebPlayer = { url -> backStack.add(WebPlayerRoute(url)) },
             onNavigateToMods = { backStack.add(ModsRoute) },
+            onReadMangaChapter = { folderPath, title ->
+                backStack.add(PageReaderRoute(listOf("file://$folderPath"), listOf(title), 0))
+            },
         )
         is AnimeDetailsRoute -> AnimeDetailsScreen(
             animeId = current.animeId,

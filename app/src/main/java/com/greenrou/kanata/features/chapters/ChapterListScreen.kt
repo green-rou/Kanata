@@ -47,6 +47,7 @@ fun ChapterListScreen(
     ),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val isDownloadFeatureEnabled by viewModel.isDownloadFeatureEnabled.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
@@ -106,6 +107,16 @@ fun ChapterListScreen(
                             number = index + 1,
                             title = chapter.title,
                             onClick = { viewModel.handleEvent(ChapterListEvent.ChapterClicked(index)) },
+                            showDownloadButton = isDownloadFeatureEnabled,
+                            downloadStatus = state.downloadStatuses[chapter.url]?.status,
+                            onDownloadClick = {
+                                viewModel.handleEvent(
+                                    ChapterListEvent.DownloadChapter(
+                                        chapterUrl = chapter.url,
+                                        chapterTitle = chapter.title,
+                                    )
+                                )
+                            },
                         )
                     }
                 }

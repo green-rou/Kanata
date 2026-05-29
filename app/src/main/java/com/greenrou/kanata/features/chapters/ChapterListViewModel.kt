@@ -2,18 +2,32 @@ package com.greenrou.kanata.features.chapters
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.greenrou.kanata.data.mod.DownloadFeatureRegistry
+import com.greenrou.kanata.domain.model.DownloadItem
 import com.greenrou.kanata.domain.usecase.GetChapterListUseCase
+import com.greenrou.kanata.domain.usecase.GetCompletedDownloadsUseCase
+import com.greenrou.kanata.domain.usecase.GetDownloadQueueUseCase
+import com.greenrou.kanata.domain.usecase.StartChapterDownloadUseCase
 import com.greenrou.kanata.features.chapters.model.ChapterListEvent
 import com.greenrou.kanata.features.chapters.model.ChapterListState
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ChapterListViewModel(
     private val getChapterList: GetChapterListUseCase,
+    private val startChapterDownload: StartChapterDownloadUseCase,
+    private val getDownloadQueue: GetDownloadQueueUseCase,
+    private val getCompletedDownloads: GetCompletedDownloadsUseCase,
+    downloadFeatureRegistry: DownloadFeatureRegistry,
     val pageUrl: String,
     val label: String,
     val title: String,
@@ -25,8 +39,12 @@ class ChapterListViewModel(
     private val _events = Channel<ChapterListEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
 
+    val isDownloadFeatureEnabled = downloadFeatureRegistry.isEnabled
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
     init {
         loadChapters()
+        observeDownloadStatuses()
     }
 
     fun handleEvent(event: ChapterListEvent) {
@@ -46,6 +64,15 @@ class ChapterListViewModel(
                     )
                 }
             }
+            is ChapterListEvent.DownloadChapter -> viewModelScope.launch {
+                startChapterDownload(
+                    mangaTitle = title,
+                    sourceName = label,
+                    chapterTitle = event.chapterTitle,
+                    chapterUrl = event.chapterUrl,
+                    mangaPageUrl = pageUrl,
+                )
+            }
             else -> Unit
         }
     }
@@ -57,5 +84,13 @@ class ChapterListViewModel(
                 .onSuccess { chapters -> _state.update { it.copy(isLoading = false, chapters = chapters) } }
                 .onFailure { e -> _state.update { it.copy(isLoading = false, error = e.message) } }
         }
+    }
+
+    private fun observeDownloadStatuses() {
+        combine(getDownloadQueue(), getCompletedDownloads()) { queued, completed ->
+            (queued + completed).associateBy(DownloadItem::episodePageUrl)
+        }
+            .onEach { map -> _state.update { it.copy(downloadStatuses = map) } }
+            .launchIn(viewModelScope)
     }
 }

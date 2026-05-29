@@ -42,6 +42,7 @@ class DownloadRepositoryImpl(
             status = DownloadStatus.QUEUED.name,
             queuePosition = maxPos + 1,
             createdAt = System.currentTimeMillis(),
+            isManga = if (item.isManga) 1 else 0,
         )
         return dao.insert(entity)
     }

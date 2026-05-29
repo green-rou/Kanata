@@ -21,6 +21,7 @@ data class DownloadEntity(
     val createdAt: Long = System.currentTimeMillis(),
     val fileSizeBytes: Long = 0,
     val errorMessage: String? = null,
+    val isManga: Int = 0,
 )
 
 fun DownloadEntity.toDomain() = DownloadItem(
@@ -38,6 +39,7 @@ fun DownloadEntity.toDomain() = DownloadItem(
     createdAt = createdAt,
     fileSizeBytes = fileSizeBytes,
     errorMessage = errorMessage,
+    isManga = isManga != 0,
 )
 
 fun DownloadItem.toEntity() = DownloadEntity(
@@ -55,4 +57,5 @@ fun DownloadItem.toEntity() = DownloadEntity(
     createdAt = createdAt,
     fileSizeBytes = fileSizeBytes,
     errorMessage = errorMessage,
+    isManga = if (isManga) 1 else 0,
 )

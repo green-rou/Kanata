@@ -69,6 +69,19 @@
     <string name="translation_type_voice">Озвучка</string>
     <string name="translation_type_subtitles">Субтитри</string>
 
+    <!-- Chapter list -->
+    <string name="chapter_list_count">%d глав</string>
+    <string name="chapter_empty_title">Глав не знайдено</string>
+    <string name="chapter_empty_subtitle">Це джерело не має доступних глав</string>
+    <string name="chapter_cd_read">Читати главу %d</string>
+    <string name="chapter_cd_download">Завантажити главу %d</string>
+
+    <!-- Page reader -->
+    <string name="reader_page_of">%1$d / %2$d</string>
+    <string name="reader_cd_prev">Попередня глава</string>
+    <string name="reader_cd_next">Наступна глава</string>
+    <string name="reader_error_empty">Сторінок для цієї глави не знайдено</string>
+
     <!-- Favorites -->
     <string name="favorites_empty_title">Немає вподобань</string>
     <string name="favorites_empty_subtitle">Аніме, які ви додасте, з\'являться тут</string>
@@ -93,6 +106,7 @@
     <string name="download_card_retry">Повторити</string>
     <string name="download_card_remove">Видалити</string>
     <string name="download_card_cd_play">Відтворити</string>
+    <string name="download_card_cd_read">Читати</string>
     <string name="download_card_cd_delete">Видалити</string>
 
     <!-- Notifications -->

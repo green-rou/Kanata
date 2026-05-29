@@ -21,6 +21,7 @@ import com.greenrou.kanata.features.details.model.AnimeDetailsState
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
@@ -65,8 +66,18 @@ class AnimeDetailsViewModel(
                 fetchEnrichment(anime)
             }
             .launchIn(viewModelScope)
-        parserRegistry.parsers
-            .onEach { parsers -> _state.update { it.copy(hasStreamSources = parsers.isNotEmpty()) } }
+        combine(parserRegistry.parsers, settingsManager.isMangaMode) { parsers, isManga ->
+            parsers.isNotEmpty() && !isManga
+        }
+            .onEach { hasStreams ->
+                _state.update {
+                    it.copy(
+                        hasStreamSources = hasStreams,
+                        videoSources = if (!hasStreams) emptyList() else it.videoSources,
+                        isSearching = if (!hasStreams) false else it.isSearching,
+                    )
+                }
+            }
             .launchIn(viewModelScope)
     }
 
@@ -132,7 +143,7 @@ class AnimeDetailsViewModel(
             getAnimeById(animeId, mediaType = mediaType)
                 .onSuccess { anime ->
                     _state.update { it.copy(isLoading = false, anime = anime) }
-                    if (_state.value.hasStreamSources) searchOnExternal(anime)
+                    if (_state.value.hasStreamSources && !isMangaMode) searchOnExternal(anime)
                     searchContentSourcesForAnime(anime)
                     observeDownloadedCount(anime.title)
                     fetchEnrichment(anime)

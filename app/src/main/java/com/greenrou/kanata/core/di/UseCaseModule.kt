@@ -34,6 +34,7 @@ import com.greenrou.kanata.domain.usecase.SavePageUseCase
 import com.greenrou.kanata.domain.usecase.SearchContentSourcesUseCase
 import com.greenrou.kanata.domain.usecase.SearchExternalAnimeUseCase
 import com.greenrou.kanata.domain.usecase.SetDownloadFolderUseCase
+import com.greenrou.kanata.domain.usecase.StartChapterDownloadUseCase
 import com.greenrou.kanata.domain.usecase.StartEpisodeDownloadUseCase
 import com.greenrou.kanata.domain.usecase.ToggleModUseCase
 import com.greenrou.kanata.domain.usecase.UninstallModUseCase
@@ -68,6 +69,7 @@ val useCaseModule = module {
     factory { GetDownloadFolderUseCase(get()) }
     factory { SetDownloadFolderUseCase(get()) }
     factory { StartEpisodeDownloadUseCase(get(), get()) }
+    factory { StartChapterDownloadUseCase(get(), get()) }
     factory { RetryDownloadUseCase(get(), get()) }
     factory { GetSavedPagesUseCase(get()) }
     factory { SavePageUseCase(get()) }

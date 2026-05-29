@@ -102,6 +102,7 @@ fun MainScreen(
     onOpenWebPlayer: () -> Unit = {},
     onNavigateToWebPlayer: (url: String) -> Unit = {},
     onNavigateToMods: () -> Unit = {},
+    onReadMangaChapter: (chapterFolderPath: String, title: String) -> Unit = { _, _ -> },
     viewModel: MainViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -487,6 +488,7 @@ fun MainScreen(
 
                     BottomNavItem.Downloads -> DownloadManagerScreen(
                         onPlayDownloaded = onNavigateToPlayer,
+                        onReadMangaChapter = onReadMangaChapter,
                         onOpenEpisodeList = onOpenEpisodeList,
                         onNavigateToAnimeDetails = onNavigateToAnimeDetails,
                         onShowSnackbar = { msg -> snackbarHostState.showSnackbar(msg) },

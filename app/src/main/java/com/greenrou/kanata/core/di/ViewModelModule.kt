@@ -32,7 +32,7 @@ val viewModelModule = module {
         EpisodeListViewModel(get(), get(), get(), get(), get(), get(), params.get(), params.get(), params.get(), params.get(), params.get())
     }
     viewModel { params ->
-        ChapterListViewModel(get(), params.get(), params.get(), params.get())
+        ChapterListViewModel(get(), get(), get(), get(), get<DownloadFeatureRegistry>(), params.get(), params.get(), params.get())
     }
     viewModel { params ->
         PageReaderViewModel(get(), params.get(), params.get(), params.get())
@@ -40,7 +40,7 @@ val viewModelModule = module {
     viewModel { params ->
         PlayerViewModel(get(), get(), get(), get(), params.get(), params.get(), params.get(), params.get(), params.get(), params.get(), params.get())
     }
-    viewModel { DownloadManagerViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { DownloadManagerViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     viewModel { WebPlayerViewModel(get(), get()) }
     viewModel { ModsViewModel(get(), get(), get(), get(), get(), get()) }
     single { CheckUpdateUseCase(get(), get(), androidContext()) }
