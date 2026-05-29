@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.greenrou.kanata.data.local.InstalledModEntity
 import com.greenrou.kanata.data.remote.dto.ModIndexDto
+import com.greenrou.kanata.domain.model.ModCategory
 import com.greenrou.kanata.domain.model.ModInfo
 import com.greenrou.kanata.domain.usecase.FetchRemoteModsUseCase
 import com.greenrou.kanata.domain.usecase.GetInstalledModsUseCase
@@ -91,6 +92,7 @@ class ModsViewModel(
                 description = dto.description,
                 apkUrl = dto.apkUrl,
                 parserClass = dto.parserClass,
+                category = categoryOf(dto.id, dto.isAdultOnly),
                 isInstalled = inst != null,
                 isEnabled = inst?.isEnabled ?: false,
                 installedVersion = inst?.version,
@@ -109,6 +111,7 @@ class ModsViewModel(
                     description = "",
                     apkUrl = "",
                     parserClass = "",
+                    category = categoryOf(e.id, isAdultOnly = false),
                     isInstalled = true,
                     isEnabled = e.isEnabled,
                     installedVersion = e.version,
@@ -116,6 +119,14 @@ class ModsViewModel(
                 )
             }
         _state.update { it.copy(mods = fromIndex + offlineOnly) }
+    }
+
+    private fun categoryOf(id: String, isAdultOnly: Boolean): ModCategory = when {
+        id.startsWith("feature-") -> ModCategory.FEATURE
+        id.startsWith("info-") -> ModCategory.INFO
+        isAdultOnly -> ModCategory.SOURCE_ADULT
+        id.contains("manga") -> ModCategory.SOURCE_MANGA
+        else -> ModCategory.SOURCE_ANIME
     }
 
     private fun handleInstall(mod: ModInfo) {

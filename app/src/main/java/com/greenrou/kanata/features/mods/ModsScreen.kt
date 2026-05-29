@@ -2,10 +2,18 @@ package com.greenrou.kanata.features.mods
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,13 +23,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.rounded.Extension
+import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.WifiOff
 import androidx.compose.material3.Button
@@ -48,15 +56,33 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.greenrou.kanata.core.composable.KanataLoader
 import com.greenrou.kanata.core.composable.KanataSnackbarHost
+import com.greenrou.kanata.domain.model.ModCategory
 import com.greenrou.kanata.domain.model.ModInfo
 import com.greenrou.kanata.features.mods.model.ModsEvent
 import org.koin.androidx.compose.koinViewModel
+
+private val categoryOrder = listOf(
+    ModCategory.FEATURE,
+    ModCategory.INFO,
+    ModCategory.SOURCE_ANIME,
+    ModCategory.SOURCE_MANGA,
+    ModCategory.SOURCE_ADULT,
+)
+
+private fun ModCategory.displayName(): String = when (this) {
+    ModCategory.FEATURE -> "Features"
+    ModCategory.INFO -> "Info Providers"
+    ModCategory.SOURCE_ANIME -> "Anime Sources"
+    ModCategory.SOURCE_MANGA -> "Manga Sources"
+    ModCategory.SOURCE_ADULT -> "18+ Sources"
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -154,13 +180,14 @@ fun ModsScreen(
             }
 
             else -> {
+                val grouped = remember(state.mods) { state.mods.groupBy { it.category } }
+                var collapsedCategories by remember { mutableStateOf(emptySet<ModCategory>()) }
+
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(padding)
-                        .padding(horizontal = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 16.dp),
+                        .padding(padding),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
                 ) {
                     if (state.mods.isEmpty() && !state.isLoadingIndex) {
                         item {
@@ -188,18 +215,98 @@ fun ModsScreen(
                         }
                     }
 
-                    items(state.mods, key = { it.id }) { mod ->
-                        ModCard(
-                            mod = mod,
-                            isDownloading = mod.id in state.downloadingIds,
-                            downloadProgress = state.downloadProgress[mod.id],
-                            onInstall = { viewModel.handleEvent(ModsEvent.Install(mod)) },
-                            onUninstall = { viewModel.handleEvent(ModsEvent.Uninstall(mod.id)) },
-                            onToggle = { enabled -> viewModel.handleEvent(ModsEvent.Toggle(mod.id, enabled)) },
-                        )
+                    categoryOrder.forEach { category ->
+                        val mods = grouped[category]
+                        if (!mods.isNullOrEmpty()) {
+                            item(key = "header_${category.name}") {
+                                val isExpanded = category !in collapsedCategories
+                                CategoryHeader(
+                                    label = category.displayName(),
+                                    count = mods.size,
+                                    isExpanded = isExpanded,
+                                    onToggle = {
+                                        collapsedCategories = if (isExpanded)
+                                            collapsedCategories + category
+                                        else
+                                            collapsedCategories - category
+                                    },
+                                )
+                            }
+                            item(key = "content_${category.name}") {
+                                val isExpanded = category !in collapsedCategories
+                                AnimatedVisibility(
+                                    visible = isExpanded,
+                                    enter = expandVertically() + fadeIn(),
+                                    exit = shrinkVertically() + fadeOut(),
+                                ) {
+                                    Column(
+                                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                                        modifier = Modifier.padding(bottom = 12.dp),
+                                    ) {
+                                        mods.forEach { mod ->
+                                            ModCard(
+                                                mod = mod,
+                                                isDownloading = mod.id in state.downloadingIds,
+                                                downloadProgress = state.downloadProgress[mod.id],
+                                                onInstall = { viewModel.handleEvent(ModsEvent.Install(mod)) },
+                                                onUninstall = { viewModel.handleEvent(ModsEvent.Uninstall(mod.id)) },
+                                                onToggle = { enabled -> viewModel.handleEvent(ModsEvent.Toggle(mod.id, enabled)) },
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun CategoryHeader(
+    label: String,
+    count: Int,
+    isExpanded: Boolean,
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val chevronRotation by animateFloatAsState(
+        targetValue = if (isExpanded) 0f else -90f,
+        label = "chevron_$label",
+    )
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onToggle)
+            .padding(vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(
+            text = label.uppercase(),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.SemiBold,
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Text(
+                text = count.toString(),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Icon(
+                imageVector = Icons.Rounded.KeyboardArrowDown,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(16.dp)
+                    .rotate(chevronRotation),
+                tint = MaterialTheme.colorScheme.primary,
+            )
         }
     }
 }

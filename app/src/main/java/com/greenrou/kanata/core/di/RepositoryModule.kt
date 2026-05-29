@@ -56,7 +56,7 @@ val repositoryModule = module {
     single<SettingsManager> { SettingsManagerImpl(get()) }
     single<RandomRepository> { RandomRepositoryImpl(get(), get()) }
     single<VideoRepository> { VideoRepositoryImpl(get()) }
-    single<SearchRepository> { SearchRepositoryImpl(get(), get()) }
+    single<SearchRepository> { SearchRepositoryImpl(get(), get(), get<ChapterParserRegistry>()) }
     single<EpisodeListRepository> { EpisodeListRepositoryImpl(get()) }
     single<ChapterListRepository> { ChapterListRepositoryImpl(get()) }
     single<ContentPagesRepository> { ContentPagesRepositoryImpl(get()) }

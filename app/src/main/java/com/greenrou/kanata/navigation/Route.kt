@@ -47,3 +47,6 @@ data class PageReaderRoute(
     val chapterTitles: List<String>,
     val startIndex: Int,
 )
+
+@Serializable
+data class OnlineSearchRoute(val query: String)

@@ -1,6 +1,7 @@
 package com.greenrou.kanata.domain.parser
 
 import com.greenrou.kanata.domain.model.Episode
+import com.greenrou.kanata.domain.model.OnlineSearchResult
 import com.greenrou.kanata.domain.model.Translation
 import com.greenrou.kanata.domain.model.VideoSourceType
 
@@ -10,6 +11,8 @@ interface SiteParser {
     val isAdultOnly: Boolean get() = false
     fun supports(host: String): Boolean
     suspend fun search(query: String): Result<String>
+    suspend fun searchWithResults(query: String): Result<List<OnlineSearchResult>> =
+        search(query).mapCatching { url -> listOf(OnlineSearchResult(label, query, url, null)) }
     suspend fun getEpisodes(pageUrl: String): List<Episode>
     suspend fun getEpisodes(pageUrl: String, expectedEpisodes: Int): List<Episode> = getEpisodes(pageUrl)
     suspend fun getTranslations(episodePageUrl: String): List<Translation> = emptyList()

@@ -13,6 +13,7 @@ import com.greenrou.kanata.features.favorites.FavoritesViewModel
 import com.greenrou.kanata.features.main.MainViewModel
 import com.greenrou.kanata.features.mods.ModsViewModel
 import com.greenrou.kanata.features.mood.MoodViewModel
+import com.greenrou.kanata.features.onlinesearch.OnlineSearchViewModel
 import com.greenrou.kanata.features.pagereader.PageReaderViewModel
 import com.greenrou.kanata.features.player.PlayerViewModel
 import com.greenrou.kanata.features.random.RandomImageViewModel
@@ -29,7 +30,7 @@ val viewModelModule = module {
     viewModel { MoodViewModel(get(), get(), get(), get<MangaModRegistry>()) }
     viewModel { RandomImageViewModel(get(), get(), get(), get(), get(), get(), get<MangaModRegistry>()) }
     viewModel { params ->
-        EpisodeListViewModel(get(), get(), get(), get(), get(), get(), params.get(), params.get(), params.get(), params.get(), params.get())
+        EpisodeListViewModel(get(), get(), get(), get(), get(), get(), get<DownloadFeatureRegistry>(), params.get(), params.get(), params.get(), params.get(), params.get())
     }
     viewModel { params ->
         ChapterListViewModel(get(), params.get(), params.get(), params.get())
@@ -38,11 +39,12 @@ val viewModelModule = module {
         PageReaderViewModel(get(), params.get(), params.get(), params.get())
     }
     viewModel { params ->
-        PlayerViewModel(get(), get(), get(), get(), params.get(), params.get(), params.get(), params.get(), params.get(), params.get(), params.get())
+        PlayerViewModel(get(), get(), get(), get(), get<DownloadFeatureRegistry>(), params.get(), params.get(), params.get(), params.get(), params.get(), params.get(), params.get())
     }
     viewModel { DownloadManagerViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
     viewModel { WebPlayerViewModel(get(), get()) }
     viewModel { ModsViewModel(get(), get(), get(), get(), get(), get()) }
+    viewModel { params -> OnlineSearchViewModel(get(), get(), get(), params.get()) }
     single { CheckUpdateUseCase(get(), get(), androidContext()) }
     viewModel { UpdateViewModel(get(), get(), androidContext(), get()) }
 }
