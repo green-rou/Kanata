@@ -18,14 +18,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Install fdroidserver
-        run: pip install fdroidserver "androguard==3.3.5"
-
       - name: Download latest release APK
         run: |
           mkdir -p fdroid/repo
@@ -34,34 +26,33 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Decode keystore
-        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > fdroid/keystore.jks
-
-      - name: Generate fdroid config
-        run: |
-          cat > fdroid/config.yml << 'EOF'
-          repo_url: "https://green-rou.github.io/Kanata/fdroid/repo"
-          repo_name: "Kanata"
-          repo_description: "Official Kanata releases"
-          repo_icon: "icon.png"
-          archive_older: 5
-          EOF
-          echo "keystore: keystore.jks" >> fdroid/config.yml
-          echo "repo_keyalias: ${{ secrets.KEY_ALIAS }}" >> fdroid/config.yml
-          echo "keystorepass: ${{ secrets.KEYSTORE_PASSWORD }}" >> fdroid/config.yml
-          echo "keypass: ${{ secrets.KEY_PASSWORD }}" >> fdroid/config.yml
-
       - name: Copy app icon
         run: cp AppIcon.png fdroid/repo/icon.png 2>/dev/null || true
 
-      - name: Build F-Droid repo index
-        working-directory: fdroid
-        run: fdroid update --create-metadata --verbose
+      - name: Decode keystore
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > fdroid/keystore.jks
+
+      - name: Generate index-v1.json
+        run: python3 fdroid/generate_index.py fdroid/repo
+        env:
+          REPO_URL:  "https://green-rou.github.io/Kanata/fdroid/repo"
+          REPO_NAME: "Kanata"
+          REPO_DESC: "Official Kanata releases"
+
+      - name: Pack and sign index-v1.jar
+        run: |
+          cd fdroid/repo
+          zip -j index-v1.jar index-v1.json
+          jarsigner \
+            -keystore ../keystore.jks \
+            -storepass "${{ secrets.KEYSTORE_PASSWORD }}" \
+            -keypass "${{ secrets.KEY_PASSWORD }}" \
+            index-v1.jar "${{ secrets.KEY_ALIAS }}"
 
       - name: Copy repo to docs
         run: |
-          mkdir -p docs/fdroid
-          cp -r fdroid/repo docs/fdroid/
+          mkdir -p docs/fdroid/repo
+          cp -r fdroid/repo/. docs/fdroid/repo/
 
       - name: Commit and push
         run: |
@@ -70,3 +61,7 @@ jobs:
           git add docs/fdroid/
           git diff --cached --quiet || git commit -m "chore: update F-Droid repo"
           git push
+
+      - name: Cleanup secrets
+        if: always()
+        run: rm -f fdroid/keystore.jks
