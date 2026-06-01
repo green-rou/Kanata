@@ -1,30 +1,28 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Kanata — Android app for browsing anime, streaming and downloading episodes from multiple sources. Built-in web player with ad blocker and offline playback." />
-  <meta name="keywords" content="anime, android app, anime streaming, anime download, ukrainian dub, kotlin, open source, free anime" />
+  <meta name="description" content="Kanata — An extension-based anime browser for Android. Browse new releases, save favourites, and extend functionality with community extensions." />
+  <meta name="keywords" content="anime, android app, anime catalogue, anilist, kotlin, open source" />
   <link rel="canonical" href="https://green-rou.github.io/Kanata/" />
 
-  <!-- Open Graph / Telegram / Facebook -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://green-rou.github.io/Kanata/" />
-  <meta property="og:title" content="Kanata — Anime for Android" />
-  <meta property="og:description" content="Browse anime, stream or download episodes from multiple sources — built-in web player, ad blocker, offline playback. Free &amp; open source." />
+  <meta property="og:title" content="Kanata — Anime Browser for Android" />
+  <meta property="og:description" content="Browse the AniList catalogue, save favourites, discover new anime, and extend the app with community extensions. Free &amp; open source." />
   <meta property="og:image" content="https://raw.githubusercontent.com/green-rou/Kanata/master/AppIcon.png" />
   <meta property="og:image:width" content="1024" />
   <meta property="og:image:height" content="1024" />
   <meta property="og:locale" content="en_US" />
   <meta property="og:site_name" content="Kanata" />
 
-  <!-- Twitter / X Card -->
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Kanata — Anime for Android" />
-  <meta name="twitter:description" content="Browse anime, stream or download episodes from multiple sources — built-in web player, ad blocker, offline playback. Free &amp; open source." />
+  <meta name="twitter:title" content="Kanata — Anime Browser for Android" />
+  <meta name="twitter:description" content="Browse the AniList catalogue, save favourites, discover new anime, and extend the app with community extensions. Free &amp; open source." />
   <meta name="twitter:image" content="https://raw.githubusercontent.com/green-rou/Kanata/master/AppIcon.png" />
 
-  <title>Kanata — Anime for Android</title>
+  <title>Kanata — Anime Browser for Android</title>
   <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/green-rou/Kanata/master/AppIcon.png" />
   <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/green-rou/Kanata/master/AppIcon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -79,9 +77,7 @@
       color: var(--muted);
     }
     .nav-links a:hover { color: var(--text); background: var(--bg3); }
-    .nav-links a.primary {
-      background: var(--accent); color: #fff;
-    }
+    .nav-links a.primary { background: var(--accent); color: #fff; }
     .nav-links a.primary:hover { background: #6d4ef0; }
 
     /* ── HERO ── */
@@ -261,29 +257,8 @@
       font-size: 0.72rem; color: var(--muted); font-weight: 500;
     }
 
-    /* ── SOURCES ── */
-    .sources { background: var(--bg); }
-    .sources-header { text-align: center; }
-    .sources-header .section-sub { margin: 0 auto 48px; }
-    .sources-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 12px; max-width: 900px; margin: 0 auto;
-    }
-    .source-card {
-      display: flex; align-items: center; gap: 14px;
-      padding: 18px 20px;
-      background: var(--bg2); border: 1px solid var(--border); border-radius: 12px;
-      transition: border-color 0.2s;
-    }
-    .source-card:hover { border-color: rgba(124,92,252,0.35); }
-    .source-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .source-dot.active { background: #6effa0; box-shadow: 0 0 8px rgba(110,255,160,0.5); }
-    .source-info h4 { font-size: 0.9rem; font-weight: 600; color: var(--text); }
-    .source-info span { font-size: 0.75rem; color: var(--muted); }
-
     /* ── TECH ── */
-    .tech { background: var(--bg2); }
+    .tech { background: var(--bg); }
     .tech-header { text-align: center; }
     .tech-header .section-sub { margin: 0 auto 48px; }
     .tech-grid {
@@ -322,7 +297,6 @@
     }
     .footer-right a:hover { color: var(--text); }
 
-    /* ── SVG ICONS ── */
     .icon-gh { display: inline-block; width: 18px; height: 18px; vertical-align: middle; }
 
     .phone-frame { cursor: zoom-in; }
@@ -342,7 +316,6 @@
       transition: opacity 0.25s;
     }
     .lb-overlay.active { opacity: 1; pointer-events: all; }
-
     .lb-content {
       display: flex; flex-direction: column; align-items: center; gap: 16px;
       max-height: 100vh; padding: 20px 0;
@@ -374,12 +347,7 @@
       transition: opacity 0.15s;
     }
     .lb-screen img.loading { opacity: 0; }
-
-    .lb-caption {
-      font-size: 0.85rem; color: var(--muted); font-weight: 500;
-      letter-spacing: 0.02em;
-    }
-
+    .lb-caption { font-size: 0.85rem; color: var(--muted); font-weight: 500; letter-spacing: 0.02em; }
     .lb-close {
       position: fixed; top: 20px; right: 24px;
       width: 40px; height: 40px; border-radius: 50%;
@@ -389,7 +357,6 @@
       transition: background 0.15s;
     }
     .lb-close:hover { background: rgba(255,255,255,0.16); }
-
     .lb-arrow {
       width: 48px; height: 48px; border-radius: 50%;
       background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
@@ -416,38 +383,17 @@
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     "name": "Kanata",
-    "description": "Browse anime, stream or download episodes from multiple sources — all in one beautiful Android app. Free and open source.",
+    "description": "An extension-based anime browser for Android. Browse the AniList catalogue, save favourites, and discover new anime.",
     "applicationCategory": "EntertainmentApplication",
     "operatingSystem": "Android 9+",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
-    },
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
     "url": "https://green-rou.github.io/Kanata/",
     "downloadUrl": "https://github.com/green-rou/Kanata/releases",
     "softwareVersion": "latest",
     "license": "https://github.com/green-rou/Kanata/blob/master/LICENSE",
     "codeRepository": "https://github.com/green-rou/Kanata",
     "programmingLanguage": "Kotlin",
-    "author": {
-      "@type": "Person",
-      "name": "GreenRou",
-      "url": "https://github.com/green-rou"
-    },
-    "screenshot": "https://raw.githubusercontent.com/green-rou/Kanata/master/screenshots/01_home.png",
-    "featureList": [
-      "Anime catalogue via AniList GraphQL",
-      "Multi-source streaming (8 active sources)",
-      "HLS and direct video episode downloads",
-      "Offline playback",
-      "Built-in web player with stream detection",
-      "Ad blocker for embedded players",
-      "Saved pages for web player",
-      "Favourites list",
-      "Mood-based discovery and random picker",
-      "Light, dark and system theme with custom accent colors"
-    ]
+    "author": { "@type": "Person", "name": "GreenRou", "url": "https://github.com/green-rou" }
   }
   </script>
 </head>
@@ -462,7 +408,6 @@
   <div class="nav-links">
     <a href="#features">Features</a>
     <a href="#screenshots">Screenshots</a>
-    <a href="#sources">Sources</a>
     <a href="https://github.com/green-rou/Kanata" target="_blank" rel="noopener" class="primary">
       <svg class="icon-gh" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836a9.59 9.59 0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.741 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
       GitHub
@@ -477,7 +422,7 @@
        src="https://raw.githubusercontent.com/green-rou/Kanata/master/AppIcon.png"
        alt="Kanata" />
   <h1>Kanata</h1>
-  <p>Browse anime, stream or download episodes from multiple sources — with a built-in web player, ad blocker, and offline playback, all in one beautiful Android app.</p>
+  <p>An extension-based anime browser for Android. Browse new releases, save favourites, and expand the app with community-built extensions.</p>
   <div class="hero-cta">
     <a class="btn btn-primary" href="https://github.com/green-rou/Kanata/releases" target="_blank" rel="noopener">
       ↓ Download APK
@@ -504,64 +449,39 @@
 <section class="features" id="features">
   <div class="features-header">
     <div class="section-label">Features</div>
-    <h2 class="section-title">One app, many sources</h2>
-    <p class="section-sub">Search once — Kanata checks all active sources and shows what's available to stream, download, or open in the built-in ad-blocking web player.</p>
+    <h2 class="section-title">Browse. Discover. Extend.</h2>
+    <p class="section-sub">A clean anime catalogue app powered by AniList, with community extensions for extra functionality.</p>
   </div>
   <div class="features-grid">
     <div class="feat-card">
       <span class="feat-num">01</span>
       <h3>Anime Catalogue</h3>
-      <p>Paginated grid from the AniList GraphQL API. Filter by genre and format, or search by title.</p>
+      <p>Paginated grid of anime from the AniList GraphQL API. Filter by genre and format, or search by title.</p>
     </div>
     <div class="feat-card">
       <span class="feat-num">02</span>
-      <h3>Automatic Source Search</h3>
-      <p>Open any anime and Kanata finds it across all active sources simultaneously — no manual switching.</p>
+      <h3>Extensions</h3>
+      <p>Install community-built extension mods to add sources and features. Browse and manage them from the Extensions screen.</p>
     </div>
     <div class="feat-card">
       <span class="feat-num">03</span>
-      <h3>Built-in Player</h3>
-      <p>HLS playback via Media3 / ExoPlayer. Auto-locks to landscape, full transport controls.</p>
+      <h3>Favourites</h3>
+      <p>Save anime to a local list. No account, no sync, no cloud — your data stays on your device.</p>
     </div>
     <div class="feat-card">
       <span class="feat-num">04</span>
-      <h3>Episode Downloads</h3>
-      <p>HLS and direct video downloads run in the background via WorkManager with progress notifications.</p>
+      <h3>Discover</h3>
+      <p>Mood-based recommendations, a random anime picker, and an anime wallpaper browser for when you don't know what to watch.</p>
     </div>
     <div class="feat-card">
       <span class="feat-num">05</span>
-      <h3>Offline Playback</h3>
-      <p>Downloaded episodes play without a connection. Files go wherever you point the folder picker.</p>
+      <h3>Anime Detail</h3>
+      <p>Title, score, genres, synopsis, episode count, cover art, and AniList enrichment data — all in one screen.</p>
     </div>
     <div class="feat-card">
       <span class="feat-num">06</span>
-      <h3>Favourites</h3>
-      <p>Save anime locally with Room. The list is yours — no account, no sync, no cloud.</p>
-    </div>
-    <div class="feat-card">
-      <span class="feat-num">07</span>
-      <h3>Discover</h3>
-      <p>Mood-based search, a random anime picker, and a wallpaper browser — when you don't know what to watch.</p>
-    </div>
-    <div class="feat-card">
-      <span class="feat-num">08</span>
       <h3>Settings</h3>
-      <p>Light/dark/system theme, extended accent color palette, language, adult content toggle, per-source on/off, download folder picker.</p>
-    </div>
-    <div class="feat-card">
-      <span class="feat-num">09</span>
-      <h3>Web Player</h3>
-      <p>Opens embedded player pages in a built-in browser. Detects stream URLs automatically and offers to play them in ExoPlayer — no copy-pasting needed.</p>
-    </div>
-    <div class="feat-card">
-      <span class="feat-num">10</span>
-      <h3>Ad Blocker</h3>
-      <p>Built-in WebView ad blocker for the Web Player. Blocks ads and trackers on embedded player pages so streams load cleanly.</p>
-    </div>
-    <div class="feat-card">
-      <span class="feat-num">11</span>
-      <h3>Saved Pages</h3>
-      <p>Bookmark Web Player pages for quick access. Skip re-searching and go straight to your preferred source with one tap.</p>
+      <p>Light, dark, or system theme with a custom accent color palette. Language switching and per-source toggles.</p>
     </div>
   </div>
 </section>
@@ -571,7 +491,7 @@
   <div class="screenshots-header">
     <div class="section-label">See it in action</div>
     <h2 class="section-title">Screenshots</h2>
-    <p class="section-sub">A look at the real app across all its screens.</p>
+    <p class="section-sub">A look at the real app across its main screens.</p>
   </div>
 
   <div class="screenshots-groups">
@@ -628,149 +548,6 @@
         </div>
       </div>
     </div>
-
-    <div>
-      <div class="screenshot-group-label">Detail &amp; Episodes</div>
-      <div class="screenshots-row">
-        <div class="phone-frame">
-          <div class="phone-outer">
-            <div class="phone-screen">
-              <img src="https://raw.githubusercontent.com/green-rou/Kanata/master/screenshots/03_detail.png" alt="Detail" loading="lazy" />
-            </div>
-          </div>
-          <div class="phone-caption">Detail</div>
-        </div>
-        <div class="phone-frame">
-          <div class="phone-outer">
-            <div class="phone-screen">
-              <img src="https://raw.githubusercontent.com/green-rou/Kanata/master/screenshots/04_detail_downloaded.png" alt="Downloaded" loading="lazy" />
-            </div>
-          </div>
-          <div class="phone-caption">Downloaded</div>
-        </div>
-        <div class="phone-frame">
-          <div class="phone-outer">
-            <div class="phone-screen">
-              <img src="https://raw.githubusercontent.com/green-rou/Kanata/master/screenshots/05_episodes.png" alt="Episodes" loading="lazy" />
-            </div>
-          </div>
-          <div class="phone-caption">Episodes</div>
-        </div>
-        <div class="phone-frame">
-          <div class="phone-outer">
-            <div class="phone-screen">
-              <img src="https://raw.githubusercontent.com/green-rou/Kanata/master/screenshots/06_player.png" alt="Player" loading="lazy" />
-            </div>
-          </div>
-          <div class="phone-caption">Player</div>
-        </div>
-      </div>
-    </div>
-
-    <div>
-      <div class="screenshot-group-label">Downloads &amp; Settings</div>
-      <div class="screenshots-row">
-        <div class="phone-frame">
-          <div class="phone-outer">
-            <div class="phone-screen">
-              <img src="https://raw.githubusercontent.com/green-rou/Kanata/master/screenshots/11_downloads_queue.png" alt="Queue" loading="lazy" />
-            </div>
-          </div>
-          <div class="phone-caption">Queue</div>
-        </div>
-        <div class="phone-frame">
-          <div class="phone-outer">
-            <div class="phone-screen">
-              <img src="https://raw.githubusercontent.com/green-rou/Kanata/master/screenshots/12_downloads_completed.png" alt="Completed" loading="lazy" />
-            </div>
-          </div>
-          <div class="phone-caption">Completed</div>
-        </div>
-        <div class="phone-frame">
-          <div class="phone-outer">
-            <div class="phone-screen">
-              <img src="https://raw.githubusercontent.com/green-rou/Kanata/master/screenshots/13_settings.png" alt="Settings" loading="lazy" />
-            </div>
-          </div>
-          <div class="phone-caption">Settings</div>
-        </div>
-        <div class="phone-frame">
-          <div class="phone-outer">
-            <div class="phone-screen">
-              <img src="https://raw.githubusercontent.com/green-rou/Kanata/master/screenshots/14_settings_sources.png" alt="Sources" loading="lazy" />
-            </div>
-          </div>
-          <div class="phone-caption">Sources</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- SOURCES -->
-<section class="sources" id="sources">
-  <div class="sources-header">
-    <div class="section-label">Streaming Sources</div>
-    <h2 class="section-title">Multiple languages</h2>
-    <p class="section-sub">Kanata searches all active sources automatically when you open any anime.</p>
-  </div>
-  <div class="sources-grid">
-    <div class="source-card">
-      <div class="source-dot active"></div>
-      <div class="source-info">
-        <h4>Mikai</h4>
-        <span>Ukrainian dub · REST API</span>
-      </div>
-    </div>
-    <div class="source-card">
-      <div class="source-dot active"></div>
-      <div class="source-info">
-        <h4>AniStar</h4>
-        <span>Ukrainian dub · Scraping</span>
-      </div>
-    </div>
-    <div class="source-card">
-      <div class="source-dot active"></div>
-      <div class="source-info">
-        <h4>YummyAnime</h4>
-        <span>Russian dub · Scraping</span>
-      </div>
-    </div>
-    <div class="source-card">
-      <div class="source-dot active"></div>
-      <div class="source-info">
-        <h4>AnimeGO</h4>
-        <span>Russian dub · Scraping</span>
-      </div>
-    </div>
-    <div class="source-card">
-      <div class="source-dot active"></div>
-      <div class="source-info">
-        <h4>KissKH</h4>
-        <span>English sub · Scraping</span>
-      </div>
-    </div>
-    <div class="source-card">
-      <div class="source-dot active"></div>
-      <div class="source-info">
-        <h4>YouTube</h4>
-        <span>Various · NewPipe extractor</span>
-      </div>
-    </div>
-    <div class="source-card">
-      <div class="source-dot active"></div>
-      <div class="source-info">
-        <h4>Archive.org</h4>
-        <span>Various · Public API</span>
-      </div>
-    </div>
-    <div class="source-card">
-      <div class="source-dot active"></div>
-      <div class="source-info">
-        <h4>AniList</h4>
-        <span>Metadata · GraphQL API</span>
-      </div>
-    </div>
   </div>
 </section>
 
@@ -792,12 +569,8 @@
     <span class="tech-pill">Apollo GraphQL</span>
     <span class="tech-pill">Room</span>
     <span class="tech-pill">DataStore</span>
-    <span class="tech-pill">WorkManager</span>
-    <span class="tech-pill">Media3 / ExoPlayer</span>
     <span class="tech-pill">Coil</span>
-    <span class="tech-pill">Jsoup</span>
     <span class="tech-pill">Kotlin Serialization</span>
-    <span class="tech-pill">NewPipe Extractor</span>
   </div>
 </section>
 
@@ -810,7 +583,6 @@
   <div class="footer-right">
     <a href="https://github.com/green-rou/Kanata" target="_blank" rel="noopener">GitHub</a>
     <a href="https://github.com/green-rou/Kanata/releases" target="_blank" rel="noopener">Releases</a>
-    <a href="https://github.com/green-rou/Kanata/blob/master/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a>
     <a href="https://ko-fi.com/C0C31ZLH6K" target="_blank" rel="noopener">Ko-fi</a>
   </div>
 </footer>
@@ -889,7 +661,6 @@
       if (e.key === 'ArrowRight')  next();
     });
 
-    /* swipe on mobile */
     let touchX = null;
     overlay.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
     overlay.addEventListener('touchend', e => {
