@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+
 import com.greenrou.kanata.domain.repository.SettingsManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -27,6 +28,8 @@ class SettingsManagerImpl(private val context: Context) : SettingsManager {
         val SKIPPED_VERSION = stringPreferencesKey("skipped_version")
         val ACTIVE_INFO_PROVIDER_ID = stringPreferencesKey("active_info_provider_id")
         val IS_MANGA_MODE = booleanPreferencesKey("is_manga_mode")
+        val MOD_INDEX_URL = stringPreferencesKey("mod_index_url")
+        val MOD_SOURCE_INPUT = stringPreferencesKey("mod_source_input")
     }
 
     override val showAdultContent: Flow<Boolean> = context.dataStore.data
@@ -166,6 +169,24 @@ class SettingsManagerImpl(private val context: Context) : SettingsManager {
     override suspend fun setMangaMode(enabled: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.IS_MANGA_MODE] = enabled
+        }
+    }
+
+    override val modIndexUrl: Flow<String> = context.dataStore.data
+        .map { preferences -> preferences[PreferencesKeys.MOD_INDEX_URL] ?: "" }
+
+    override suspend fun setModIndexUrl(url: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.MOD_INDEX_URL] = url
+        }
+    }
+
+    override val modSourceInput: Flow<String> = context.dataStore.data
+        .map { preferences -> preferences[PreferencesKeys.MOD_SOURCE_INPUT] ?: "" }
+
+    override suspend fun setModSourceInput(input: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.MOD_SOURCE_INPUT] = input
         }
     }
 }

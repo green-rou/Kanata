@@ -1,6 +1,5 @@
 package com.greenrou.kanata.core.di
 
-import com.greenrou.kanata.BuildConfig
 import com.greenrou.kanata.data.mod.ChapterParserRegistry
 import com.greenrou.kanata.data.mod.DownloadFeatureRegistry
 import com.greenrou.kanata.data.mod.InfoProviderRegistry
@@ -49,7 +48,6 @@ val repositoryModule = module {
             api = get(),
             okHttpClient = get(),
             modsDir = get<ModLoader>().modsDir,
-            modIndexUrl = BuildConfig.MOD_INDEX_URL,
         )
     }
     single<AnimeRepository> { AnimeRepositoryImpl(get()) }

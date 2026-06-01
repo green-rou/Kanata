@@ -45,7 +45,7 @@ val viewModelModule = module {
     }
     viewModel { DownloadManagerViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     viewModel { WebPlayerViewModel(get(), get()) }
-    viewModel { ModsViewModel(get(), get(), get(), get(), get(), get()) }
+    viewModel { ModsViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { params -> OnlineSearchViewModel(get(), get(), get(), params.get()) }
     single { CheckUpdateUseCase(get(), get(), androidContext()) }
     viewModel { UpdateViewModel(get(), get(), androidApplication(), get()) }

@@ -30,8 +30,10 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.rounded.Extension
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
+import androidx.compose.material.icons.rounded.Link
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.WifiOff
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -42,11 +44,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -59,6 +63,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.greenrou.kanata.core.composable.KanataLoader
@@ -115,6 +120,9 @@ fun ModsScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = { viewModel.handleEvent(ModsEvent.ShowSourceDialog) }) {
+                        Icon(Icons.Rounded.Link, contentDescription = "Extension source")
+                    }
                     if (state.isInstallingFromFile) {
                         CircularProgressIndicator(
                             modifier = Modifier
@@ -145,6 +153,19 @@ fun ModsScreen(
         snackbarHost = { KanataSnackbarHost(snackbarHostState) },
     ) { padding ->
         when {
+            !state.isSourceConfigured -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    ModsNotConfiguredState(
+                        onConfigure = { viewModel.handleEvent(ModsEvent.ShowSourceDialog) },
+                    )
+                }
+            }
+
             state.isLoadingIndex && state.mods.isEmpty() -> {
                 Box(
                     modifier = Modifier
@@ -261,6 +282,50 @@ fun ModsScreen(
                 }
             }
         }
+    }
+    if (state.showSourceDialog) {
+        AlertDialog(
+            onDismissRequest = { viewModel.handleEvent(ModsEvent.DismissSourceDialog) },
+            title = { Text("Extension source") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = "Add an extension repository to browse and install extensions.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    OutlinedTextField(
+                        value = state.sourceInput,
+                        onValueChange = { viewModel.handleEvent(ModsEvent.SourceInputChanged(it)) },
+                        singleLine = true,
+                        placeholder = { Text("Paste link or shortcode", overflow = TextOverflow.Ellipsis, maxLines = 1) },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    if (state.currentSourceUrl.isNotBlank()) {
+                        Text(
+                            text = state.currentSourceUrl,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = { viewModel.handleEvent(ModsEvent.ConfirmSource) },
+                    enabled = state.sourceInput.isNotBlank(),
+                ) {
+                    Text("Apply")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.handleEvent(ModsEvent.DismissSourceDialog) }) {
+                    Text("Cancel")
+                }
+            },
+        )
     }
 }
 
@@ -468,6 +533,55 @@ private fun LanguageBadge(language: String, modifier: Modifier = Modifier) {
             color = MaterialTheme.colorScheme.onSecondaryContainer,
             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
         )
+    }
+}
+
+@Composable
+private fun ModsNotConfiguredState(
+    onConfigure: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier.padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(20.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(80.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
+                    shape = CircleShape,
+                ),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.Extension,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.size(36.dp),
+            )
+        }
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(
+                text = "No extension source",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center,
+            )
+            Text(
+                text = "Add a source to browse and install extensions.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+        }
+        Button(onClick = onConfigure) {
+            Text("Add source")
+        }
     }
 }
 

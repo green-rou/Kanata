@@ -9,4 +9,9 @@ data class ModsState(
     val downloadingIds: Set<String> = emptySet(),
     val downloadProgress: Map<String, Int> = emptyMap(),
     val isInstallingFromFile: Boolean = false,
+    val isSourceConfigured: Boolean = false,
+    val showSourceDialog: Boolean = false,
+    val sourceInput: String = "",
+    val savedSourceInput: String = "",
+    val currentSourceUrl: String = "",
 )

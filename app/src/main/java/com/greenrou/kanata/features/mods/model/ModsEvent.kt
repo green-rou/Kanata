@@ -9,6 +9,10 @@ sealed interface ModsEvent {
     data class Uninstall(val modId: String) : ModsEvent
     data class Toggle(val modId: String, val enabled: Boolean) : ModsEvent
     data object RefreshIndex : ModsEvent
+    data object ShowSourceDialog : ModsEvent
+    data object DismissSourceDialog : ModsEvent
+    data class SourceInputChanged(val input: String) : ModsEvent
+    data object ConfirmSource : ModsEvent
 
     data class ShowSnackbar(val message: String) : ModsEvent
 }
