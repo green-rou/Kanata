@@ -1,5 +1,6 @@
 package com.greenrou.kanata.data.repository
 
+import android.system.Os
 import com.greenrou.kanata.data.local.InstalledModDao
 import com.greenrou.kanata.data.local.InstalledModEntity
 import com.greenrou.kanata.data.remote.ModIndexApi
@@ -30,6 +31,7 @@ class ModRepositoryImpl(
                 val fileName = "${mod.id}__${mod.parserClass}.apk"
                 val dest = File(modsDir, fileName)
                 downloadFile(mod.apkUrl, dest, onProgress)
+                makeReadOnly(dest)
                 dao.insert(
                     InstalledModEntity(
                         id = mod.id,
@@ -51,6 +53,14 @@ class ModRepositoryImpl(
 
     override suspend fun setEnabled(modId: String, enabled: Boolean) =
         dao.setEnabled(modId, enabled)
+
+    private fun makeReadOnly(file: File) {
+        try {
+            Os.chmod(file.absolutePath, 0b100_100_100)
+        } catch (_: Exception) {
+            file.setReadOnly()
+        }
+    }
 
     private fun downloadFile(url: String, dest: File, onProgress: (Int) -> Unit) {
         val request = Request.Builder().url(url).build()

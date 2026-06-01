@@ -3,6 +3,7 @@ package com.greenrou.kanata.data.mod
 import android.content.Context
 import android.content.res.AssetManager
 import android.content.res.Resources
+import android.system.Os
 import android.util.Log
 import com.greenrou.kanata.domain.parser.ChapterParser
 import com.greenrou.kanata.domain.parser.InfoProvider
@@ -139,7 +140,11 @@ class ModLoader(private val context: Context) {
         val className = apk.nameWithoutExtension.substringAfter("__")
             .ifEmpty { error("APK '${apk.name}' missing class name (expected format: id__com.example.ClassName.apk)") }
         Log.d(TAG, "instantiate: ${apk.name} → class=$className")
-        apk.setReadOnly()
+        try {
+            Os.chmod(apk.absolutePath, 0b100_100_100)
+        } catch (_: Exception) {
+            apk.setReadOnly()
+        }
         val loader = ModClassLoader(
             apk.absolutePath,
             context.codeCacheDir.absolutePath,
