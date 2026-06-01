@@ -1,0 +1,21 @@
+Categories:
+  - Multimedia
+License: MIT
+AuthorName: GreenRou
+AuthorWebSite: https://github.com/green-rou
+SourceCode: https://github.com/green-rou/Kanata
+IssueTracker: https://github.com/green-rou/Kanata/issues
+Changelog: https://github.com/green-rou/Kanata/releases
+
+AutoName: Kanata
+Description: |-
+  An extension-based anime browser for Android.
+
+  Browse the AniList catalogue, save favourites, and discover new anime.
+  Extend the app with community-built extension mods installed from the
+  Extensions screen.
+
+  The core app hosts zero content. All sources are user-managed via extensions.
+
+CurrentVersion: '0.3.1'
+CurrentVersionCode: 9

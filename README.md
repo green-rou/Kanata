@@ -20,6 +20,12 @@ Kanata's functionality is driven by user-installed extension mods. The core app 
 
 Extensions can be discovered and installed from the **Mods** screen inside the app.
 
+## Community
+
+[![Reddit](https://img.shields.io/badge/Reddit-r%2FKanataExt-FF4500?logo=reddit&logoColor=white)](https://www.reddit.com/r/KanataExt/)
+
+Share extensions, report issues, and discuss the app on Reddit.
+
 ## Download
 
 Get the latest release from [GitHub Releases](https://github.com/green-rou/Kanata/releases/latest).
