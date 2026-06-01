@@ -11,6 +11,7 @@ import com.greenrou.kanata.domain.usecase.StartChapterDownloadUseCase
 import com.greenrou.kanata.features.chapters.model.ChapterListEvent
 import com.greenrou.kanata.features.chapters.model.ChapterListState
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,6 +22,9 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
+private const val MAX_RETRIES = 3
+private const val RETRY_DELAY_MS = 2_000L
 
 class ChapterListViewModel(
     private val getChapterList: GetChapterListUseCase,
@@ -52,6 +56,9 @@ class ChapterListViewModel(
             ChapterListEvent.BackClicked -> viewModelScope.launch {
                 _events.send(ChapterListEvent.NavigateBack)
             }
+            ChapterListEvent.RetryClicked -> loadChapters()
+            is ChapterListEvent.SaveScrollPosition ->
+                _state.update { it.copy(scrollIndex = event.index, scrollOffset = event.offset) }
             is ChapterListEvent.ChapterClicked -> {
                 val chapters = _state.value.chapters
                 viewModelScope.launch {
@@ -79,10 +86,21 @@ class ChapterListViewModel(
 
     private fun loadChapters() {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
-            getChapterList(pageUrl)
-                .onSuccess { chapters -> _state.update { it.copy(isLoading = false, chapters = chapters) } }
-                .onFailure { e -> _state.update { it.copy(isLoading = false, error = e.message) } }
+            _state.update { it.copy(isLoading = true, error = null, retryAttempt = 0) }
+            repeat(MAX_RETRIES + 1) { attempt ->
+                val result = getChapterList(pageUrl)
+                if (result.isSuccess) {
+                    _state.update { it.copy(isLoading = false, chapters = result.getOrDefault(emptyList()), retryAttempt = 0) }
+                    return@launch
+                }
+                if (attempt < MAX_RETRIES) {
+                    _state.update { it.copy(retryAttempt = attempt + 1) }
+                    delay(RETRY_DELAY_MS)
+                } else {
+                    val e = result.exceptionOrNull()
+                    _state.update { it.copy(isLoading = false, error = e?.message ?: e?.javaClass?.simpleName ?: "Unknown error", retryAttempt = 0) }
+                }
+            }
         }
     }
 

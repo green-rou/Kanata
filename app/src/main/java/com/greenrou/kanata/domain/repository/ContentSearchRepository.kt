@@ -1,7 +1,8 @@
 package com.greenrou.kanata.domain.repository
 
 import com.greenrou.kanata.domain.model.ContentSource
+import kotlinx.coroutines.flow.Flow
 
 interface ContentSearchRepository {
-    suspend fun searchAll(titles: List<String>): List<ContentSource>
+    fun searchAll(titles: List<String>): Flow<ContentSource>
 }

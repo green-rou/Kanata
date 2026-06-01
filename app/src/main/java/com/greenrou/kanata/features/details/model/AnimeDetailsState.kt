@@ -13,6 +13,7 @@ data class AnimeDetailsState(
     val videoSources: List<VideoSource> = emptyList(),
     val contentSources: List<ContentSource> = emptyList(),
     val isSearching: Boolean = false,
+    val isSearchingContent: Boolean = false,
     val hasStreamSources: Boolean = true,
     val error: String? = null,
     val coverFillsTopBar: Boolean = true,

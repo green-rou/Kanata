@@ -5,6 +5,7 @@ sealed interface PageReaderEvent {
     data object ToggleBars : PageReaderEvent
     data object PrevChapter : PageReaderEvent
     data object NextChapter : PageReaderEvent
+    data object RetryClicked : PageReaderEvent
 
     data object NavigateBack : PageReaderEvent
 }

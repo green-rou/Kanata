@@ -1,6 +1,6 @@
 package com.greenrou.kanata.features.update
 
-import android.content.Context
+import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.greenrou.kanata.domain.repository.SettingsManager
@@ -22,7 +22,7 @@ import java.io.File
 class UpdateViewModel(
     private val checkUpdate: CheckUpdateUseCase,
     private val settings: SettingsManager,
-    private val context: Context,
+    private val context: Application,
     private val okHttpClient: OkHttpClient,
 ) : ViewModel() {
 
@@ -37,7 +37,8 @@ class UpdateViewModel(
 
     fun handleEvent(event: UpdateEvent) {
         when (event) {
-            UpdateEvent.CheckUpdate -> checkForUpdate()
+            UpdateEvent.CheckUpdate -> checkForUpdate(silent = false)
+            UpdateEvent.CheckUpdateSilent -> checkForUpdate(silent = true)
             UpdateEvent.SkipUpdate -> skipUpdate()
             UpdateEvent.DismissDialog -> _state.update { it.copy(pendingRelease = null, error = null) }
             UpdateEvent.StartDownload -> downloadAndInstall()
@@ -45,7 +46,7 @@ class UpdateViewModel(
         }
     }
 
-    private fun checkForUpdate() {
+    private fun checkForUpdate(silent: Boolean = false) {
         if (_state.value.isChecking) return
         viewModelScope.launch {
             _state.update { it.copy(isChecking = true, error = null, noUpdatesAvailable = false) }
@@ -55,13 +56,13 @@ class UpdateViewModel(
                         it.copy(
                             isChecking = false,
                             pendingRelease = release,
-                            noUpdatesAvailable = release == null,
+                            noUpdatesAvailable = !silent && release == null,
                             updateCheckHasRun = true,
                         )
                     }
                 }
                 .onFailure { e ->
-                    _state.update { it.copy(isChecking = false, error = e.message, updateCheckHasRun = true) }
+                    _state.update { it.copy(isChecking = false, error = if (silent) null else e.message, updateCheckHasRun = true) }
                 }
         }
     }

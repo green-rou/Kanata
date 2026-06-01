@@ -100,6 +100,7 @@ fun MainScreen(
     onNavigateToDetails: (Int) -> Unit,
     onNavigateToPlayer: (localFilePath: String, title: String) -> Unit = { _, _ -> },
     onOpenEpisodeList: (animePageUrl: String, sourceName: String, animeTitle: String) -> Unit = { _, _, _ -> },
+    onOpenChapterList: (pageUrl: String, sourceName: String, animeTitle: String) -> Unit = { _, _, _ -> },
     onNavigateToAnimeDetails: (animeId: Int) -> Unit = {},
     onOpenWebPlayer: () -> Unit = {},
     onNavigateToWebPlayer: (url: String) -> Unit = {},
@@ -110,9 +111,11 @@ fun MainScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val isDownloadFeatureEnabled by viewModel.isDownloadFeatureEnabled.collectAsStateWithLifecycle()
+    val contentProviderHasStreams by viewModel.contentProviderHasStreams.collectAsStateWithLifecycle()
     val favoriteIds by viewModel.favoriteIds.collectAsStateWithLifecycle()
     val regularSources by viewModel.regularSources.collectAsStateWithLifecycle()
     val adultSources by viewModel.adultSources.collectAsStateWithLifecycle()
+    val mangaSources by viewModel.mangaSources.collectAsStateWithLifecycle()
     val infoProviders by viewModel.infoProviders.collectAsStateWithLifecycle()
     val mangaModResources by viewModel.mangaModResources.collectAsStateWithLifecycle()
     val mangaModeOnTitle = mangaModResources?.getString("mod_mode_on_title")
@@ -192,7 +195,7 @@ fun MainScreen(
             }
     }
 
-    val isFabVisible = fabAllowedOnTab && fabScrollVisible && isDownloadFeatureEnabled
+    val isFabVisible = fabAllowedOnTab && fabScrollVisible && isDownloadFeatureEnabled && contentProviderHasStreams
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
@@ -508,6 +511,7 @@ fun MainScreen(
                         onPlayDownloaded = onNavigateToPlayer,
                         onReadMangaChapter = onReadMangaChapter,
                         onOpenEpisodeList = onOpenEpisodeList,
+                        onOpenChapterList = onOpenChapterList,
                         onNavigateToAnimeDetails = onNavigateToAnimeDetails,
                         onShowSnackbar = { msg -> snackbarHostState.showSnackbar(msg) },
                         bottomPadding = contentPadding.calculateBottomPadding(),
@@ -528,8 +532,8 @@ fun MainScreen(
                         accentColor = state.accentColor,
                         onSetAccentColor = { viewModel.handleEvent(MainEvent.SetAccentColor(it)) },
                         disabledSources = state.disabledSources,
-                        regularSources = regularSources,
-                        adultSources = adultSources,
+                        regularSources = if (state.isMangaMode) mangaSources else regularSources,
+                        adultSources = if (state.isMangaMode) emptyList() else adultSources,
                         onToggleSource = { viewModel.handleEvent(MainEvent.ToggleSource(it)) },
                         adBlockerEnabled = state.adBlockerEnabled,
                         onToggleAdBlocker = { viewModel.handleEvent(MainEvent.ToggleAdBlocker) },

@@ -133,7 +133,9 @@ fun AnimeDetailsScreen(
                     onWatchOffline = { viewModel.handleEvent(AnimeDetailsEvent.WatchOffline) },
                     enrichment = state.enrichment,
                     contentSources = state.contentSources,
+                    isSearchingContent = state.isSearchingContent,
                     onContentSourceClick = { viewModel.handleEvent(AnimeDetailsEvent.OpenChapterList(it)) },
+                    onRetrySearch = { viewModel.handleEvent(AnimeDetailsEvent.RetrySourceSearch) },
                 )
                 state.isOffline -> OfflineState(
                     onRetry = { viewModel.handleEvent(AnimeDetailsEvent.LoadAnime(animeId)) },
