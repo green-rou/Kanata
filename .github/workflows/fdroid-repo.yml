@@ -18,10 +18,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
       - name: Download latest release APK
         run: |
           mkdir -p fdroid/repo
-          LATEST_TAG=$(gh release list --limit 1 --json tagName --jq '.[0].tagName')
+          LATEST_TAG=$(gh release list --json tagName --jq '[.[] | .tagName | select(startswith("v"))] | first')
+          echo "Downloading APK from $LATEST_TAG"
           gh release download "$LATEST_TAG" --pattern "*.apk" --dir fdroid/repo
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -42,8 +49,10 @@ jobs:
       - name: Pack and sign index-v1.jar
         run: |
           cd fdroid/repo
-          zip -j index-v1.jar index-v1.json
+          jar cf index-v1.jar index-v1.json
           jarsigner \
+            -sigalg SHA256withRSA \
+            -digestalg SHA-256 \
             -keystore ../keystore.jks \
             -storepass "${{ secrets.KEYSTORE_PASSWORD }}" \
             -keypass "${{ secrets.KEY_PASSWORD }}" \
