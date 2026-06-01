@@ -6,6 +6,7 @@ data class PageReaderState(
     val isLoading: Boolean = false,
     val pages: List<ContentPage> = emptyList(),
     val error: String? = null,
+    val retryAttempt: Int = 0,
     val currentChapterIndex: Int = 0,
     val chapterUrls: List<String> = emptyList(),
     val chapterTitles: List<String> = emptyList(),

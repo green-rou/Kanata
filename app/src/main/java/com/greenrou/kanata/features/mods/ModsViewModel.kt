@@ -5,7 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.greenrou.kanata.data.local.InstalledModEntity
 import com.greenrou.kanata.data.remote.dto.ModIndexDto
+import com.greenrou.kanata.domain.model.ModCategory
 import com.greenrou.kanata.domain.model.ModInfo
+import com.greenrou.kanata.domain.repository.SettingsManager
 import com.greenrou.kanata.domain.usecase.FetchRemoteModsUseCase
 import com.greenrou.kanata.domain.usecase.GetInstalledModsUseCase
 import com.greenrou.kanata.domain.usecase.InstallModFromFileUseCase
@@ -17,6 +19,7 @@ import com.greenrou.kanata.features.mods.model.ModsState
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -30,6 +33,7 @@ class ModsViewModel(
     private val installModFromFile: InstallModFromFileUseCase,
     private val uninstallMod: UninstallModUseCase,
     private val toggleMod: ToggleModUseCase,
+    private val settingsManager: SettingsManager,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ModsState())
@@ -43,7 +47,16 @@ class ModsViewModel(
 
     init {
         observeInstalled()
-        loadIndex()
+        viewModelScope.launch {
+            val url = settingsManager.modIndexUrl.first()
+            val savedInput = settingsManager.modSourceInput.first()
+            if (url.isBlank()) {
+                _state.update { it.copy(isSourceConfigured = false, currentSourceUrl = "", sourceInput = "", savedSourceInput = "") }
+            } else {
+                _state.update { it.copy(isSourceConfigured = true, currentSourceUrl = url, sourceInput = "", savedSourceInput = savedInput) }
+                loadIndex(url)
+            }
+        }
     }
 
     fun handleEvent(event: ModsEvent) {
@@ -52,15 +65,28 @@ class ModsViewModel(
             is ModsEvent.InstallFromFile -> handleInstallFromFile(event.uri)
             is ModsEvent.Uninstall -> handleUninstall(event.modId)
             is ModsEvent.Toggle -> handleToggle(event.modId, event.enabled)
-            ModsEvent.RefreshIndex -> loadIndex()
+            ModsEvent.RefreshIndex -> loadIndex(_state.value.currentSourceUrl)
+            ModsEvent.ShowSourceDialog -> _state.update { it.copy(showSourceDialog = true, sourceInput = it.savedSourceInput) }
+            ModsEvent.DismissSourceDialog -> _state.update { it.copy(showSourceDialog = false, sourceInput = it.savedSourceInput) }
+            is ModsEvent.SourceInputChanged -> _state.update { it.copy(sourceInput = event.input) }
+            ModsEvent.ConfirmSource -> {
+                val rawInput = _state.value.sourceInput
+                val resolved = resolveToIndexUrl(rawInput)
+                viewModelScope.launch {
+                    settingsManager.setModIndexUrl(resolved)
+                    settingsManager.setModSourceInput(rawInput)
+                    _state.update { it.copy(showSourceDialog = false, isSourceConfigured = true, currentSourceUrl = resolved, savedSourceInput = rawInput, sourceInput = rawInput) }
+                    loadIndex(resolved)
+                }
+            }
             else -> Unit
         }
     }
 
-    private fun loadIndex() {
+    private fun loadIndex(url: String) {
         viewModelScope.launch {
             _state.update { it.copy(isLoadingIndex = true, indexError = null) }
-            fetchRemoteMods()
+            fetchRemoteMods(url)
                 .onSuccess { index ->
                     remoteIndex = index
                     mergeAndUpdateState()
@@ -91,6 +117,7 @@ class ModsViewModel(
                 description = dto.description,
                 apkUrl = dto.apkUrl,
                 parserClass = dto.parserClass,
+                category = categoryOf(dto.id, dto.isAdultOnly),
                 isInstalled = inst != null,
                 isEnabled = inst?.isEnabled ?: false,
                 installedVersion = inst?.version,
@@ -109,6 +136,7 @@ class ModsViewModel(
                     description = "",
                     apkUrl = "",
                     parserClass = "",
+                    category = categoryOf(e.id, isAdultOnly = false),
                     isInstalled = true,
                     isEnabled = e.isEnabled,
                     installedVersion = e.version,
@@ -116,6 +144,14 @@ class ModsViewModel(
                 )
             }
         _state.update { it.copy(mods = fromIndex + offlineOnly) }
+    }
+
+    private fun categoryOf(id: String, isAdultOnly: Boolean): ModCategory = when {
+        id.startsWith("feature-") -> ModCategory.FEATURE
+        id.startsWith("info-") -> ModCategory.INFO
+        isAdultOnly -> ModCategory.SOURCE_ADULT
+        id.contains("manga") -> ModCategory.SOURCE_MANGA
+        else -> ModCategory.SOURCE_ANIME
     }
 
     private fun handleInstall(mod: ModInfo) {
@@ -172,4 +208,11 @@ class ModsViewModel(
         }
     }
 
+    private fun resolveToIndexUrl(input: String): String {
+        val trimmed = input.trim()
+        if (trimmed.startsWith("https://raw.githubusercontent.com/")) return trimmed
+        val ownerRepo = Regex("github\\.com/([\\w.-]+/[\\w.-]+)").find(trimmed)?.groupValues?.get(1)
+            ?: if (trimmed.matches(Regex("[\\w.-]+/[\\w.-]+"))) trimmed else return trimmed
+        return "https://raw.githubusercontent.com/$ownerRepo/main/index.json"
+    }
 }

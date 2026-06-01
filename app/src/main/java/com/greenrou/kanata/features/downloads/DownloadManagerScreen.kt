@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -47,15 +46,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.greenrou.kanata.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.greenrou.kanata.R
 import com.greenrou.kanata.features.downloads.content.CompletedDownloadCard
 import com.greenrou.kanata.features.downloads.content.QueuedDownloadCard
 import com.greenrou.kanata.features.downloads.model.DownloadManagerEvent
@@ -65,11 +64,13 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun DownloadManagerScreen(
     onPlayDownloaded: (localFilePath: String, title: String) -> Unit,
+    modifier: Modifier = Modifier,
+    onReadMangaChapter: (chapterFolderPath: String, title: String) -> Unit = { _, _ -> },
     onOpenEpisodeList: (animePageUrl: String, sourceName: String, animeTitle: String) -> Unit = { _, _, _ -> },
+    onOpenChapterList: (pageUrl: String, sourceName: String, animeTitle: String) -> Unit = { _, _, _ -> },
     onNavigateToAnimeDetails: (animeId: Int) -> Unit = {},
     onShowSnackbar: suspend (String) -> Unit = {},
     bottomPadding: Dp = 0.dp,
-    modifier: Modifier = Modifier,
     viewModel: DownloadManagerViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -81,6 +82,8 @@ fun DownloadManagerScreen(
             when (event) {
                 is DownloadManagerEvent.NavigateToPlayer ->
                     onPlayDownloaded(event.localFilePath, event.title)
+                is DownloadManagerEvent.NavigateToReader ->
+                    onReadMangaChapter(event.chapterFolderPath, event.title)
                 is DownloadManagerEvent.ShowSnackbar ->
                     onShowSnackbar(event.message)
                 else -> Unit
@@ -114,6 +117,7 @@ fun DownloadManagerScreen(
                         viewModel.handleEvent(DownloadManagerEvent.DeleteDownload(item.id, item.localFilePath))
                     },
                     onOpenEpisodeList = onOpenEpisodeList,
+                    onOpenChapterList = onOpenChapterList,
                     onNavigateToAnimeDetails = onNavigateToAnimeDetails,
                     bottomPadding = bottomPadding,
                     modifier = Modifier.fillMaxSize(),
@@ -137,8 +141,8 @@ private fun QueueTab(
     onCancel: (Long) -> Unit,
     onRetry: (com.greenrou.kanata.domain.model.DownloadItem) -> Unit,
     onReorder: (List<Long>) -> Unit,
-    bottomPadding: Dp = 0.dp,
     modifier: Modifier = Modifier,
+    bottomPadding: Dp = 0.dp,
 ) {
     if (items.isEmpty()) {
         DownloadsEmptyState(
@@ -248,9 +252,10 @@ private fun DownloadedTab(
     onPlay: (com.greenrou.kanata.domain.model.DownloadItem) -> Unit,
     onDelete: (com.greenrou.kanata.domain.model.DownloadItem) -> Unit,
     onOpenEpisodeList: (animePageUrl: String, sourceName: String, animeTitle: String) -> Unit,
+    onOpenChapterList: (pageUrl: String, sourceName: String, animeTitle: String) -> Unit,
     onNavigateToAnimeDetails: (animeId: Int) -> Unit,
-    bottomPadding: Dp = 0.dp,
     modifier: Modifier = Modifier,
+    bottomPadding: Dp = 0.dp,
 ) {
     if (items.isEmpty()) {
         DownloadsEmptyState(
@@ -272,6 +277,7 @@ private fun DownloadedTab(
         grouped.forEach { (animeTitle, episodes) ->
             val animePageUrl = episodes.firstOrNull { it.animePageUrl.isNotBlank() }?.animePageUrl
             val animeId = episodes.firstOrNull { it.animeId > 0 }?.animeId ?: 0
+            val isMangaGroup = episodes.any { it.isManga }
             item(key = "header_$animeTitle") {
                 androidx.compose.foundation.layout.Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -299,11 +305,11 @@ private fun DownloadedTab(
                     if (animePageUrl != null) {
                         IconButton(
                             onClick = {
-                                onOpenEpisodeList(
-                                    animePageUrl,
-                                    episodes.first().sourceName,
-                                    animeTitle,
-                                )
+                                if (isMangaGroup) {
+                                    onOpenChapterList(animePageUrl, episodes.first().sourceName, animeTitle)
+                                } else {
+                                    onOpenEpisodeList(animePageUrl, episodes.first().sourceName, animeTitle)
+                                }
                             },
                             modifier = Modifier.size(32.dp),
                         ) {
@@ -322,6 +328,7 @@ private fun DownloadedTab(
                     item = item,
                     onPlay = { onPlay(item) },
                     onDelete = { onDelete(item) },
+                    isManga = item.isManga,
                 )
             }
         }

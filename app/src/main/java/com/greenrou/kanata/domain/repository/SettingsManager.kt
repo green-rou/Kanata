@@ -16,6 +16,10 @@ interface SettingsManager {
     val skippedVersion: Flow<String>
     val activeInfoProviderId: Flow<String?>
     val isMangaMode: Flow<Boolean>
+    val modIndexUrl: Flow<String>
+    val modSourceInput: Flow<String>
+    suspend fun setModIndexUrl(url: String)
+    suspend fun setModSourceInput(input: String)
 
     suspend fun setShowAdultContent(show: Boolean)
     suspend fun setDarkTheme(isDark: Boolean)

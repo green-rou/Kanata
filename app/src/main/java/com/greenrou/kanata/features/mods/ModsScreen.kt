@@ -2,10 +2,18 @@ package com.greenrou.kanata.features.mods
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,15 +23,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.rounded.Extension
+import androidx.compose.material.icons.rounded.KeyboardArrowDown
+import androidx.compose.material.icons.rounded.Link
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.WifiOff
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -34,11 +44,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -48,15 +60,34 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.greenrou.kanata.core.composable.KanataLoader
 import com.greenrou.kanata.core.composable.KanataSnackbarHost
+import com.greenrou.kanata.domain.model.ModCategory
 import com.greenrou.kanata.domain.model.ModInfo
 import com.greenrou.kanata.features.mods.model.ModsEvent
 import org.koin.androidx.compose.koinViewModel
+
+private val categoryOrder = listOf(
+    ModCategory.FEATURE,
+    ModCategory.INFO,
+    ModCategory.SOURCE_ANIME,
+    ModCategory.SOURCE_MANGA,
+    ModCategory.SOURCE_ADULT,
+)
+
+private fun ModCategory.displayName(): String = when (this) {
+    ModCategory.FEATURE -> "Features"
+    ModCategory.INFO -> "Info Providers"
+    ModCategory.SOURCE_ANIME -> "Anime Sources"
+    ModCategory.SOURCE_MANGA -> "Manga Sources"
+    ModCategory.SOURCE_ADULT -> "18+ Sources"
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -89,6 +120,9 @@ fun ModsScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = { viewModel.handleEvent(ModsEvent.ShowSourceDialog) }) {
+                        Icon(Icons.Rounded.Link, contentDescription = "Extension source")
+                    }
                     if (state.isInstallingFromFile) {
                         CircularProgressIndicator(
                             modifier = Modifier
@@ -119,6 +153,19 @@ fun ModsScreen(
         snackbarHost = { KanataSnackbarHost(snackbarHostState) },
     ) { padding ->
         when {
+            !state.isSourceConfigured -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    ModsNotConfiguredState(
+                        onConfigure = { viewModel.handleEvent(ModsEvent.ShowSourceDialog) },
+                    )
+                }
+            }
+
             state.isLoadingIndex && state.mods.isEmpty() -> {
                 Box(
                     modifier = Modifier
@@ -154,13 +201,14 @@ fun ModsScreen(
             }
 
             else -> {
+                val grouped = remember(state.mods) { state.mods.groupBy { it.category } }
+                var collapsedCategories by remember { mutableStateOf(emptySet<ModCategory>()) }
+
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(padding)
-                        .padding(horizontal = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 16.dp),
+                        .padding(padding),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
                 ) {
                     if (state.mods.isEmpty() && !state.isLoadingIndex) {
                         item {
@@ -188,18 +236,142 @@ fun ModsScreen(
                         }
                     }
 
-                    items(state.mods, key = { it.id }) { mod ->
-                        ModCard(
-                            mod = mod,
-                            isDownloading = mod.id in state.downloadingIds,
-                            downloadProgress = state.downloadProgress[mod.id],
-                            onInstall = { viewModel.handleEvent(ModsEvent.Install(mod)) },
-                            onUninstall = { viewModel.handleEvent(ModsEvent.Uninstall(mod.id)) },
-                            onToggle = { enabled -> viewModel.handleEvent(ModsEvent.Toggle(mod.id, enabled)) },
-                        )
+                    categoryOrder.forEach { category ->
+                        val mods = grouped[category]
+                        if (!mods.isNullOrEmpty()) {
+                            item(key = "header_${category.name}") {
+                                val isExpanded = category !in collapsedCategories
+                                CategoryHeader(
+                                    label = category.displayName(),
+                                    count = mods.size,
+                                    isExpanded = isExpanded,
+                                    onToggle = {
+                                        collapsedCategories = if (isExpanded)
+                                            collapsedCategories + category
+                                        else
+                                            collapsedCategories - category
+                                    },
+                                )
+                            }
+                            item(key = "content_${category.name}") {
+                                val isExpanded = category !in collapsedCategories
+                                AnimatedVisibility(
+                                    visible = isExpanded,
+                                    enter = expandVertically() + fadeIn(),
+                                    exit = shrinkVertically() + fadeOut(),
+                                ) {
+                                    Column(
+                                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                                        modifier = Modifier.padding(bottom = 12.dp),
+                                    ) {
+                                        mods.forEach { mod ->
+                                            ModCard(
+                                                mod = mod,
+                                                isDownloading = mod.id in state.downloadingIds,
+                                                downloadProgress = state.downloadProgress[mod.id],
+                                                onInstall = { viewModel.handleEvent(ModsEvent.Install(mod)) },
+                                                onUninstall = { viewModel.handleEvent(ModsEvent.Uninstall(mod.id)) },
+                                                onToggle = { enabled -> viewModel.handleEvent(ModsEvent.Toggle(mod.id, enabled)) },
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
+        }
+    }
+    if (state.showSourceDialog) {
+        AlertDialog(
+            onDismissRequest = { viewModel.handleEvent(ModsEvent.DismissSourceDialog) },
+            title = { Text("Extension source") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = "Add an extension repository to browse and install extensions.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    OutlinedTextField(
+                        value = state.sourceInput,
+                        onValueChange = { viewModel.handleEvent(ModsEvent.SourceInputChanged(it)) },
+                        singleLine = true,
+                        placeholder = { Text("Paste link or shortcode", overflow = TextOverflow.Ellipsis, maxLines = 1) },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    if (state.currentSourceUrl.isNotBlank()) {
+                        Text(
+                            text = state.currentSourceUrl,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = { viewModel.handleEvent(ModsEvent.ConfirmSource) },
+                    enabled = state.sourceInput.isNotBlank(),
+                ) {
+                    Text("Apply")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.handleEvent(ModsEvent.DismissSourceDialog) }) {
+                    Text("Cancel")
+                }
+            },
+        )
+    }
+}
+
+@Composable
+private fun CategoryHeader(
+    label: String,
+    count: Int,
+    isExpanded: Boolean,
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val chevronRotation by animateFloatAsState(
+        targetValue = if (isExpanded) 0f else -90f,
+        label = "chevron_$label",
+    )
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onToggle)
+            .padding(vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(
+            text = label.uppercase(),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.SemiBold,
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Text(
+                text = count.toString(),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Icon(
+                imageVector = Icons.Rounded.KeyboardArrowDown,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(16.dp)
+                    .rotate(chevronRotation),
+                tint = MaterialTheme.colorScheme.primary,
+            )
         }
     }
 }
@@ -361,6 +533,55 @@ private fun LanguageBadge(language: String, modifier: Modifier = Modifier) {
             color = MaterialTheme.colorScheme.onSecondaryContainer,
             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
         )
+    }
+}
+
+@Composable
+private fun ModsNotConfiguredState(
+    onConfigure: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier.padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(20.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(80.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
+                    shape = CircleShape,
+                ),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.Extension,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.size(36.dp),
+            )
+        }
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(
+                text = "No extension source",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center,
+            )
+            Text(
+                text = "Add a source to browse and install extensions.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+        }
+        Button(onClick = onConfigure) {
+            Text("Add source")
+        }
     }
 }
 

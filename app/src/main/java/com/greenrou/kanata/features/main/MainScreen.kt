@@ -31,8 +31,10 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.FilterList
 import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.TravelExplore
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
@@ -98,17 +100,22 @@ fun MainScreen(
     onNavigateToDetails: (Int) -> Unit,
     onNavigateToPlayer: (localFilePath: String, title: String) -> Unit = { _, _ -> },
     onOpenEpisodeList: (animePageUrl: String, sourceName: String, animeTitle: String) -> Unit = { _, _, _ -> },
+    onOpenChapterList: (pageUrl: String, sourceName: String, animeTitle: String) -> Unit = { _, _, _ -> },
     onNavigateToAnimeDetails: (animeId: Int) -> Unit = {},
     onOpenWebPlayer: () -> Unit = {},
     onNavigateToWebPlayer: (url: String) -> Unit = {},
     onNavigateToMods: () -> Unit = {},
+    onReadMangaChapter: (chapterFolderPath: String, title: String) -> Unit = { _, _ -> },
+    onNavigateToOnlineSearch: (query: String) -> Unit = {},
     viewModel: MainViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val isDownloadFeatureEnabled by viewModel.isDownloadFeatureEnabled.collectAsStateWithLifecycle()
+    val contentProviderHasStreams by viewModel.contentProviderHasStreams.collectAsStateWithLifecycle()
     val favoriteIds by viewModel.favoriteIds.collectAsStateWithLifecycle()
     val regularSources by viewModel.regularSources.collectAsStateWithLifecycle()
     val adultSources by viewModel.adultSources.collectAsStateWithLifecycle()
+    val mangaSources by viewModel.mangaSources.collectAsStateWithLifecycle()
     val infoProviders by viewModel.infoProviders.collectAsStateWithLifecycle()
     val mangaModResources by viewModel.mangaModResources.collectAsStateWithLifecycle()
     val mangaModeOnTitle = mangaModResources?.getString("mod_mode_on_title")
@@ -188,7 +195,7 @@ fun MainScreen(
             }
     }
 
-    val isFabVisible = fabAllowedOnTab && fabScrollVisible && isDownloadFeatureEnabled
+    val isFabVisible = fabAllowedOnTab && fabScrollVisible && isDownloadFeatureEnabled && contentProviderHasStreams
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
@@ -296,6 +303,11 @@ fun MainScreen(
                             actions = {
                                 if (selectedTab == BottomNavItem.AnimeList) {
                                     if (state.isSearchActive) {
+                                        if (state.searchQuery.isNotBlank()) {
+                                            IconButton(onClick = { onNavigateToOnlineSearch(state.searchQuery) }) {
+                                                Icon(Icons.Rounded.TravelExplore, contentDescription = stringResource(R.string.online_search_button))
+                                            }
+                                        }
                                         IconButton(onClick = { viewModel.handleEvent(MainEvent.ToggleSearch) }) {
                                             Icon(Icons.Rounded.Close, contentDescription = stringResource(R.string.main_cd_close_search))
                                         }
@@ -416,13 +428,23 @@ fun MainScreen(
                                             .padding(contentPadding),
                                     )
 
-                                    !state.isOffline && state.animeList.isEmpty() && (state.hasActiveFilters || state.searchQuery.isNotEmpty()) -> Text(
-                                        stringResource(R.string.main_no_anime_found),
+                                    !state.isOffline && state.animeList.isEmpty() && (state.hasActiveFilters || state.searchQuery.isNotEmpty()) -> Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.spacedBy(12.dp),
                                         modifier = Modifier
                                             .align(Alignment.Center)
                                             .padding(contentPadding),
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
+                                    ) {
+                                        Text(
+                                            stringResource(R.string.main_no_anime_found),
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                        if (state.searchQuery.isNotEmpty() && (regularSources.isNotEmpty() || adultSources.isNotEmpty())) {
+                                            Button(onClick = { onNavigateToOnlineSearch(state.searchQuery) }) {
+                                                Text(stringResource(R.string.main_search_in_mods))
+                                            }
+                                        }
+                                    }
 
                                     !state.isOffline && state.animeList.isEmpty() -> ErrorState(
                                         onRetry = { viewModel.handleEvent(MainEvent.LoadAnime) },
@@ -487,7 +509,9 @@ fun MainScreen(
 
                     BottomNavItem.Downloads -> DownloadManagerScreen(
                         onPlayDownloaded = onNavigateToPlayer,
+                        onReadMangaChapter = onReadMangaChapter,
                         onOpenEpisodeList = onOpenEpisodeList,
+                        onOpenChapterList = onOpenChapterList,
                         onNavigateToAnimeDetails = onNavigateToAnimeDetails,
                         onShowSnackbar = { msg -> snackbarHostState.showSnackbar(msg) },
                         bottomPadding = contentPadding.calculateBottomPadding(),
@@ -508,8 +532,8 @@ fun MainScreen(
                         accentColor = state.accentColor,
                         onSetAccentColor = { viewModel.handleEvent(MainEvent.SetAccentColor(it)) },
                         disabledSources = state.disabledSources,
-                        regularSources = regularSources,
-                        adultSources = adultSources,
+                        regularSources = if (state.isMangaMode) mangaSources else regularSources,
+                        adultSources = if (state.isMangaMode) emptyList() else adultSources,
                         onToggleSource = { viewModel.handleEvent(MainEvent.ToggleSource(it)) },
                         adBlockerEnabled = state.adBlockerEnabled,
                         onToggleAdBlocker = { viewModel.handleEvent(MainEvent.ToggleAdBlocker) },

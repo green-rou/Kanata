@@ -10,7 +10,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import com.greenrou.kanata.core.composable.KanataLoader
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -25,8 +24,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.greenrou.kanata.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.greenrou.kanata.R
+import com.greenrou.kanata.core.composable.KanataLoader
 import com.greenrou.kanata.features.episodes.content.EpisodeCard
 import com.greenrou.kanata.features.episodes.content.EpisodeEmptyState
 import com.greenrou.kanata.features.episodes.content.TranslationBottomSheet
@@ -50,6 +50,7 @@ fun EpisodeListScreen(
     ),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val isDownloadFeatureEnabled by viewModel.isDownloadFeatureEnabled.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
@@ -118,6 +119,7 @@ fun EpisodeListScreen(
                                         EpisodeListEvent.EpisodeClicked(urls, titles, index)
                                     )
                                 },
+                                showDownloadButton = isDownloadFeatureEnabled,
                                 downloadStatus = state.downloadStatuses[episode.url]?.status,
                                 onDownloadClick = {
                                     viewModel.handleEvent(

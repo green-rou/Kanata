@@ -17,13 +17,12 @@ class ModRepositoryImpl(
     private val api: ModIndexApi,
     private val okHttpClient: OkHttpClient,
     private val modsDir: File,
-    private val modIndexUrl: String,
 ) : ModRepository {
 
     override fun observeInstalled(): Flow<List<InstalledModEntity>> = dao.observeAll()
 
-    override suspend fun fetchRemoteIndex(): Result<List<ModIndexDto>> =
-        runCatching { api.getModIndex(modIndexUrl) }
+    override suspend fun fetchRemoteIndex(url: String): Result<List<ModIndexDto>> =
+        runCatching { api.getModIndex(url) }
 
     override suspend fun install(mod: ModIndexDto, onProgress: (Int) -> Unit): Result<Unit> =
         runCatching {

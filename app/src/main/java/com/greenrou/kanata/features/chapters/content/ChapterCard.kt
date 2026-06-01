@@ -10,9 +10,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.DownloadDone
+import androidx.compose.material.icons.rounded.ErrorOutline
+import androidx.compose.material.icons.rounded.HourglassTop
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -24,6 +29,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.greenrou.kanata.R
+import com.greenrou.kanata.core.composable.KanataSmallLoader
+import com.greenrou.kanata.domain.model.DownloadStatus
 
 @Composable
 internal fun ChapterCard(
@@ -31,6 +38,9 @@ internal fun ChapterCard(
     title: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    showDownloadButton: Boolean = false,
+    downloadStatus: DownloadStatus? = null,
+    onDownloadClick: () -> Unit = {},
 ) {
     ElevatedCard(
         onClick = onClick,
@@ -65,7 +75,33 @@ internal fun ChapterCard(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f),
             )
-            Spacer(Modifier.width(8.dp))
+            if (showDownloadButton) {
+                Spacer(Modifier.width(8.dp))
+                IconButton(onClick = onDownloadClick) {
+                    when (downloadStatus) {
+                        DownloadStatus.COMPLETED -> Icon(
+                            imageVector = Icons.Rounded.DownloadDone,
+                            contentDescription = stringResource(R.string.episode_cd_downloaded),
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                        DownloadStatus.DOWNLOADING -> KanataSmallLoader(size = 20.dp, strokeWidth = 2.dp)
+                        DownloadStatus.QUEUED -> Icon(
+                            imageVector = Icons.Rounded.HourglassTop,
+                            contentDescription = stringResource(R.string.episode_cd_queued),
+                            tint = MaterialTheme.colorScheme.secondary,
+                        )
+                        DownloadStatus.FAILED -> Icon(
+                            imageVector = Icons.Rounded.ErrorOutline,
+                            contentDescription = stringResource(R.string.episode_cd_failed),
+                            tint = MaterialTheme.colorScheme.error,
+                        )
+                        else -> Icon(
+                            imageVector = Icons.Rounded.Download,
+                            contentDescription = stringResource(R.string.chapter_cd_download, number),
+                        )
+                    }
+                }
+            }
             FilledIconButton(onClick = onClick) {
                 Icon(
                     imageVector = Icons.Filled.MenuBook,

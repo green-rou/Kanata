@@ -6,11 +6,15 @@ import com.greenrou.kanata.domain.usecase.GetContentPagesUseCase
 import com.greenrou.kanata.features.pagereader.model.PageReaderEvent
 import com.greenrou.kanata.features.pagereader.model.PageReaderState
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
+private const val MAX_RETRIES = 3
+private const val RETRY_DELAY_MS = 2_000L
 
 class PageReaderViewModel(
     private val getContentPages: GetContentPagesUseCase,
@@ -50,6 +54,7 @@ class PageReaderViewModel(
                 _state.update { it.copy(currentChapterIndex = it.currentChapterIndex + 1) }
                 loadPages()
             }
+            PageReaderEvent.RetryClicked -> loadPages()
             else -> Unit
         }
     }
@@ -57,10 +62,21 @@ class PageReaderViewModel(
     private fun loadPages() {
         val url = _state.value.chapterUrls.getOrNull(_state.value.currentChapterIndex) ?: return
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null, pages = emptyList()) }
-            getContentPages(url)
-                .onSuccess { pages -> _state.update { it.copy(isLoading = false, pages = pages) } }
-                .onFailure { e -> _state.update { it.copy(isLoading = false, error = e.message ?: e.javaClass.simpleName) } }
+            _state.update { it.copy(isLoading = true, error = null, pages = emptyList(), retryAttempt = 0) }
+            repeat(MAX_RETRIES + 1) { attempt ->
+                val result = getContentPages(url)
+                if (result.isSuccess) {
+                    _state.update { it.copy(isLoading = false, pages = result.getOrDefault(emptyList()), retryAttempt = 0) }
+                    return@launch
+                }
+                if (attempt < MAX_RETRIES) {
+                    _state.update { it.copy(retryAttempt = attempt + 1) }
+                    delay(RETRY_DELAY_MS)
+                } else {
+                    val e = result.exceptionOrNull()
+                    _state.update { it.copy(isLoading = false, error = e?.message ?: e?.javaClass?.simpleName ?: "Unknown error", retryAttempt = 0) }
+                }
+            }
         }
     }
 }

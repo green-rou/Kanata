@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.ElevatedCard
@@ -36,6 +37,7 @@ internal fun CompletedDownloadCard(
     onPlay: () -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
+    isManga: Boolean = false,
 ) {
     ElevatedCard(modifier = modifier.fillMaxWidth()) {
         Row(
@@ -64,11 +66,19 @@ internal fun CompletedDownloadCard(
                 )
             }
             IconButton(onClick = onPlay) {
-                Icon(
-                    imageVector = Icons.Rounded.PlayArrow,
-                    contentDescription = stringResource(R.string.download_card_cd_play),
-                    tint = MaterialTheme.colorScheme.primary,
-                )
+                if (isManga) {
+                    Icon(
+                        imageVector = Icons.Filled.MenuBook,
+                        contentDescription = stringResource(R.string.download_card_cd_read),
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Rounded.PlayArrow,
+                        contentDescription = stringResource(R.string.download_card_cd_play),
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                }
             }
             IconButton(onClick = onDelete) {
                 Icon(

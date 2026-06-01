@@ -12,6 +12,7 @@ class EnqueueDownloadUseCase(private val repo: DownloadRepository) {
         episodePageUrl: String,
         animePageUrl: String = "",
         animeId: Int = 0,
+        isManga: Boolean = false,
     ): Long? {
         val existing = repo.getDownloadByEpisodeUrl(episodePageUrl)
         if (existing != null && existing.status in listOf(
@@ -35,6 +36,7 @@ class EnqueueDownloadUseCase(private val repo: DownloadRepository) {
                 createdAt = System.currentTimeMillis(),
                 fileSizeBytes = 0,
                 errorMessage = null,
+                isManga = isManga,
             )
         )
     }

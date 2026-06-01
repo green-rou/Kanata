@@ -16,6 +16,7 @@ import com.greenrou.kanata.features.episodes.EpisodeListScreen
 import com.greenrou.kanata.features.main.BottomNavItem
 import com.greenrou.kanata.features.main.MainScreen
 import com.greenrou.kanata.features.mods.ModsScreen
+import com.greenrou.kanata.features.onlinesearch.OnlineSearchScreen
 import com.greenrou.kanata.features.pagereader.PageReaderScreen
 import com.greenrou.kanata.features.player.PlayerScreen
 import com.greenrou.kanata.features.webplayer.WebPlayerScreen
@@ -35,7 +36,7 @@ fun NavGraph(backStack: SnapshotStateList<Any>) {
         is MainRoute -> MainScreen(
             gridState = gridState,
             selectedTabName = selectedTabName,
-            onTabSelected = { selectedTabName = it },
+            onTabSelected = @Suppress("UNUSED_VALUE") { selectedTabName = it },
             onNavigateToDetails = { id -> backStack.add(AnimeDetailsRoute(id)) },
             onNavigateToPlayer = { path, title ->
                 backStack.add(PlayerRoute(listOf(path), listOf(title), 0))
@@ -43,12 +44,19 @@ fun NavGraph(backStack: SnapshotStateList<Any>) {
             onOpenEpisodeList = { animePageUrl, sourceName, animeTitle ->
                 backStack.add(EpisodeListRoute(animePageUrl, sourceName, animeTitle))
             },
+            onOpenChapterList = { pageUrl, sourceName, animeTitle ->
+                backStack.add(ChapterListRoute(pageUrl, sourceName, animeTitle))
+            },
             onNavigateToAnimeDetails = { animeId ->
                 backStack.add(AnimeDetailsRoute(animeId))
             },
             onOpenWebPlayer = { backStack.add(WebPlayerRoute()) },
             onNavigateToWebPlayer = { url -> backStack.add(WebPlayerRoute(url)) },
             onNavigateToMods = { backStack.add(ModsRoute) },
+            onNavigateToOnlineSearch = { query -> backStack.add(OnlineSearchRoute(query)) },
+            onReadMangaChapter = { folderPath, title ->
+                backStack.add(PageReaderRoute(listOf("file://$folderPath"), listOf(title), 0))
+            },
         )
         is AnimeDetailsRoute -> AnimeDetailsScreen(
             animeId = current.animeId,
@@ -137,6 +145,19 @@ fun NavGraph(backStack: SnapshotStateList<Any>) {
                 chapterTitles = current.chapterTitles,
                 startIndex = current.startIndex,
                 onNavigateBack = { backStack.removeAt(backStack.size - 1) },
+            )
+        }
+        is OnlineSearchRoute -> key(current) {
+            OnlineSearchScreen(
+                query = current.query,
+                onNavigateBack = { backStack.removeAt(backStack.size - 1) },
+                onNavigateToDetails = { animeId -> backStack.add(AnimeDetailsRoute(animeId)) },
+                onNavigateToEpisodeList = { pageUrl, label, title ->
+                    backStack.add(EpisodeListRoute(pageUrl, label, title))
+                },
+                onNavigateToChapterList = { pageUrl, label, title ->
+                    backStack.add(ChapterListRoute(pageUrl, label, title))
+                },
             )
         }
     }

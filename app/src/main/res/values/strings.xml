@@ -23,13 +23,14 @@
     <!-- Main screen -->
     <string name="main_title">Kanata</string>
     <string name="main_subtitle">Discover anime</string>
-    <string name="main_search_anime_hint">Search anime…</string>
+    <string name="main_search_anime_hint">Search…</string>
     <string name="main_search_downloads_hint">Search downloads…</string>
     <string name="main_cd_close_search">Close search</string>
     <string name="main_cd_search">Search</string>
     <string name="main_cd_filter">Filter</string>
     <string name="main_cd_search_downloads">Search downloads</string>
     <string name="main_no_anime_found">No anime found</string>
+    <string name="main_search_in_mods">Search in mod resources</string>
 
     <!-- Anime details -->
     <string name="detail_title_fallback">Anime Detail</string>
@@ -51,6 +52,7 @@
     <string name="detail_source_ann">Source: Anime News Network</string>
     <string name="detail_cd_copy">Copy</string>
     <string name="detail_cd_copied">Copied</string>
+    <string name="detail_cd_retry_search">Retry source search</string>
     <plurals name="detail_downloaded_episodes">
         <item quantity="one">%d episode downloaded</item>
         <item quantity="other">%d episodes downloaded</item>
@@ -73,13 +75,17 @@
     <string name="chapter_list_count">%d chapters</string>
     <string name="chapter_empty_title">No chapters found</string>
     <string name="chapter_empty_subtitle">This source has no chapters available</string>
+    <string name="chapter_error_title">Failed to load chapters</string>
     <string name="chapter_cd_read">Read chapter %d</string>
+    <string name="chapter_cd_download">Download chapter %d</string>
+    <string name="download_card_cd_read">Read</string>
 
     <!-- Page reader -->
     <string name="reader_page_of">%1$d / %2$d</string>
     <string name="reader_cd_prev">Previous chapter</string>
     <string name="reader_cd_next">Next chapter</string>
     <string name="reader_error_empty">No pages found for this chapter</string>
+    <string name="reader_retrying">Retrying… %d / 3</string>
 
     <!-- Favorites -->
     <string name="favorites_empty_title">No favorites yet</string>
@@ -238,4 +244,8 @@
     <string name="update_skip_hint">If you skip, this dialog won\'t appear again for version %s</string>
     <string name="update_downloading">Downloading…</string>
     <string name="update_no_updates">Already up to date</string>
+    <string name="online_search_button">Search online</string>
+    <string name="online_search_searching">Searching on %s…</string>
+    <string name="online_search_empty">Nothing found on %s</string>
+    <string name="online_search_error">Error on %s</string>
 </resources>

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.greenrou.kanata.domain.model.DownloadItem
 import com.greenrou.kanata.domain.model.DownloadStatus
+import com.greenrou.kanata.domain.repository.SettingsManager
 import com.greenrou.kanata.domain.usecase.CancelDownloadUseCase
 import com.greenrou.kanata.domain.usecase.DeleteCompletedDownloadUseCase
 import com.greenrou.kanata.domain.usecase.GetCompletedDownloadsUseCase
@@ -33,6 +34,7 @@ class DownloadManagerViewModel(
     private val getDownloadFolder: GetDownloadFolderUseCase,
     private val setDownloadFolder: SetDownloadFolderUseCase,
     private val retryDownload: RetryDownloadUseCase,
+    private val settingsManager: SettingsManager,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(DownloadManagerState())
@@ -48,20 +50,20 @@ class DownloadManagerViewModel(
 
     init {
         combine(
-            getDownloadQueue(),
-            getCompletedDownloads(),
-            searchQuery,
-        ) { queued, completed, query ->
-            Triple(queued, completed, query)
-        }.onEach { (queued, completed, query) ->
+            combine(getDownloadQueue(), getCompletedDownloads()) { q, c -> q to c },
+            combine(searchQuery, settingsManager.isMangaMode) { q, m -> q to m },
+        ) { (queued, completed), (query, isManga) ->
+            Triple(queued, completed, query to isManga)
+        }.onEach { (queued, completed, queryMode) ->
+            val (query, isManga) = queryMode
             _state.update {
                 it.copy(
-                    queuedDownloads = queued.filter(query),
-                    completedDownloads = completed.filter(query),
+                    queuedDownloads = queued.filterByMode(isManga).filter(query),
+                    completedDownloads = completed.filterByMode(isManga).filter(query),
                     searchQuery = query,
                 )
             }
-            checkForNewFailures(queued)
+            checkForNewFailures(queued.filterByMode(isManga))
         }.launchIn(viewModelScope)
 
         viewModelScope.launch {
@@ -87,8 +89,13 @@ class DownloadManagerViewModel(
                 retryDownload(event.item)
             }
             is DownloadManagerEvent.PlayDownloaded -> viewModelScope.launch {
-                val path = event.item.localFilePath ?: return@launch
-                _events.send(DownloadManagerEvent.NavigateToPlayer("file://$path", event.item.episodeTitle))
+                val item = event.item
+                val path = item.localFilePath ?: return@launch
+                if (item.isManga) {
+                    _events.send(DownloadManagerEvent.NavigateToReader(path, item.episodeTitle))
+                } else {
+                    _events.send(DownloadManagerEvent.NavigateToPlayer("file://$path", item.episodeTitle))
+                }
             }
             is DownloadManagerEvent.FolderChosen -> viewModelScope.launch {
                 setDownloadFolder(event.uri)
@@ -118,6 +125,9 @@ class DownloadManagerViewModel(
                 }
             }
     }
+
+    private fun List<DownloadItem>.filterByMode(isManga: Boolean) =
+        filter { it.isManga == isManga }
 
     private fun List<DownloadItem>.filter(query: String): List<DownloadItem> {
         if (query.isBlank()) return this

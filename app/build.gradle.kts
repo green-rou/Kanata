@@ -23,8 +23,8 @@ android {
         applicationId = "com.greenrou.kanata"
         minSdk = 28
         targetSdk = 36
-        versionCode = 8
-        versionName = System.getenv("VERSION_NAME")?.removePrefix("v") ?: "0.3.0"
+        versionCode = 9
+        versionName = System.getenv("VERSION_NAME")?.removePrefix("v") ?: "0.3.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

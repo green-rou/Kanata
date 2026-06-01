@@ -1,26 +1,86 @@
 package com.greenrou.kanata.data.repository
 
+import android.util.Log
 import com.greenrou.kanata.data.mod.ChapterParserRegistry
 import com.greenrou.kanata.domain.model.ContentSource
 import com.greenrou.kanata.domain.repository.ContentSearchRepository
+import com.greenrou.kanata.domain.repository.SettingsManager
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.first
+import java.util.concurrent.ConcurrentHashMap
 
 class ContentSearchRepositoryImpl(
     private val registry: ChapterParserRegistry,
+    private val settingsManager: SettingsManager,
 ) : ContentSearchRepository {
 
-    override suspend fun searchAll(titles: List<String>): List<ContentSource> = withContext(Dispatchers.IO) {
-        val sources = mutableListOf<ContentSource>()
-        registry.parsers.value.forEach { parser ->
-            for (title in titles) {
-                val result = parser.search(title)
-                if (result.isSuccess) {
-                    result.onSuccess { url -> sources.add(ContentSource(parser.label, url)) }
-                    break
+    private val deadHosts: MutableSet<String> = ConcurrentHashMap.newKeySet()
+
+    override fun searchAll(titles: List<String>): Flow<ContentSource> = channelFlow {
+        val disabled = settingsManager.disabledSources.first()
+        registry.parsers.value
+            .filter { it.label !in disabled }
+            .map { parser ->
+            async(Dispatchers.IO) {
+                if (deadHosts.any { parser.supports(it) }) {
+                    Log.d(TAG, "[${parser.label}] ⤳ skipped (dead host)")
+                    return@async
                 }
+                var found = false
+                var hitDeadHost = false
+                for (title in titles) {
+                    var deadThisRound = false
+                    parser.search(title).fold(
+                        onSuccess = { url ->
+                            val chaptersResult = runCatching { parser.getChapters(url) }
+                            chaptersResult.fold(
+                                onSuccess = { chapters ->
+                                    if (chapters.isNotEmpty()) {
+                                        Log.d(TAG, "[${parser.label}] ✓ '$title' → $url (${chapters.size} chapters)")
+                                        send(ContentSource(parser.label, url))
+                                        found = true
+                                    } else {
+                                        Log.w(TAG, "[${parser.label}] ✗ '$title': no chapters at $url")
+                                    }
+                                },
+                                onFailure = { e ->
+                                    val msg = e.message ?: ""
+                                    if (e is java.net.UnknownHostException || "Unable to resolve host" in msg) {
+                                        val host = msg.substringAfter('"').substringBefore('"').takeIf { it.isNotBlank() }
+                                        host?.let { deadHosts.add(it) }
+                                        Log.w(TAG, "[${parser.label}] ✗ dead host on chapters fetch: ${host ?: msg}")
+                                        deadThisRound = true
+                                        hitDeadHost = true
+                                    } else {
+                                        Log.w(TAG, "[${parser.label}] ✗ '$title': chapters fetch failed — $msg")
+                                    }
+                                },
+                            )
+                        },
+                        onFailure = { e ->
+                            val msg = e.message ?: ""
+                            if (e is java.net.UnknownHostException || "Unable to resolve host" in msg) {
+                                val host = msg.substringAfter('"').substringBefore('"').takeIf { it.isNotBlank() }
+                                host?.let { deadHosts.add(it) }
+                                Log.w(TAG, "[${parser.label}] ✗ dead host: ${host ?: msg}")
+                                deadThisRound = true
+                                hitDeadHost = true
+                            } else {
+                                Log.w(TAG, "[${parser.label}] ✗ '$title': $msg")
+                            }
+                        },
+                    )
+                    if (found || deadThisRound) break
+                }
+                if (!found && !hitDeadHost) Log.w(TAG, "[${parser.label}] no result for any title")
             }
-        }
-        sources
+        }.forEach { it.await() }
+    }
+
+    private companion object {
+        const val TAG = "ContentSearchRepo"
     }
 }

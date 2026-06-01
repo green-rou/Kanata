@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.greenrou.kanata.core.analytics.AnalyticsManager
 import com.greenrou.kanata.core.analytics.reportToCrashlytics
 import com.greenrou.kanata.core.network.NetworkMonitor
+import com.greenrou.kanata.data.mod.ChapterParserRegistry
 import com.greenrou.kanata.data.mod.DownloadFeatureRegistry
 import com.greenrou.kanata.data.mod.InfoProviderRegistry
 import com.greenrou.kanata.data.mod.MangaModRegistry
@@ -38,7 +39,7 @@ class MainViewModel(
     private val getAnimeList: GetAnimeListUseCase,
     private val addFavorite: AddFavoriteUseCase,
     private val removeFavorite: RemoveFavoriteUseCase,
-    private val getFavorites: GetFavoritesUseCase,
+    getFavorites: GetFavoritesUseCase,
     private val settingsManager: SettingsManager,
     private val setDownloadFolder: SetDownloadFolderUseCase,
     private val networkMonitor: NetworkMonitor,
@@ -47,10 +48,12 @@ class MainViewModel(
     infoProviderRegistry: InfoProviderRegistry,
     downloadFeatureRegistry: DownloadFeatureRegistry,
     private val mangaModRegistry: MangaModRegistry,
+    chapterParserRegistry: ChapterParserRegistry,
 ) : ViewModel() {
 
     val isDownloadFeatureEnabled: StateFlow<Boolean> = downloadFeatureRegistry.isEnabled
     val mangaModResources = mangaModRegistry.modResources
+    val contentProviderHasStreams: StateFlow<Boolean> = mangaModRegistry.contentProviderHasStreams
 
     val regularSources: StateFlow<List<String>> = parserRegistry.parsers
         .map { list -> list.filter { !it.isAdultOnly }.map { it.label } }
@@ -58,6 +61,10 @@ class MainViewModel(
 
     val adultSources: StateFlow<List<String>> = parserRegistry.parsers
         .map { list -> list.filter { it.isAdultOnly }.map { it.label } }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val mangaSources: StateFlow<List<String>> = chapterParserRegistry.parsers
+        .map { list -> list.map { it.label } }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val infoProviders: StateFlow<List<Pair<String, String>>> = infoProviderRegistry.providers

@@ -1,6 +1,5 @@
 package com.greenrou.kanata.core.di
 
-import com.greenrou.kanata.BuildConfig
 import com.greenrou.kanata.data.mod.ChapterParserRegistry
 import com.greenrou.kanata.data.mod.DownloadFeatureRegistry
 import com.greenrou.kanata.data.mod.InfoProviderRegistry
@@ -49,18 +48,17 @@ val repositoryModule = module {
             api = get(),
             okHttpClient = get(),
             modsDir = get<ModLoader>().modsDir,
-            modIndexUrl = BuildConfig.MOD_INDEX_URL,
         )
     }
     single<AnimeRepository> { AnimeRepositoryImpl(get()) }
     single<SettingsManager> { SettingsManagerImpl(get()) }
     single<RandomRepository> { RandomRepositoryImpl(get(), get()) }
     single<VideoRepository> { VideoRepositoryImpl(get()) }
-    single<SearchRepository> { SearchRepositoryImpl(get(), get()) }
+    single<SearchRepository> { SearchRepositoryImpl(get(), get(), get<ChapterParserRegistry>()) }
     single<EpisodeListRepository> { EpisodeListRepositoryImpl(get()) }
     single<ChapterListRepository> { ChapterListRepositoryImpl(get()) }
     single<ContentPagesRepository> { ContentPagesRepositoryImpl(get()) }
-    single<ContentSearchRepository> { ContentSearchRepositoryImpl(get()) }
+    single<ContentSearchRepository> { ContentSearchRepositoryImpl(get(), get()) }
     single<DownloadRepository> { DownloadRepositoryImpl(get(), get(), get()) }
     single<UpdateRepository> { UpdateRepositoryImpl(get()) }
 }

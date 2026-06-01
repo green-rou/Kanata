@@ -8,6 +8,7 @@ data class ModInfo(
     val description: String,
     val apkUrl: String,
     val parserClass: String,
+    val category: ModCategory,
     val isInstalled: Boolean,
     val isEnabled: Boolean,
     val installedVersion: Int?,
