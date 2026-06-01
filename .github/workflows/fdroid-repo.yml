@@ -35,7 +35,7 @@ jobs:
       - name: Generate index-v1.json
         run: python3 fdroid/generate_index.py fdroid/repo
         env:
-          REPO_URL:  "https://green-rou.github.io/Kanata/fdroid/repo"
+          REPO_URL:  "https://github.com/green-rou/Kanata/releases/download/fdroid-repo"
           REPO_NAME: "Kanata"
           REPO_DESC: "Official Kanata releases"
 
@@ -49,18 +49,24 @@ jobs:
             -keypass "${{ secrets.KEY_PASSWORD }}" \
             index-v1.jar "${{ secrets.KEY_ALIAS }}"
 
-      - name: Copy repo to docs
+      - name: Publish to fdroid-repo release
         run: |
-          mkdir -p docs/fdroid/repo
-          cp -r fdroid/repo/. docs/fdroid/repo/
+          cat > /tmp/fdroid_notes.md << 'EOF'
+          ### F-Droid Repository
+          Add in F-Droid: Settings > Repositories > +
+          https://github.com/green-rou/Kanata/releases/download/fdroid-repo
+          EOF
 
-      - name: Commit and push
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/fdroid/
-          git diff --cached --quiet || git commit -m "chore: update F-Droid repo"
-          git push
+          gh release delete fdroid-repo --yes --cleanup-tag 2>/dev/null || true
+          gh release create fdroid-repo \
+            --title "F-Droid Repository" \
+            --notes-file /tmp/fdroid_notes.md \
+            fdroid/repo/*.apk \
+            fdroid/repo/index-v1.jar \
+            fdroid/repo/index-v1.json \
+            fdroid/repo/icon.png
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cleanup secrets
         if: always()
