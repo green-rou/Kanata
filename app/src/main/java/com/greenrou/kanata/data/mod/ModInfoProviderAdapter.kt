@@ -12,7 +12,8 @@ class ModInfoProviderAdapter(private val mod: ModInfoProvider) : InfoProvider {
 
     override suspend fun getInfo(titles: List<String>): Result<AnimeEnrichment> =
         withContext(Dispatchers.IO) {
-            mod.getInfo(titles).map { info ->
+            runCatching {
+                val info = mod.getInfo(titles).getOrThrow()
                 AnimeEnrichment(
                     synopsis = info.synopsis,
                     score = info.score,

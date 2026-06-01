@@ -15,6 +15,7 @@ data class AnimeDetailsState(
     val isSearching: Boolean = false,
     val isSearchingContent: Boolean = false,
     val hasStreamSources: Boolean = true,
+    val isMangaMode: Boolean = false,
     val error: String? = null,
     val coverFillsTopBar: Boolean = true,
     val downloadedEpisodeCount: Int = 0,

@@ -113,7 +113,14 @@
 -keep interface com.greenrou.kanata.modapi.** { *; }
 -keep class com.greenrou.kanata.modapi.** { *; }
 
+# ── Kotlin types used in mod API suspend function signatures ──────────────────
+-keep class kotlin.coroutines.** { *; }
+-keepnames class kotlin.coroutines.**
+-keep class kotlin.Result { *; }
+-keep class kotlin.Result$Failure { *; }
+
 # ── App domain / data models ──────────────────────────────────────────────────
 -keep class com.greenrou.kanata.domain.model.** { *; }
+-keep class com.greenrou.kanata.domain.parser.** { *; }
 -keep class com.greenrou.kanata.data.local.** { *; }
 -keep class com.greenrou.kanata.data.remote.dto.** { *; }

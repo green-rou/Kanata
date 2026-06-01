@@ -79,6 +79,7 @@ internal fun AnimeDetailContent(
     downloadedEpisodeCount: Int = 0,
     onWatchOffline: () -> Unit = {},
     enrichment: AnimeEnrichment? = null,
+    isMangaMode: Boolean = false,
     contentSources: List<ContentSource> = emptyList(),
     isSearchingContent: Boolean = false,
     onContentSourceClick: (ContentSource) -> Unit = {},
@@ -358,7 +359,7 @@ internal fun AnimeDetailContent(
                 }
             }
 
-            if (!hasStreamSources) {
+            if (isMangaMode) {
                 Spacer(Modifier.height(16.dp))
                 Row(
                     verticalAlignment = Alignment.CenterVertically,

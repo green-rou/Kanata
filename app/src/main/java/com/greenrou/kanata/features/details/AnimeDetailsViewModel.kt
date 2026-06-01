@@ -76,12 +76,13 @@ class AnimeDetailsViewModel(
             }
             .launchIn(viewModelScope)
         combine(parserRegistry.parsers, settingsManager.isMangaMode) { parsers, isManga ->
-            parsers.isNotEmpty() && !isManga
+            Pair(parsers.isNotEmpty() && !isManga, isManga)
         }
-            .onEach { hasStreams ->
+            .onEach { (hasStreams, isManga) ->
                 _state.update {
                     it.copy(
                         hasStreamSources = hasStreams,
+                        isMangaMode = isManga,
                         videoSources = if (!hasStreams) emptyList() else it.videoSources,
                         isSearching = if (!hasStreams) false else it.isSearching,
                     )

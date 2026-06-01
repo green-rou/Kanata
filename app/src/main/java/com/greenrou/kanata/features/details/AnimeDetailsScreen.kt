@@ -132,6 +132,7 @@ fun AnimeDetailsScreen(
                     downloadedEpisodeCount = state.downloadedEpisodeCount,
                     onWatchOffline = { viewModel.handleEvent(AnimeDetailsEvent.WatchOffline) },
                     enrichment = state.enrichment,
+                    isMangaMode = state.isMangaMode,
                     contentSources = state.contentSources,
                     isSearchingContent = state.isSearchingContent,
                     onContentSourceClick = { viewModel.handleEvent(AnimeDetailsEvent.OpenChapterList(it)) },
