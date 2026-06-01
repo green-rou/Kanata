@@ -15,4 +15,5 @@ data class DownloadItem(
     val createdAt: Long,
     val fileSizeBytes: Long,
     val errorMessage: String?,
+    val isManga: Boolean = false,
 )

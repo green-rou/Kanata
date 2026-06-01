@@ -10,6 +10,7 @@ sealed interface AnimeDetailsEvent {
     data object ToggleFavorite : AnimeDetailsEvent
     data class OpenEpisodeList(val source: VideoSource) : AnimeDetailsEvent
     data class OpenChapterList(val source: ContentSource) : AnimeDetailsEvent
+    data object RetrySourceSearch : AnimeDetailsEvent
     data object WatchOffline : AnimeDetailsEvent
     data object DismissOfflinePicker : AnimeDetailsEvent
     data class SelectOfflineEpisode(val index: Int) : AnimeDetailsEvent

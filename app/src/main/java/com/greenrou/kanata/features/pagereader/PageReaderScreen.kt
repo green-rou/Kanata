@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.NavigateBefore
 import androidx.compose.material.icons.automirrored.filled.NavigateNext
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,7 +33,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -50,6 +54,9 @@ import com.greenrou.kanata.features.pagereader.model.PageReaderEvent
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
+private const val USER_AGENT =
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PageReaderScreen(
@@ -58,6 +65,7 @@ fun PageReaderScreen(
     startIndex: Int,
     onNavigateBack: () -> Unit,
     viewModel: PageReaderViewModel = koinViewModel(
+        key = "reader_${startIndex}_${chapterUrls.firstOrNull()}",
         parameters = { parametersOf(chapterUrls, chapterTitles, startIndex) },
     ),
 ) {
@@ -78,7 +86,7 @@ fun PageReaderScreen(
         listState.scrollToItem(0)
     }
 
-    val currentPage = (listState.firstVisibleItemIndex + 1).coerceAtMost(state.pages.size.coerceAtLeast(1))
+    val currentPage by remember { derivedStateOf { (listState.firstVisibleItemIndex + 1).coerceAtMost(state.pages.size.coerceAtLeast(1)) } }
 
     Box(
         modifier = Modifier
@@ -86,15 +94,35 @@ fun PageReaderScreen(
             .background(Color.Black),
     ) {
         when {
-            state.isLoading -> KanataLoader(
+            state.isLoading -> Column(
                 modifier = Modifier.align(Alignment.Center),
-                color = Color.White,
-            )
-            state.error != null -> Text(
-                text = stringResource(R.string.detail_error, state.error ?: ""),
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.align(Alignment.Center).padding(horizontal = 24.dp),
-            )
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                KanataLoader(color = Color.White)
+                if (state.retryAttempt > 0) {
+                    Text(
+                        text = stringResource(R.string.reader_retrying, state.retryAttempt),
+                        color = Color.White,
+                        style = MaterialTheme.typography.labelMedium,
+                    )
+                }
+            }
+            state.error != null -> Column(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(horizontal = 24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Text(
+                    text = stringResource(R.string.detail_error, state.error ?: ""),
+                    color = MaterialTheme.colorScheme.error,
+                )
+                Button(onClick = { viewModel.handleEvent(PageReaderEvent.RetryClicked) }) {
+                    Text(stringResource(R.string.action_retry))
+                }
+            }
             state.pages.isEmpty() -> Text(
                 text = stringResource(R.string.reader_error_empty),
                 color = Color.White,
@@ -112,12 +140,18 @@ fun PageReaderScreen(
                     AsyncImage(
                         model = ImageRequest.Builder(context)
                             .data(page.url)
-                            .apply { page.headers.forEach { (k, v) -> addHeader(k, v) } }
+                            .apply {
+                                if (!page.headers.containsKey("User-Agent")) {
+                                    addHeader("User-Agent", USER_AGENT)
+                                }
+                                page.headers.forEach { (k, v) -> addHeader(k, v) }
+                            }
                             .crossfade(true)
                             .build(),
                         contentDescription = null,
                         contentScale = ContentScale.FillWidth,
                         modifier = Modifier.fillMaxWidth(),
+                        onError = { android.util.Log.w("PageReader", "Failed to load: ${page.url} — ${it.result.throwable.message}") },
                     )
                 }
             }

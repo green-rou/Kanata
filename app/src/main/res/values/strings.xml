@@ -52,6 +52,7 @@
     <string name="detail_source_ann">Source: Anime News Network</string>
     <string name="detail_cd_copy">Copy</string>
     <string name="detail_cd_copied">Copied</string>
+    <string name="detail_cd_retry_search">Retry source search</string>
     <plurals name="detail_downloaded_episodes">
         <item quantity="one">%d episode downloaded</item>
         <item quantity="other">%d episodes downloaded</item>
@@ -74,13 +75,17 @@
     <string name="chapter_list_count">%d chapters</string>
     <string name="chapter_empty_title">No chapters found</string>
     <string name="chapter_empty_subtitle">This source has no chapters available</string>
+    <string name="chapter_error_title">Failed to load chapters</string>
     <string name="chapter_cd_read">Read chapter %d</string>
+    <string name="chapter_cd_download">Download chapter %d</string>
+    <string name="download_card_cd_read">Read</string>
 
     <!-- Page reader -->
     <string name="reader_page_of">%1$d / %2$d</string>
     <string name="reader_cd_prev">Previous chapter</string>
     <string name="reader_cd_next">Next chapter</string>
     <string name="reader_error_empty">No pages found for this chapter</string>
+    <string name="reader_retrying">Retrying… %d / 3</string>
 
     <!-- Favorites -->
     <string name="favorites_empty_title">No favorites yet</string>

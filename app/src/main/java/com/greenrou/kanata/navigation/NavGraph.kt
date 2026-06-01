@@ -30,20 +30,22 @@ fun NavGraph(backStack: SnapshotStateList<Any>) {
 
     val gridState = rememberLazyGridState()
 
-    @Suppress("UNUSED_VALUE")
     var selectedTabName by rememberSaveable { mutableStateOf(BottomNavItem.AnimeList.name) }
 
     when (val current = backStack.last()) {
         is MainRoute -> MainScreen(
             gridState = gridState,
             selectedTabName = selectedTabName,
-            onTabSelected = { selectedTabName = it },
+            onTabSelected = @Suppress("UNUSED_VALUE") { selectedTabName = it },
             onNavigateToDetails = { id -> backStack.add(AnimeDetailsRoute(id)) },
             onNavigateToPlayer = { path, title ->
                 backStack.add(PlayerRoute(listOf(path), listOf(title), 0))
             },
             onOpenEpisodeList = { animePageUrl, sourceName, animeTitle ->
                 backStack.add(EpisodeListRoute(animePageUrl, sourceName, animeTitle))
+            },
+            onOpenChapterList = { pageUrl, sourceName, animeTitle ->
+                backStack.add(ChapterListRoute(pageUrl, sourceName, animeTitle))
             },
             onNavigateToAnimeDetails = { animeId ->
                 backStack.add(AnimeDetailsRoute(animeId))
@@ -52,6 +54,9 @@ fun NavGraph(backStack: SnapshotStateList<Any>) {
             onNavigateToWebPlayer = { url -> backStack.add(WebPlayerRoute(url)) },
             onNavigateToMods = { backStack.add(ModsRoute) },
             onNavigateToOnlineSearch = { query -> backStack.add(OnlineSearchRoute(query)) },
+            onReadMangaChapter = { folderPath, title ->
+                backStack.add(PageReaderRoute(listOf("file://$folderPath"), listOf(title), 0))
+            },
         )
         is AnimeDetailsRoute -> AnimeDetailsScreen(
             animeId = current.animeId,

@@ -26,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.PlayCircle
+import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -79,7 +80,9 @@ internal fun AnimeDetailContent(
     onWatchOffline: () -> Unit = {},
     enrichment: AnimeEnrichment? = null,
     contentSources: List<ContentSource> = emptyList(),
+    isSearchingContent: Boolean = false,
     onContentSourceClick: (ContentSource) -> Unit = {},
+    onRetrySearch: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -215,7 +218,7 @@ internal fun AnimeDetailContent(
                 }
             }
 
-            if (downloadedEpisodeCount > 0) {
+            if (hasStreamSources && downloadedEpisodeCount > 0) {
                 Spacer(Modifier.height(12.dp))
                 Card(
                     colors = CardDefaults.cardColors(
@@ -282,31 +285,55 @@ internal fun AnimeDetailContent(
                     }
                 }
                 Spacer(Modifier.height(16.dp))
-                Text(
-                    text = stringResource(R.string.detail_available_streams),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(
+                        text = stringResource(R.string.detail_available_streams),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.weight(1f),
+                    )
+                    IconButton(
+                        onClick = onRetrySearch,
+                        enabled = !isSearching,
+                        modifier = Modifier.size(32.dp),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Refresh,
+                            contentDescription = stringResource(R.string.detail_cd_retry_search),
+                            modifier = Modifier.size(18.dp),
+                            tint = if (isSearching) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                   else MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
                 Spacer(Modifier.height(8.dp))
-                when {
-                    isSearching -> LinearProgressIndicator(
+                if (isSearching) {
+                    LinearProgressIndicator(
                         modifier = Modifier.fillMaxWidth(),
                         strokeCap = StrokeCap.Round,
                         color = MaterialTheme.colorScheme.primary,
                         trackColor = MaterialTheme.colorScheme.surfaceVariant,
                     )
-                    videoSources.isEmpty() -> Text(
+                    if (videoSources.isNotEmpty()) Spacer(Modifier.height(8.dp))
+                }
+                when {
+                    videoSources.isEmpty() && !isSearching -> Text(
                         text = stringResource(R.string.detail_no_streams),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                    else -> Column {
-                        Text(
-                            text = stringResource(R.string.detail_tap_source),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        Spacer(Modifier.height(8.dp))
+                    videoSources.isNotEmpty() -> Column {
+                        if (!isSearching) {
+                            Text(
+                                text = stringResource(R.string.detail_tap_source),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Spacer(Modifier.height(8.dp))
+                        }
                         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             videoSources.forEach { source ->
                                 VideoSourceChip(
@@ -318,7 +345,7 @@ internal fun AnimeDetailContent(
                     }
                 }
                 AnimatedVisibility(
-                    visible = showHint,
+                    visible = showHint && videoSources.isEmpty(),
                     enter = fadeIn() + expandVertically(),
                     exit = fadeOut() + shrinkVertically(),
                 ) {
@@ -331,26 +358,65 @@ internal fun AnimeDetailContent(
                 }
             }
 
-            if (contentSources.isNotEmpty()) {
+            if (!hasStreamSources) {
                 Spacer(Modifier.height(16.dp))
-                Text(
-                    text = stringResource(R.string.detail_chapter_sources),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                )
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    text = stringResource(R.string.detail_tap_chapter_source),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Spacer(Modifier.height(8.dp))
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    contentSources.forEach { source ->
-                        ContentSourceChip(
-                            source = source,
-                            onClick = { onContentSourceClick(source) },
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(
+                        text = stringResource(R.string.detail_chapter_sources),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.weight(1f),
+                    )
+                    IconButton(
+                        onClick = onRetrySearch,
+                        enabled = !isSearchingContent,
+                        modifier = Modifier.size(32.dp),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Refresh,
+                            contentDescription = stringResource(R.string.detail_cd_retry_search),
+                            modifier = Modifier.size(18.dp),
+                            tint = if (isSearchingContent) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                   else MaterialTheme.colorScheme.onSurfaceVariant,
                         )
+                    }
+                }
+                Spacer(Modifier.height(8.dp))
+                if (isSearchingContent) {
+                    LinearProgressIndicator(
+                        modifier = Modifier.fillMaxWidth(),
+                        strokeCap = StrokeCap.Round,
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    )
+                    if (contentSources.isNotEmpty()) Spacer(Modifier.height(8.dp))
+                }
+                when {
+                    contentSources.isEmpty() && !isSearchingContent -> Text(
+                        text = stringResource(R.string.detail_no_streams),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    contentSources.isNotEmpty() -> {
+                        if (!isSearchingContent) {
+                            Text(
+                                text = stringResource(R.string.detail_tap_chapter_source),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Spacer(Modifier.height(8.dp))
+                        }
+                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            contentSources.forEach { source ->
+                                ContentSourceChip(
+                                    source = source,
+                                    onClick = { onContentSourceClick(source) },
+                                )
+                            }
+                        }
                     }
                 }
             }

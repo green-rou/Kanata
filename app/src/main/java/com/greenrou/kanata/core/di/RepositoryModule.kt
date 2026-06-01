@@ -60,7 +60,7 @@ val repositoryModule = module {
     single<EpisodeListRepository> { EpisodeListRepositoryImpl(get()) }
     single<ChapterListRepository> { ChapterListRepositoryImpl(get()) }
     single<ContentPagesRepository> { ContentPagesRepositoryImpl(get()) }
-    single<ContentSearchRepository> { ContentSearchRepositoryImpl(get()) }
+    single<ContentSearchRepository> { ContentSearchRepositoryImpl(get(), get()) }
     single<DownloadRepository> { DownloadRepositoryImpl(get(), get(), get()) }
     single<UpdateRepository> { UpdateRepositoryImpl(get()) }
 }

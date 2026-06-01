@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
-import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.ComponentActivity
@@ -21,6 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.platform.LocalView
 import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -44,7 +44,7 @@ class MainActivity : ComponentActivity() {
         val lang = LanguagePrefs.get(base)
         val ctx = if (lang == LanguagePrefs.SYSTEM) base else {
             val config = Configuration(base.resources.configuration)
-            config.setLocale(Locale(lang))
+            config.setLocale(Locale.forLanguageTag(lang))
             base.createConfigurationContext(config)
         }
         super.attachBaseContext(ctx)
@@ -70,7 +70,7 @@ class MainActivity : ComponentActivity() {
             var analyticsConsentVisible by remember { mutableStateOf(false) }
 
             LaunchedEffect(Unit) {
-                updateViewModel.handleEvent(UpdateEvent.CheckUpdate)
+                updateViewModel.handleEvent(UpdateEvent.CheckUpdateSilent)
 
                 snapshotFlow {
                     !state.analyticsConsentShown &&
@@ -103,7 +103,7 @@ class MainActivity : ComponentActivity() {
             LaunchedEffect(Unit) {
                 updateViewModel.needInstallPermission.collect {
                     val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
-                        data = Uri.parse("package:$packageName")
+                        data = "package:$packageName".toUri()
                     }
                     startActivity(intent)
                 }

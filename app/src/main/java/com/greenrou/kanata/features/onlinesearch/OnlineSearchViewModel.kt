@@ -48,9 +48,11 @@ class OnlineSearchViewModel(
     fun handleEvent(event: OnlineSearchScreenEvent) {
         when (event) {
             is OnlineSearchScreenEvent.QueryChanged -> {
-                _state.update { it.copy(currentQuery = event.query) }
+                _state.update { it.copy(currentQuery = event.query, hiddenGroups = emptySet()) }
                 queryFlow.value = event.query
             }
+            is OnlineSearchScreenEvent.HideGroup ->
+                _state.update { it.copy(hiddenGroups = it.hiddenGroups + event.sourceLabel) }
             is OnlineSearchScreenEvent.ResultClicked -> viewModelScope.launch {
                 if (settingsManager.isMangaMode.first()) {
                     _events.send(OnlineSearchScreenEvent.NavigateToChapterList(

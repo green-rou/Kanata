@@ -1,5 +1,6 @@
 package com.greenrou.kanata.data.repository
 
+import android.util.Log
 import com.greenrou.kanata.data.mod.ChapterParserRegistry
 import com.greenrou.kanata.data.mod.ParserRegistry
 import com.greenrou.kanata.domain.model.OnlineSearchGroup
@@ -14,7 +15,7 @@ import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
+import java.util.concurrent.ConcurrentHashMap
 
 class SearchRepositoryImpl(
     private val parserRegistry: ParserRegistry,
@@ -22,23 +23,52 @@ class SearchRepositoryImpl(
     private val chapterParserRegistry: ChapterParserRegistry,
 ) : SearchRepository {
 
-    override suspend fun searchAll(titles: List<String>): List<VideoSource> = withContext(Dispatchers.IO) {
+    private val deadHosts: MutableSet<String> = ConcurrentHashMap.newKeySet()
+
+    private companion object {
+        const val TAG = "SearchRepo"
+    }
+
+    override fun searchAll(titles: List<String>): Flow<VideoSource> = channelFlow {
         val showAdult = settingsManager.showAdultContent.first()
         val disabled = settingsManager.disabledSources.first()
-        val sources = mutableListOf<VideoSource>()
         parserRegistry.parsers.value
-            .filter { parser -> !parser.isAdultOnly || showAdult }
-            .filter { parser -> parser.label !in disabled }
-            .forEach { parser ->
-                for (title in titles) {
-                    val result = parser.search(title)
-                    if (result.isSuccess) {
-                        result.onSuccess { url -> sources.add(VideoSource(parser.label, url, parser.sourceType)) }
-                        break
+            .filter { !it.isAdultOnly || showAdult }
+            .filter { it.label !in disabled }
+            .map { parser ->
+                async(Dispatchers.IO) {
+                    if (deadHosts.any { parser.supports(it) }) {
+                        Log.d(TAG, "[${parser.label}] ⤳ skipped (dead host)")
+                        return@async
                     }
+                    var found = false
+                    var hitDeadHost = false
+                    for (title in titles) {
+                        var deadThisRound = false
+                        parser.search(title).fold(
+                            onSuccess = { url ->
+                                Log.d(TAG, "[${parser.label}] ✓ '$title' → $url")
+                                send(VideoSource(parser.label, url, parser.sourceType))
+                                found = true
+                            },
+                            onFailure = { e ->
+                                val msg = e.message ?: ""
+                                if (e is java.net.UnknownHostException || "Unable to resolve host" in msg) {
+                                    val host = msg.substringAfter('"').substringBefore('"').takeIf { it.isNotBlank() }
+                                    host?.let { deadHosts.add(it) }
+                                    Log.w(TAG, "[${parser.label}] ✗ dead host: ${host ?: msg}")
+                                    deadThisRound = true
+                                    hitDeadHost = true
+                                } else {
+                                    Log.w(TAG, "[${parser.label}] ✗ '$title': $msg")
+                                }
+                            },
+                        )
+                        if (found || deadThisRound) break
+                    }
+                    if (!found && !hitDeadHost) Log.w(TAG, "[${parser.label}] no result for any title")
                 }
-            }
-        sources
+            }.forEach { it.await() }
     }
 
     override fun searchOnline(query: String, isMangaMode: Boolean): Flow<List<OnlineSearchGroup>> = channelFlow {

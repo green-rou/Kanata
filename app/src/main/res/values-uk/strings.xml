@@ -50,6 +50,7 @@
     <string name="detail_source_ann">Джерело: Anime News Network</string>
     <string name="detail_cd_copy">Копіювати</string>
     <string name="detail_cd_copied">Скопійовано</string>
+    <string name="detail_cd_retry_search">Повторити пошук джерел</string>
     <string name="detail_chapter_sources">Джерела глав</string>
     <string name="detail_tap_chapter_source">Натисніть на джерело для перегляду глав</string>
     <plurals name="detail_downloaded_episodes">
@@ -76,13 +77,16 @@
     <string name="chapter_list_count">%d глав</string>
     <string name="chapter_empty_title">Глав не знайдено</string>
     <string name="chapter_empty_subtitle">Це джерело не має доступних глав</string>
+    <string name="chapter_error_title">Не вдалось завантажити глави</string>
     <string name="chapter_cd_read">Читати главу %d</string>
+    <string name="chapter_cd_download">Завантажити главу %d</string>
 
     <!-- Page reader -->
     <string name="reader_page_of">%1$d / %2$d</string>
     <string name="reader_cd_prev">Попередня глава</string>
     <string name="reader_cd_next">Наступна глава</string>
     <string name="reader_error_empty">Сторінок для цієї глави не знайдено</string>
+    <string name="reader_retrying">Повтор… %d / 3</string>
 
     <!-- Favorites -->
     <string name="favorites_empty_title">Немає вподобань</string>
@@ -108,6 +112,7 @@
     <string name="download_card_retry">Повторити</string>
     <string name="download_card_remove">Видалити</string>
     <string name="download_card_cd_play">Відтворити</string>
+    <string name="download_card_cd_read">Читати</string>
     <string name="download_card_cd_delete">Видалити</string>
 
     <!-- Notifications -->

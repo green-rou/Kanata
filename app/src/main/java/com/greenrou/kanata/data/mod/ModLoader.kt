@@ -6,6 +6,7 @@ import android.content.res.Resources
 import com.greenrou.kanata.domain.parser.ChapterParser
 import com.greenrou.kanata.domain.parser.InfoProvider
 import com.greenrou.kanata.domain.parser.SiteParser
+import com.greenrou.kanata.modapi.ModBundle
 import com.greenrou.kanata.modapi.ModChapterParser
 import com.greenrou.kanata.modapi.ModContentProvider
 import com.greenrou.kanata.modapi.ModDownloadFeature
@@ -20,11 +21,14 @@ class ModLoader(private val context: Context) {
         get() = File(context.filesDir, "mods").also { it.mkdirs() }
 
     fun loadAll(enabledFileNames: Set<String>): List<SiteParser> =
-        enabledApks(enabledFileNames).mapNotNull { apk ->
+        enabledApks(enabledFileNames).flatMap { apk ->
             runCatching {
-                val instance = instantiate(apk)
-                if (instance is ModSiteParser) ModSiteParserAdapter(instance) else null
-            }.getOrNull()
+                when (val instance = instantiate(apk)) {
+                    is ModBundle -> instance.siteParsers.map { ModSiteParserAdapter(it) }
+                    is ModSiteParser -> listOf(ModSiteParserAdapter(instance))
+                    else -> emptyList()
+                }
+            }.getOrDefault(emptyList())
         }
 
     fun loadInfoProviders(enabledFileNames: Set<String>): List<InfoProvider> =
@@ -44,11 +48,14 @@ class ModLoader(private val context: Context) {
         }
 
     fun loadChapterParsers(enabledFileNames: Set<String>): List<ChapterParser> =
-        enabledApks(enabledFileNames).mapNotNull { apk ->
+        enabledApks(enabledFileNames).flatMap { apk ->
             runCatching {
-                val instance = instantiate(apk)
-                if (instance is ModChapterParser) ChapterParserAdapter(instance) else null
-            }.getOrNull()
+                when (val instance = instantiate(apk)) {
+                    is ModBundle -> instance.chapterParsers.map { ChapterParserAdapter(it) }
+                    is ModChapterParser -> listOf(ChapterParserAdapter(instance))
+                    else -> emptyList()
+                }
+            }.getOrDefault(emptyList())
         }
 
     fun loadDownloadFeatures(enabledFileNames: Set<String>): List<ModDownloadFeature> =
@@ -77,7 +84,7 @@ class ModLoader(private val context: Context) {
                 context.resources.configuration,
             )
             ModResources(resources, packageInfo.packageName)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }

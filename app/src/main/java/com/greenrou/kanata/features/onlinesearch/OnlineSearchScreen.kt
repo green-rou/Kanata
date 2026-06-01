@@ -55,6 +55,7 @@ import com.greenrou.kanata.R
 import com.greenrou.kanata.domain.model.OnlineSearchGroup
 import com.greenrou.kanata.domain.model.OnlineSearchResult
 import com.greenrou.kanata.features.onlinesearch.model.OnlineSearchScreenEvent
+import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -70,6 +71,8 @@ fun OnlineSearchScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val keyboardController = LocalSoftwareKeyboardController.current
+
+    val visibleGroups = state.groups.filter { it.sourceLabel !in state.hiddenGroups }
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
@@ -124,12 +127,20 @@ fun OnlineSearchScreen(
             ),
             modifier = Modifier.fillMaxSize(),
         ) {
-            state.groups.forEach { group ->
+            visibleGroups.forEach { group ->
                 item(key = group.sourceLabel + "_header") {
+                    LaunchedEffect(group.isLoading) {
+                        if (!group.isLoading && (group.error || group.results.isEmpty())) {
+                            delay(350)
+                            viewModel.handleEvent(OnlineSearchScreenEvent.HideGroup(group.sourceLabel))
+                        }
+                    }
                     Text(
                         text = group.sourceLabel,
                         style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        modifier = Modifier
+                            .animateItem()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
                     )
                 }
                 item(key = group.sourceLabel + "_content") {
@@ -138,10 +149,11 @@ fun OnlineSearchScreen(
                         onResultClick = { result ->
                             viewModel.handleEvent(OnlineSearchScreenEvent.ResultClicked(result))
                         },
+                        modifier = Modifier.animateItem(),
                     )
                 }
                 item(key = group.sourceLabel + "_spacer") {
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.animateItem().height(8.dp))
                 }
             }
         }
@@ -152,11 +164,13 @@ fun OnlineSearchScreen(
 private fun GroupContent(
     group: OnlineSearchGroup,
     onResultClick: (OnlineSearchResult) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     AnimatedContent(
         targetState = group,
         label = "group_${group.sourceLabel}",
         transitionSpec = { fadeIn().togetherWith(fadeOut()) },
+        modifier = modifier,
     ) { g ->
         when {
             g.isLoading -> {
