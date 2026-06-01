@@ -109,6 +109,10 @@
 -dontwarn com.google.firebase.**
 -keep class com.google.firebase.** { *; }
 
+# ── Mod API (must keep original names — extensions reference by name at runtime) ─
+-keep interface com.greenrou.kanata.modapi.** { *; }
+-keep class com.greenrou.kanata.modapi.** { *; }
+
 # ── App domain / data models ──────────────────────────────────────────────────
 -keep class com.greenrou.kanata.domain.model.** { *; }
 -keep class com.greenrou.kanata.data.local.** { *; }
