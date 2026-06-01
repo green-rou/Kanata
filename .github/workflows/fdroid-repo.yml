@@ -24,7 +24,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install fdroidserver
-        run: pip install fdroidserver
+        run: pip install fdroidserver "androguard==3.3.5"
 
       - name: Download latest release APK
         run: |
