@@ -3,7 +3,6 @@ package com.greenrou.kanata.data.mod
 import android.content.Context
 import android.content.res.AssetManager
 import android.content.res.Resources
-import android.system.Os
 import android.util.Log
 import com.greenrou.kanata.domain.parser.ChapterParser
 import com.greenrou.kanata.domain.parser.InfoProvider
@@ -14,8 +13,10 @@ import com.greenrou.kanata.modapi.ModContentProvider
 import com.greenrou.kanata.modapi.ModDownloadFeature
 import com.greenrou.kanata.modapi.ModInfoProvider
 import com.greenrou.kanata.modapi.ModSiteParser
-import dalvik.system.DexClassLoader
+import dalvik.system.InMemoryDexClassLoader
 import java.io.File
+import java.nio.ByteBuffer
+import java.util.zip.ZipFile
 
 class ModLoader(private val context: Context) {
 
@@ -140,27 +141,29 @@ class ModLoader(private val context: Context) {
         val className = apk.nameWithoutExtension.substringAfter("__")
             .ifEmpty { error("APK '${apk.name}' missing class name (expected format: id__com.example.ClassName.apk)") }
         Log.d(TAG, "instantiate: ${apk.name} → class=$className")
-        try {
-            Os.chmod(apk.absolutePath, 0b100_100_100)
-        } catch (_: Exception) {
-            apk.setReadOnly()
-        }
-        val loader = ModClassLoader(
-            apk.absolutePath,
-            context.codeCacheDir.absolutePath,
-            context.classLoader,
-        )
+        val loader = buildClassLoader(apk)
         return loader.loadClass(className).getDeclaredConstructor().newInstance()
     }
 
-    private class ModClassLoader(
-        apkPath: String,
-        optimizedDirectory: String?,
-        parent: ClassLoader,
-    ) : DexClassLoader(apkPath, optimizedDirectory, null, parent) {
+    private fun buildClassLoader(apk: File): ClassLoader {
+        val buffers = mutableListOf<ByteBuffer>()
+        ZipFile(apk).use { zip ->
+            var i = 1
+            while (true) {
+                val entry = zip.getEntry(if (i == 1) "classes.dex" else "classes${i}.dex") ?: break
+                buffers.add(ByteBuffer.wrap(zip.getInputStream(entry).readBytes()))
+                i++
+            }
+        }
+        check(buffers.isNotEmpty()) { "No classes.dex in ${apk.name}" }
+        Log.d(TAG, "buildClassLoader: ${apk.name} → ${buffers.size} dex buffer(s)")
+        return InMemoryDexClassLoader(buffers.toTypedArray(), ModApiClassLoader(context.classLoader))
+    }
+
+    private inner class ModApiClassLoader(parent: ClassLoader) : ClassLoader(parent) {
         override fun loadClass(name: String, resolve: Boolean): Class<*> {
             if (name.startsWith("com.greenrou.kanata.modapi")) {
-                return parent.loadClass(name)
+                return parent!!.loadClass(name)
             }
             return super.loadClass(name, resolve)
         }
