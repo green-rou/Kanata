@@ -172,6 +172,30 @@
       max-width: 520px; margin-bottom: 56px;
     }
 
+    /* ── INSTALL ── */
+    .install { background: var(--bg2); }
+    .install-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px; max-width: 700px; margin: 0 auto;
+    }
+    .install-card {
+      padding: 28px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    .install-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+    .install-card p { font-size: 0.875rem; color: var(--muted); margin-bottom: 16px; line-height: 1.5; }
+    .install-url {
+      font-family: monospace; font-size: 0.8rem;
+      background: var(--bg); color: var(--accent3);
+      padding: 8px 12px; border-radius: 8px;
+      border: 1px solid var(--border);
+      word-break: break-all; display: block; margin-bottom: 14px;
+      user-select: all;
+    }
+
     /* ── FEATURES ── */
     .features { background: var(--bg); }
     .features-header { text-align: center; }
@@ -388,7 +412,7 @@
     "operatingSystem": "Android 9+",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
     "url": "https://green-rou.github.io/Kanata/",
-    "downloadUrl": "https://github.com/green-rou/Kanata/releases",
+    "downloadUrl": "https://github.com/green-rou/Kanata/releases/latest/download/Kanata.apk",
     "softwareVersion": "latest",
     "license": "https://github.com/green-rou/Kanata/blob/master/LICENSE",
     "codeRepository": "https://github.com/green-rou/Kanata",
@@ -406,6 +430,7 @@
     <span>Kanata</span>
   </a>
   <div class="nav-links">
+    <a href="#install">Install</a>
     <a href="#features">Features</a>
     <a href="#screenshots">Screenshots</a>
     <a href="https://github.com/green-rou/Kanata" target="_blank" rel="noopener" class="primary">
@@ -424,7 +449,7 @@
   <h1>Kanata</h1>
   <p>An extension-based anime browser for Android. Browse new releases, save favourites, and expand the app with community-built extensions.</p>
   <div class="hero-cta">
-    <a class="btn btn-primary" href="https://github.com/green-rou/Kanata/releases" target="_blank" rel="noopener">
+    <a class="btn btn-primary" href="https://github.com/green-rou/Kanata/releases/latest/download/Kanata.apk">
       ↓ Download APK
     </a>
     <a class="btn btn-secondary" href="https://github.com/green-rou/Kanata" target="_blank" rel="noopener">
@@ -442,6 +467,18 @@
     <span class="tag">Material 3</span>
     <span class="tag">Free &amp; Open Source</span>
     <span class="tag">MIT License</span>
+  </div>
+</section>
+
+<!-- INSTALL -->
+<section class="install" id="install">
+  <div style="text-align:center;">
+    <div class="section-label">Install</div>
+    <h2 class="section-title">Get the app</h2>
+    <p class="section-sub" style="margin: 0 auto 32px;">Android 9.0 (API 28) or higher required.</p>
+    <a class="btn btn-primary" href="https://github.com/green-rou/Kanata/releases/latest/download/Kanata.apk" style="font-size:1rem; padding: 14px 32px;">
+      ↓ Download APK
+    </a>
   </div>
 </section>
 

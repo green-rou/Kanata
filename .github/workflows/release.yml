@@ -76,12 +76,16 @@ jobs:
           VERSION_NAME: ${{ github.ref_name }}
 
       - name: Rename APK
-        run: mv app/build/outputs/apk/release/app-release.apk Kanata-${{ github.ref_name }}.apk
+        run: |
+          cp app/build/outputs/apk/release/app-release.apk Kanata-${{ github.ref_name }}.apk
+          cp app/build/outputs/apk/release/app-release.apk Kanata.apk
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: Kanata-${{ github.ref_name }}.apk
+          files: |
+            Kanata-${{ github.ref_name }}.apk
+            Kanata.apk
           generate_release_notes: true
 
       - name: Delete secrets
