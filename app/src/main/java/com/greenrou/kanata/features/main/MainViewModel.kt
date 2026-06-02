@@ -114,6 +114,11 @@ class MainViewModel(
                 }
             }
             .launchIn(viewModelScope)
+        mangaModRegistry.activeProvider
+            .onEach { provider ->
+                if (provider != null && _state.value.isMangaMode) loadAnime()
+            }
+            .launchIn(viewModelScope)
     }
 
     private fun observeSettings() {
@@ -164,7 +169,7 @@ class MainViewModel(
             .onEach { isManga ->
                 val changed = _state.value.isMangaMode != isManga
                 _state.update { it.copy(isMangaMode = isManga, animeList = if (changed) emptyList() else it.animeList, selectedFormats = if (changed) emptySet() else it.selectedFormats) }
-                if (changed) loadAnime()
+                if (changed && (!isManga || mangaModRegistry.activeProvider.value != null)) loadAnime()
             }
             .launchIn(viewModelScope)
     }

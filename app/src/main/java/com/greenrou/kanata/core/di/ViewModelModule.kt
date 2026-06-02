@@ -27,7 +27,7 @@ import org.koin.dsl.module
 
 val viewModelModule = module {
     viewModel { MainViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get<ParserRegistry>(), get<InfoProviderRegistry>(), get<DownloadFeatureRegistry>(), get<MangaModRegistry>(), get<ChapterParserRegistry>()) }
-    viewModel { AnimeDetailsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get<ParserRegistry>(), get<MangaModRegistry>(), get()) }
+    viewModel { AnimeDetailsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get<ParserRegistry>(), get<ChapterParserRegistry>(), get<MangaModRegistry>(), get()) }
     viewModel { FavoritesViewModel(get(), get(), get(), get()) }
     viewModel { MoodViewModel(get(), get(), get(), get<MangaModRegistry>()) }
     viewModel { RandomImageViewModel(get(), get(), get(), get(), get(), get(), get<MangaModRegistry>()) }

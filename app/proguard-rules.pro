@@ -117,6 +117,7 @@
 -keep class kotlin.coroutines.** { *; }
 -keepnames class kotlin.coroutines.**
 -keep class kotlin.Result { *; }
+-keep class kotlin.Result$Companion { *; }
 -keep class kotlin.Result$Failure { *; }
 
 # ── App domain / data models ──────────────────────────────────────────────────

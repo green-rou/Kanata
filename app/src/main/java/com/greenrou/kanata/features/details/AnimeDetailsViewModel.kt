@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.greenrou.kanata.core.analytics.AnalyticsManager
 import com.greenrou.kanata.core.network.NetworkMonitor
+import com.greenrou.kanata.data.mod.ChapterParserRegistry
 import com.greenrou.kanata.data.mod.MangaModRegistry
 import com.greenrou.kanata.data.mod.ParserRegistry
 import com.greenrou.kanata.domain.model.Anime
@@ -49,6 +50,7 @@ class AnimeDetailsViewModel(
     private val analytics: AnalyticsManager,
     private val getAnimeEnrichment: GetAnimeEnrichmentUseCase,
     parserRegistry: ParserRegistry,
+    chapterParserRegistry: ChapterParserRegistry,
     private val mangaModRegistry: MangaModRegistry,
     private val searchContentSources: SearchContentSourcesUseCase,
 ) : ViewModel() {
@@ -79,6 +81,7 @@ class AnimeDetailsViewModel(
             Pair(parsers.isNotEmpty() && !isManga, isManga)
         }
             .onEach { (hasStreams, isManga) ->
+                val prevHasStreams = _state.value.hasStreamSources
                 _state.update {
                     it.copy(
                         hasStreamSources = hasStreams,
@@ -87,6 +90,19 @@ class AnimeDetailsViewModel(
                         isSearching = if (!hasStreams) false else it.isSearching,
                     )
                 }
+                if (hasStreams && !prevHasStreams && !isManga) {
+                    val anime = _state.value.anime
+                    if (anime != null && _state.value.videoSources.isEmpty()) searchOnExternal(anime)
+                }
+            }
+            .launchIn(viewModelScope)
+        chapterParserRegistry.parsers
+            .onEach { parsers ->
+                if (parsers.isEmpty()) return@onEach
+                if (!_state.value.isMangaMode) return@onEach
+                val anime = _state.value.anime ?: return@onEach
+                if (_state.value.isSearchingContent || _state.value.contentSources.isNotEmpty()) return@onEach
+                searchContentSourcesForAnime(anime)
             }
             .launchIn(viewModelScope)
     }
