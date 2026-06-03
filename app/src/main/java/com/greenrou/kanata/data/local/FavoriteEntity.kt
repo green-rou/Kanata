@@ -3,6 +3,7 @@ package com.greenrou.kanata.data.local
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.greenrou.kanata.domain.model.Anime
+import java.util.Locale
 
 @Entity(tableName = "favorites")
 data class FavoriteEntity(
@@ -15,8 +16,11 @@ data class FavoriteEntity(
     val synopsis: String,
     val genres: List<String>,
     val episodes: Int,
+    val isManga: Boolean = false,
     val addedAt: Long = System.currentTimeMillis()
 )
+
+private val MANGA_TYPES = setOf("MANGA", "ONE_SHOT", "NOVEL")
 
 fun FavoriteEntity.toDomain(): Anime = Anime(
     id = id,
@@ -37,5 +41,6 @@ fun Anime.toEntity(): FavoriteEntity = FavoriteEntity(
     score = score,
     synopsis = synopsis,
     genres = genres,
-    episodes = episodes
+    episodes = episodes,
+    isManga = type.uppercase(Locale.ROOT) in MANGA_TYPES,
 )

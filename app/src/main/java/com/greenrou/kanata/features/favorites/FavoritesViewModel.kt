@@ -2,6 +2,7 @@ package com.greenrou.kanata.features.favorites
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.greenrou.kanata.domain.repository.SettingsManager
 import com.greenrou.kanata.domain.usecase.DeleteSavedPageUseCase
 import com.greenrou.kanata.domain.usecase.GetFavoritesUseCase
 import com.greenrou.kanata.domain.usecase.GetSavedPagesUseCase
@@ -12,8 +13,11 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
@@ -25,6 +29,7 @@ class FavoritesViewModel(
     private val removeFavorite: RemoveFavoriteUseCase,
     private val getSavedPages: GetSavedPagesUseCase,
     private val deleteSavedPage: DeleteSavedPageUseCase,
+    private val settingsManager: SettingsManager,
 ) : ViewModel() {
 
     private val _limit = MutableStateFlow(20)
@@ -39,6 +44,7 @@ class FavoritesViewModel(
     init {
         observeFavorites()
         observeSavedPages()
+        observeMangaMode()
     }
 
     fun handleEvent(event: FavoritesEvent) {
@@ -60,24 +66,32 @@ class FavoritesViewModel(
     }
 
     private fun observeFavorites() {
-        _limit.flatMapLatest { limit ->
-            getFavorites.observePaged(limit)
-        }
-        .onEach { result ->
-            result.onSuccess { list ->
-                _state.update {
-                    it.copy(
-                        isLoading = false,
-                        isLoadingMore = false,
-                        favorites = list,
-                        hasNextPage = list.size >= _limit.value,
-                    )
-                }
-            }.onFailure {
-                _state.update { it.copy(isLoading = false, isLoadingMore = false) }
+        combine(_limit, settingsManager.isMangaMode) { limit, isManga -> limit to isManga }
+            .flatMapLatest { (limit, isManga) ->
+                getFavorites.observePaged(limit, isManga).map { it to limit }
             }
-        }
-        .launchIn(viewModelScope)
+            .onEach { (result, limit) ->
+                result.onSuccess { list ->
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            isLoadingMore = false,
+                            favorites = list,
+                            hasNextPage = list.size >= limit,
+                        )
+                    }
+                }.onFailure {
+                    _state.update { it.copy(isLoading = false, isLoadingMore = false) }
+                }
+            }
+            .launchIn(viewModelScope)
+    }
+
+    private fun observeMangaMode() {
+        settingsManager.isMangaMode
+            .drop(1)
+            .onEach { _limit.value = pageSize }
+            .launchIn(viewModelScope)
     }
 
     private fun observeSavedPages() {

@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import com.greenrou.kanata.core.composable.KanataLoader
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -28,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.greenrou.kanata.R
+import com.greenrou.kanata.core.composable.KanataLoader
 import com.greenrou.kanata.features.main.content.AnimeGrid
 import com.greenrou.kanata.features.mood.model.Mood
 import com.greenrou.kanata.features.mood.model.MoodState
@@ -36,8 +36,10 @@ import com.greenrou.kanata.features.mood.model.MoodState
 internal fun MoodResultContent(
     mood: Mood,
     state: MoodState,
+    favoriteIds: List<Int>,
     onBack: () -> Unit,
     onAnimeClick: (Int) -> Unit,
+    onFavoriteClick: (Int) -> Unit,
     bottomPadding: Dp,
     topPadding: Dp = 0.dp,
 ) {
@@ -101,11 +103,11 @@ internal fun MoodResultContent(
 
                 else -> AnimeGrid(
                     animeList = state.animeList,
-                    favoriteIds = emptyList(),
+                    favoriteIds = favoriteIds,
                     gridState = rememberLazyGridState(),
                     isLoadingMore = false,
                     onAnimeClick = onAnimeClick,
-                    onFavoriteClick = {},
+                    onFavoriteClick = onFavoriteClick,
                     onLoadMore = {},
                     contentPadding = PaddingValues(bottom = bottomPadding),
                 )

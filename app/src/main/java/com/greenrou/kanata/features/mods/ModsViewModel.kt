@@ -150,8 +150,17 @@ class ModsViewModel(
         id.startsWith("feature-") -> ModCategory.FEATURE
         id.startsWith("info-") -> ModCategory.INFO
         isAdultOnly -> ModCategory.SOURCE_ADULT
-        id.contains("manga") -> ModCategory.SOURCE_MANGA
+        id.contains("manga") || id in MANGA_SOURCE_IDS -> ModCategory.SOURCE_MANGA
         else -> ModCategory.SOURCE_ANIME
+    }
+
+    companion object {
+        private val MANGA_SOURCE_IDS = setOf(
+            "source-frameworks",
+            "source-heancms",
+            "source-wpcomics",
+            "source-madara",
+        )
     }
 
     private fun handleInstall(mod: ModInfo) {

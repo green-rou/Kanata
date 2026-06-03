@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Kanata</string>
+
+    <!-- Common -->
+    <string name="action_retry">Паўтарыць</string>
+    <string name="action_back">Назад</string>
+    <string name="action_save">Захаваць</string>
+    <string name="error_something_wrong">Нешта пайшло не так</string>
+    <string name="error_service_title">Тэхнічныя непаладкі</string>
+    <string name="error_service_subtitle">Сэрвіс часова недаступны.\nПаспрабуйце пазней.</string>
+    <string name="error_offline_title">Няма злучэння з інтэрнэтам</string>
+    <string name="error_offline_subtitle">Праверце злучэнне і паспрабуйце зноў.\nКантэнт загрузіцца аўтаматычна.</string>
+    <string name="error_offline_banner">Няма злучэння з інтэрнэтам</string>
+
+    <!-- Bottom nav -->
+    <string name="tab_anime">Анімэ</string>
+    <string name="tab_favorites">Улюбёныя</string>
+    <string name="tab_discover">Адкрыць</string>
+    <string name="tab_downloads">Спампоўкі</string>
+    <string name="tab_settings">Настройкі</string>
+
+    <!-- Main screen -->
+    <string name="main_title">Kanata</string>
+    <string name="main_subtitle">Адкрывай анімэ</string>
+    <string name="main_search_anime_hint">Пошук…</string>
+    <string name="main_search_downloads_hint">Пошук спамповак…</string>
+    <string name="main_cd_close_search">Закрыць пошук</string>
+    <string name="main_cd_search">Пошук</string>
+    <string name="main_cd_filter">Фільтр</string>
+    <string name="main_cd_search_downloads">Пошук спамповак</string>
+    <string name="main_no_anime_found">Анімэ не знойдзена</string>
+    <string name="main_search_in_mods">Шукаць у рэсурсах модаў</string>
+
+    <!-- Anime details -->
+    <string name="detail_title_fallback">Дэталі анімэ</string>
+    <string name="detail_error">Памылка: %s</string>
+    <string name="detail_episodes_count">%d серый</string>
+    <string name="detail_chapters_count">%d раздзелаў</string>
+    <string name="detail_volumes_count">%d тамоў</string>
+    <string name="detail_watch_offline">Глядзець афлайн</string>
+    <string name="detail_offline_picker_title">Спампаваныя серыі</string>
+    <string name="detail_available_streams">Крыніцы анімэ</string>
+    <string name="detail_no_streams">Крыніц не знойдзена</string>
+    <string name="detail_chapter_sources">Крыніцы раздзелаў</string>
+    <string name="detail_tap_chapter_source">Націсніце на крыніцу для прагляду раздзелаў</string>
+    <string name="detail_slow_search_hint">Каб паскорыць загрузку, можна адключыць некаторыя крыніцы ў настройках</string>
+    <string name="detail_tap_source">Націсніце на крыніцу для прагляду серый</string>
+    <string name="detail_synopsis">Апісанне</string>
+    <string name="detail_synopsis_via">праз %s</string>
+    <string name="detail_studios">Студыі</string>
+    <string name="detail_source_ann">Крыніца: Anime News Network</string>
+    <string name="detail_cd_copy">Капіяваць</string>
+    <string name="detail_cd_copied">Скапіявана</string>
+    <string name="detail_cd_retry_search">Паўтарыць пошук крыніц</string>
+    <plurals name="detail_downloaded_episodes">
+        <item quantity="one">%d серыя спампавана</item>
+        <item quantity="few">%d серыі спампаваны</item>
+        <item quantity="many">%d серый спампавана</item>
+        <item quantity="other">%d серый спампавана</item>
+    </plurals>
+
+    <!-- Episodes -->
+    <string name="episode_list_count">%d серый</string>
+    <string name="episode_empty_title">Серый не знойдзена</string>
+    <string name="episode_empty_subtitle">Гэтая крыніца не мае даступных серый</string>
+    <string name="episode_cd_downloaded">Спампавана</string>
+    <string name="episode_cd_queued">У чарзе на спампоўку</string>
+    <string name="episode_cd_failed">Памылка спампоўкі</string>
+    <string name="episode_cd_download">Спампаваць серыю %d</string>
+    <string name="episode_cd_play">Прайграць серыю %d</string>
+    <string name="translation_sheet_title">Абярыце азвучку</string>
+    <string name="translation_type_voice">Азвучка</string>
+    <string name="translation_type_subtitles">Субтытры</string>
+
+    <!-- Chapter list -->
+    <string name="chapter_list_count">%d раздзелаў</string>
+    <string name="chapter_empty_title">Раздзелаў не знойдзена</string>
+    <string name="chapter_empty_subtitle">Гэтая крыніца не мае даступных раздзелаў</string>
+    <string name="chapter_error_title">Не ўдалося загрузіць раздзелы</string>
+    <string name="chapter_cd_read">Чытаць раздзел %d</string>
+    <string name="chapter_cd_download">Спампаваць раздзел %d</string>
+    <string name="download_card_cd_read">Чытаць</string>
+
+    <!-- Page reader -->
+    <string name="reader_page_of">%1$d / %2$d</string>
+    <string name="reader_cd_prev">Папярэдні раздзел</string>
+    <string name="reader_cd_next">Наступны раздзел</string>
+    <string name="reader_error_empty">Старонак для гэтага раздзела не знойдзена</string>
+    <string name="reader_retrying">Паўтор… %d / 3</string>
+
+    <!-- Favorites -->
+    <string name="favorites_empty_title">Улюбёных няма</string>
+    <string name="favorites_empty_subtitle">Анімэ, якое вы дадасце, з\'явіцца тут</string>
+    <string name="favorites_explore">Прагледзець анімэ</string>
+    <string name="favorites_saved_pages_title">Захаваныя старонкі</string>
+    <string name="saved_page_delete">Выдаліць захаваную старонку</string>
+
+    <!-- Downloads screen -->
+    <string name="downloads_tab_downloaded">Спампавана (%d)</string>
+    <string name="downloads_tab_queue">Чарга (%d)</string>
+    <string name="downloads_cd_drag">Перацягніце для змены парадку</string>
+    <string name="downloads_queue_empty_title">Чарга пустая</string>
+    <string name="downloads_queue_empty_subtitle">Націсніце кнопку спампоўкі на любой серыі</string>
+    <string name="downloads_empty_title">Спамповак яшчэ няма</string>
+    <string name="downloads_empty_subtitle">Спампаваныя серыі з\'явяцца тут</string>
+    <string name="downloads_cd_anime_details">Дэталі анімэ</string>
+    <string name="downloads_cd_episode_list">Адкрыць спіс серый</string>
+
+    <!-- Download card -->
+    <string name="download_card_cd_cancel">Скасаваць спампоўку</string>
+    <string name="download_card_unknown_error">Невядомая памылка</string>
+    <string name="download_card_retry">Паўтарыць</string>
+    <string name="download_card_remove">Выдаліць</string>
+    <string name="download_card_cd_play">Прайграць</string>
+    <string name="download_card_cd_delete">Выдаліць</string>
+
+    <!-- Notifications -->
+    <string name="notif_channel_downloads">Спампоўкі</string>
+    <string name="notif_downloading">Спампоўка: %s</string>
+
+    <!-- Web player -->
+    <string name="webplayer_hint">Увядзіце URL…</string>
+    <string name="webplayer_stream_found">Струмень знойдзены</string>
+    <string name="webplayer_open_in_player">Адкрыць у плэеры</string>
+    <string name="webplayer_cd_reload">Абнавіць</string>
+    <string name="webplayer_cd_open_webplayer">Адкрыць вэб-плэер</string>
+    <string name="webplayer_guide_title">Вэб-плэер</string>
+    <string name="webplayer_guide_subtitle">Транслюйце відэа з любога сайта прама ў плэер</string>
+    <string name="webplayer_guide_step1">Увядзіце URL сайта ў адрасны радок вышэй</string>
+    <string name="webplayer_guide_step2">Перайдзіце да серыі і запусціце відэа</string>
+    <string name="webplayer_guide_step3">Калі знойдзены струмень — націсніце «Адкрыць у плэеры»</string>
+    <string name="webplayer_adblock_warning">Некаторыя сайты могуць блакаваць прайграванне пры ўключаным блакавальніку рэкламы.</string>
+    <string name="webplayer_adblock_warning_hint">Вы можаце ўключыць яго ў любы час у настройках.</string>
+    <string name="webplayer_adblock_warning_disable">Адключыць блакавальнік рэкламы</string>
+    <string name="webplayer_save_page">Захаваць старонку</string>
+    <string name="webplayer_save_page_title">Захаваць старонку</string>
+    <string name="webplayer_save_page_hint">Назва старонкі</string>
+
+    <!-- Player -->
+    <string name="player_cd_exit_fullscreen">Выйсці з поўнаэкраннага рэжыму</string>
+    <string name="player_cd_fullscreen">Поўны экран</string>
+    <string name="player_cd_prev_episode">Папярэдняя серыя</string>
+    <string name="player_cd_next_episode">Наступная серыя</string>
+    <string name="player_up_next">Далей</string>
+    <string name="player_cd_play_next">Прайграць наступную серыю</string>
+    <string name="player_error_title">Памылка прайгравання</string>
+    <string name="player_error_subtitle">Нешта пайшло не так пры загрузцы гэтай серыі</string>
+    <string name="player_try_again">Паспрабаваць зноў</string>
+    <string name="player_episode_of">Серыя %1$d з %2$d</string>
+    <string name="player_cd_downloaded">Спампавана</string>
+    <string name="player_cd_queued">У чарзе на спампоўку</string>
+    <string name="player_cd_failed">Памылка спампоўкі</string>
+    <string name="player_cd_download">Спампаваць серыю</string>
+
+    <!-- Mood -->
+    <string name="mood_title">Які ў вас настрой?</string>
+    <string name="mood_subtitle">Абярыце настрой і знайдзіце ідэальнае анімэ</string>
+    <string name="mood_no_results">Анімэ для гэтага настрою не знойдзена</string>
+
+    <!-- Random / Discover -->
+    <string name="tab_by_mood">Па настроі</string>
+    <string name="tab_random">Выпадковае</string>
+    <string name="tab_wallpaper">Шпалеры</string>
+    <string name="random_your_pick">Ваш выпадковы выбар</string>
+    <string name="random_pick_another">Іншы варыянт</string>
+    <string name="random_cd_wallpaper">Выпадковыя шпалеры анімэ</string>
+    <string name="random_download_started">Спампоўка пачалася</string>
+    <string name="random_cd_download">Спампаваць</string>
+    <string name="random_wallpaper_set">Шпалеры ўсталяваны!</string>
+    <string name="random_wallpaper_failed">Не ўдалося ўсталяваць шпалеры</string>
+    <string name="random_cd_set_wallpaper">Усталяваць як шпалеры</string>
+    <string name="random_new">Новае</string>
+    <string name="random_wallpaper_dm_title">Шпалеры анімэ</string>
+    <string name="random_wallpaper_dm_desc">Захаванне ў Выявы</string>
+
+    <!-- Filters -->
+    <string name="filter_title">Фільтры</string>
+    <string name="filter_clear_all">Ачысціць усё</string>
+    <string name="filter_section_format">Фармат</string>
+    <string name="filter_section_genre">Жанр</string>
+
+    <!-- Settings -->
+    <string name="settings_section_appearance">Знешні выгляд</string>
+    <string name="settings_theme_dark">Цёмная тэма</string>
+    <string name="settings_theme_light">Светлая тэма</string>
+    <string name="settings_theme_subtitle">Пераключэнне паміж светлай і цёмнай тэмай</string>
+    <string name="settings_cover_title">Вокладка пад верхняй панэллю</string>
+    <string name="settings_cover_extends">Выява выходзіць за верхнюю панэль</string>
+    <string name="settings_cover_below">Выява поўнасцю ніжэй верхняй панэлі</string>
+    <string name="settings_accent_color_title">Колер акцэнту</string>
+    <string name="settings_language_title">Мова</string>
+    <string name="settings_language_system">Сістэмная мова</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_language_uk">Українська</string>
+    <string name="settings_language_pl">Polski</string>
+    <string name="settings_language_be">Беларуская</string>
+    <string name="settings_section_content">Кантэнт</string>
+    <string name="settings_adult_on_title">Рэжым 18+</string>
+    <string name="settings_adult_off_title">Дарослы кантэнт</string>
+    <string name="settings_adult_on_subtitle">Паказваюцца толькі тайтлы 18+</string>
+    <string name="settings_adult_off_subtitle">Паказваць толькі тайтлы без 18+</string>
+    <string name="settings_content_type_anime">Рэжым анімэ</string>
+    <string name="settings_content_type_manga">Рэжым манги</string>
+    <string name="settings_content_type_subtitle">Пераключэнне паміж анімэ і мангай</string>
+    <string name="settings_section_sources">Крыніцы</string>
+    <string name="settings_sources_select">Абярыце актыўныя крыніцы</string>
+    <string name="settings_section_extensions">Пашырэнні</string>
+    <string name="settings_extensions_manage_title">Кіраванне пашырэннямі</string>
+    <string name="settings_extensions_manage_subtitle">Усталёўка або выдаленне модаў</string>
+    <string name="settings_info_provider_select">Крыніца інфармацыі пра анімэ</string>
+    <string name="settings_info_provider_none">Не выбрана (толькі AniList)</string>
+    <string name="settings_section_downloads">Спампоўкі</string>
+    <string name="settings_download_folder_title">Папка спамповак</string>
+    <string name="settings_download_folder_default">Па змаўчанні (вонкавая памяць)</string>
+    <string name="settings_section_webplayer">Вэб-плэер</string>
+    <string name="settings_adblock_on_title">Блакавальнік рэкламы: Уключаны</string>
+    <string name="settings_adblock_off_title">Блакавальнік рэкламы: Адключаны</string>
+    <string name="settings_adblock_on_subtitle">Рэклама і трэкеры блакуюцца</string>
+    <string name="settings_adblock_off_subtitle">Рэклама не блакуецца ў вэб-плэеры</string>
+    <string name="settings_web_back_fab_title">Навігацыя назад: Кнопка</string>
+    <string name="settings_web_back_fab_subtitle">Над вэб-старонкай з\'яўляецца кнопка «Назад»</string>
+    <string name="settings_web_back_topbar_title">Навігацыя назад: Верхняя панэль</string>
+    <string name="settings_web_back_topbar_subtitle">Кнопка «Назад» на верхняй панэлі навігуе ў межах вэб-старонкі</string>
+    <string name="settings_section_privacy">Прыватнасць</string>
+    <string name="settings_analytics_on_title">Аналітыка і справаздачы: Уключана</string>
+    <string name="settings_analytics_off_title">Аналітыка і справаздачы: Адключана</string>
+    <string name="settings_analytics_on_subtitle">Дапамагае паляпшаць праграму, збіраючы дадзеныя пра выкарыстанне</string>
+    <string name="settings_analytics_off_subtitle">Дадзеныя пра выкарыстанне не збіраюцца</string>
+    <string name="analytics_consent_title">Дапамажыце палепшыць Kanata</string>
+    <string name="analytics_consent_body">Мы збіраем ананімныя справаздачы пра збоі і аналітыку выкарыстання для паляпшэння праграмы. Ніякія асабістыя дадзеныя не збіраюцца. Вы можаце змяніць гэта ў любы час у настройках.</string>
+    <string name="analytics_consent_allow">Дазволіць</string>
+    <string name="analytics_consent_deny">Забараніць</string>
+    <string name="settings_section_about">Пра праграму</string>
+    <string name="settings_version">Kanata v%s</string>
+    <string name="settings_made_by">Зроблена GreenRou</string>
+    <string name="settings_github">GitHub</string>
+    <string name="settings_github_subtitle">green-rou/Kanata</string>
+    <string name="settings_support">Падтрымаць на Ko-fi</string>
+    <string name="settings_support_subtitle">ko-fi.com/C0C31ZLH6K</string>
+    <string name="settings_check_update">Праверыць абнаўленні</string>
+    <string name="settings_check_update_checking">Правяраем…</string>
+    <string name="settings_check_update_subtitle">Праверыць наяўнасць новай версіі</string>
+    <string name="update_available_title">Даступнае абнаўленне</string>
+    <string name="update_button">Абнавіць</string>
+    <string name="update_skip_button">Прапусціць</string>
+    <string name="update_github_link">Прагледзець на GitHub</string>
+    <string name="update_skip_hint">Калі прапусціць — гэтае акно больш не з\'явіцца для версіі %s</string>
+    <string name="update_downloading">Спампоўка…</string>
+    <string name="update_no_updates">Абнаўленняў няма</string>
+    <string name="online_search_button">Шукаць анлайн</string>
+    <string name="online_search_searching">Шукаем на %s…</string>
+    <string name="online_search_empty">Нічога не знойдзена на %s</string>
+    <string name="online_search_error">Памылка на %s</string>
+</resources>

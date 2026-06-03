@@ -15,7 +15,10 @@ interface FavoritesDao {
 
     @Query("SELECT * FROM favorites ORDER BY addedAt DESC LIMIT :limit")
     fun getFavoritesPagedFlow(limit: Int): Flow<List<FavoriteEntity>>
-    
+
+    @Query("SELECT * FROM favorites WHERE isManga = :isManga ORDER BY addedAt DESC LIMIT :limit")
+    fun getFavoritesPagedFlow(limit: Int, isManga: Boolean): Flow<List<FavoriteEntity>>
+
     @Query("SELECT * FROM favorites ORDER BY addedAt DESC")
     fun getAllFavoritesFlow(): Flow<List<FavoriteEntity>>
     
