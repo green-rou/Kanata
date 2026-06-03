@@ -191,6 +191,8 @@
     <string name="settings_language_system">System default</string>
     <string name="settings_language_en">English</string>
     <string name="settings_language_uk">Українська</string>
+    <string name="settings_language_pl">Polski</string>
+    <string name="settings_language_be">Беларуская</string>
     <string name="settings_section_content">Content</string>
     <string name="settings_adult_on_title">18+ Mode</string>
     <string name="settings_adult_off_title">Adult Content</string>

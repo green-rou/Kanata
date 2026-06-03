@@ -10,8 +10,11 @@ class GetFavoritesUseCase(
     suspend fun execute(page: Int = 1, pageSize: Int = 20): Result<List<Anime>> = 
         favoritesManager.getFavoritesPaged(page, pageSize)
 
-    fun observePaged(limit: Int): Flow<Result<List<Anime>>> = 
+    fun observePaged(limit: Int): Flow<Result<List<Anime>>> =
         favoritesManager.getFavoritesPagedFlow(limit)
+
+    fun observePaged(limit: Int, isManga: Boolean): Flow<Result<List<Anime>>> =
+        favoritesManager.getFavoritesPagedFlow(limit, isManga)
     
     fun observe(): Flow<Result<List<Anime>>> = favoritesManager.getAllFavoritesFlow()
     

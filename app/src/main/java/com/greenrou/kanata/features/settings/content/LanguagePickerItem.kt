@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material3.AlertDialog
@@ -27,16 +28,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.shape.RoundedCornerShape
 import com.greenrou.kanata.R
 import com.greenrou.kanata.core.util.LanguagePrefs
 
 private data class LangOption(val code: String, val labelRes: Int)
 
 private val langOptions = listOf(
-    LangOption(LanguagePrefs.SYSTEM,    R.string.settings_language_system),
-    LangOption(LanguagePrefs.ENGLISH,   R.string.settings_language_en),
-    LangOption(LanguagePrefs.UKRAINIAN, R.string.settings_language_uk),
+    LangOption(LanguagePrefs.SYSTEM,     R.string.settings_language_system),
+    LangOption(LanguagePrefs.ENGLISH,    R.string.settings_language_en),
+    LangOption(LanguagePrefs.UKRAINIAN,  R.string.settings_language_uk),
+    LangOption(LanguagePrefs.POLISH,     R.string.settings_language_pl),
+    LangOption(LanguagePrefs.BELARUSIAN, R.string.settings_language_be),
 )
 
 @Composable

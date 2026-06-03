@@ -31,6 +31,12 @@ class FavoritesManagerImpl(
         }
     }
 
+    override fun getFavoritesPagedFlow(limit: Int, isManga: Boolean): Flow<Result<List<Anime>>> {
+        return favoritesDao.getFavoritesPagedFlow(limit, isManga).map { entities ->
+            Result.success(entities.map { it.toDomain() })
+        }
+    }
+
     override fun getAllFavoritesFlow(): Flow<Result<List<Anime>>> {
         return favoritesDao.getAllFavoritesFlow().map { entities ->
             Result.success(entities.map { it.toDomain() })

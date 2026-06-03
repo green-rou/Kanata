@@ -30,6 +30,7 @@ val databaseModule = module {
             StorageDatabase.MIGRATION_5_6,
             StorageDatabase.MIGRATION_6_7,
             StorageDatabase.MIGRATION_7_8,
+            StorageDatabase.MIGRATION_8_9,
         ).build()
     }
 
