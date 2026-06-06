@@ -8,8 +8,10 @@ import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -103,12 +105,18 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
+            val installPermissionLauncher = rememberLauncherForActivityResult(
+                ActivityResultContracts.StartActivityForResult()
+            ) {
+                updateViewModel.handleEvent(UpdateEvent.RetryInstall)
+            }
+
             LaunchedEffect(Unit) {
                 updateViewModel.needInstallPermission.collect {
                     val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
                         data = "package:$packageName".toUri()
                     }
-                    startActivity(intent)
+                    installPermissionLauncher.launch(intent)
                 }
             }
 

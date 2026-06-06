@@ -7,4 +7,5 @@ sealed interface UpdateEvent {
     data object DismissDialog : UpdateEvent
     data object StartDownload : UpdateEvent
     data object ConsumeNoUpdatesMessage : UpdateEvent
+    data object RetryInstall : UpdateEvent
 }
