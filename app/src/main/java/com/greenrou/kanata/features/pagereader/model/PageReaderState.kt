@@ -11,6 +11,7 @@ data class PageReaderState(
     val chapterUrls: List<String> = emptyList(),
     val chapterTitles: List<String> = emptyList(),
     val areBarsVisible: Boolean = true,
+    val resumePageIndex: Int = 0,
 ) {
     val currentChapterTitle: String
         get() = chapterTitles.getOrElse(currentChapterIndex) { "" }

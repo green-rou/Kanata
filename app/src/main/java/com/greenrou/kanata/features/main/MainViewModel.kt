@@ -15,6 +15,7 @@ import com.greenrou.kanata.domain.repository.SettingsManager
 import com.greenrou.kanata.domain.usecase.AddFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.GetAnimeListUseCase
 import com.greenrou.kanata.domain.usecase.GetFavoritesUseCase
+import com.greenrou.kanata.domain.usecase.GetLastWatchedUseCase
 import com.greenrou.kanata.domain.usecase.RemoveFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.SetDownloadFolderUseCase
 import com.greenrou.kanata.features.main.model.MainEvent
@@ -49,6 +50,7 @@ class MainViewModel(
     downloadFeatureRegistry: DownloadFeatureRegistry,
     private val mangaModRegistry: MangaModRegistry,
     chapterParserRegistry: ChapterParserRegistry,
+    private val getLastWatched: GetLastWatchedUseCase,
 ) : ViewModel() {
 
     val isDownloadFeatureEnabled: StateFlow<Boolean> = downloadFeatureRegistry.isEnabled
@@ -99,6 +101,16 @@ class MainViewModel(
         observeNetwork()
         observeMangaMod()
         loadAnime()
+        checkContinueWatching()
+    }
+
+    private fun checkContinueWatching() {
+        viewModelScope.launch {
+            val last = getLastWatched()
+            if (last != null) {
+                _state.update { it.copy(pendingContinueWatching = last) }
+            }
+        }
     }
 
     private fun currentMediaType() =
@@ -171,6 +183,10 @@ class MainViewModel(
                 _state.update { it.copy(isMangaMode = isManga, animeList = if (changed) emptyList() else it.animeList, selectedFormats = if (changed) emptySet() else it.selectedFormats) }
                 if (changed && (!isManga || mangaModRegistry.activeProvider.value != null)) loadAnime()
             }
+            .launchIn(viewModelScope)
+
+        settingsManager.showContinueWatchingDialog
+            .onEach { enabled -> _state.update { it.copy(showContinueWatchingDialog = enabled) } }
             .launchIn(viewModelScope)
     }
 
@@ -296,6 +312,10 @@ class MainViewModel(
                 settingsManager.setAnalyticsEnabled(false)
                 settingsManager.setAnalyticsConsentShown(true)
             }
+            MainEvent.ToggleContinueWatchingDialog -> viewModelScope.launch {
+                settingsManager.setShowContinueWatchingDialog(!_state.value.showContinueWatchingDialog)
+            }
+            MainEvent.DismissContinueWatching -> _state.update { it.copy(pendingContinueWatching = null) }
             else -> Unit
         }
     }

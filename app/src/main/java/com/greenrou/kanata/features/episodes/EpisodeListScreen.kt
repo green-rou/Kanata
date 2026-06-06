@@ -106,6 +106,8 @@ fun EpisodeListScreen(
                 else -> {
                     val urls = state.episodes.map { it.url }
                     val titles = state.episodes.map { it.title }
+                    val lastWatchedUrl = state.watchProgress.values
+                        .maxByOrNull { it.updatedAt }?.episodeUrl
                     LazyColumn(
                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -133,6 +135,8 @@ fun EpisodeListScreen(
                                         )
                                     )
                                 },
+                                watchProgress = state.watchProgress[episode.url],
+                                isLastWatched = episode.url == lastWatchedUrl,
                             )
                         }
                     }

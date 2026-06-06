@@ -26,6 +26,7 @@ data class PlayerRoute(
     val sourceName: String = "",
     val headerKeys: List<String> = emptyList(),
     val headerValues: List<String> = emptyList(),
+    val episodePageUrls: List<String> = emptyList(),
 )
 
 @Serializable
@@ -46,6 +47,8 @@ data class PageReaderRoute(
     val chapterUrls: List<String>,
     val chapterTitles: List<String>,
     val startIndex: Int,
+    val chapterPageUrls: List<String> = emptyList(),
+    val animeTitle: String = "",
 )
 
 @Serializable

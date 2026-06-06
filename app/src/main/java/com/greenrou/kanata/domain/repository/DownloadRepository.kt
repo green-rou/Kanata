@@ -10,6 +10,7 @@ interface DownloadRepository {
     fun getCompletedDownloads(): Flow<List<DownloadItem>>
     suspend fun enqueueDownload(item: DownloadItem): Long
     suspend fun getDownloadByEpisodeUrl(url: String): DownloadItem?
+    suspend fun getCompletedVideosByAnimeTitle(animeTitle: String): List<DownloadItem>
     suspend fun updateStatus(id: Long, status: DownloadStatus, errorMessage: String? = null)
     suspend fun updateProgress(id: Long, progressPercent: Int, fileSizeBytes: Long)
     suspend fun setLocalFilePath(id: Long, path: String)

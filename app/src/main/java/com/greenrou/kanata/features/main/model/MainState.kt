@@ -2,6 +2,7 @@ package com.greenrou.kanata.features.main.model
 
 import com.greenrou.kanata.domain.model.Anime
 import com.greenrou.kanata.domain.model.AnimeFormat
+import com.greenrou.kanata.domain.model.WatchProgress
 
 data class MainState(
     val isLoading: Boolean = false,
@@ -30,6 +31,8 @@ data class MainState(
     val activeInfoProviderId: String? = null,
     val isMangaModInstalled: Boolean = false,
     val isMangaMode: Boolean = false,
+    val showContinueWatchingDialog: Boolean = true,
+    val pendingContinueWatching: WatchProgress? = null,
 ) {
     val hasActiveFilters: Boolean get() = selectedGenres.isNotEmpty() || selectedFormats.isNotEmpty()
 }

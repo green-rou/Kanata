@@ -50,6 +50,9 @@ class DownloadRepositoryImpl(
     override suspend fun getDownloadByEpisodeUrl(url: String): DownloadItem? =
         dao.getByEpisodeUrl(url)?.toDomain()
 
+    override suspend fun getCompletedVideosByAnimeTitle(animeTitle: String): List<DownloadItem> =
+        dao.getCompletedVideosByAnimeTitle(animeTitle).map { it.toDomain() }
+
     override suspend fun updateStatus(id: Long, status: DownloadStatus, errorMessage: String?) {
         dao.updateStatus(id, status.name, errorMessage)
     }

@@ -12,6 +12,6 @@ sealed interface DownloadManagerEvent {
     data class FolderChosen(val uri: String) : DownloadManagerEvent
 
     data class ShowSnackbar(val message: String) : DownloadManagerEvent
-    data class NavigateToPlayer(val localFilePath: String, val title: String) : DownloadManagerEvent
-    data class NavigateToReader(val chapterFolderPath: String, val title: String) : DownloadManagerEvent
+    data class NavigateToPlayer(val localFilePaths: List<String>, val titles: List<String>, val startIndex: Int, val episodePageUrls: List<String> = emptyList()) : DownloadManagerEvent
+    data class NavigateToReader(val chapterFolderPath: String, val title: String, val chapterPageUrl: String = "", val animeTitle: String = "") : DownloadManagerEvent
 }

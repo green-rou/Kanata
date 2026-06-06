@@ -26,6 +26,7 @@ import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.LightMode
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.LockOpen
+import androidx.compose.material.icons.rounded.PlayCircle
 import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material.icons.rounded.Tv
 import androidx.compose.material.icons.rounded.VolunteerActivism
@@ -78,6 +79,8 @@ fun SettingsScreen(
     mangaModeOnTitle: String = stringResource(R.string.settings_content_type_manga),
     mangaModeOffTitle: String = stringResource(R.string.settings_content_type_anime),
     mangaModeSubtitle: String = stringResource(R.string.settings_content_type_subtitle),
+    showContinueWatchingDialog: Boolean = true,
+    onToggleContinueWatchingDialog: () -> Unit = {},
     isCheckingUpdate: Boolean = false,
     onCheckUpdate: () -> Unit = {},
     onNavigateToMods: () -> Unit = {},
@@ -172,6 +175,16 @@ fun SettingsScreen(
                 title = stringResource(R.string.settings_download_folder_title),
                 subtitle = downloadFolder.ifBlank { stringResource(R.string.settings_download_folder_default) },
                 onClick = { folderPickerLauncher.launch(null) },
+            )
+        }
+
+        SettingsSection(title = stringResource(R.string.settings_section_playback)) {
+            SettingsItem(
+                icon = Icons.Rounded.PlayCircle,
+                title = stringResource(R.string.settings_continue_watching_title),
+                subtitle = stringResource(R.string.settings_continue_watching_subtitle),
+                checked = showContinueWatchingDialog,
+                onCheckedChange = { onToggleContinueWatchingDialog() },
             )
         }
 
