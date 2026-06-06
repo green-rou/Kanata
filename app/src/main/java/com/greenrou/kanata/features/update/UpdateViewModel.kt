@@ -35,6 +35,8 @@ class UpdateViewModel(
     private val _needInstallPermission = Channel<Unit>(Channel.CONFLATED)
     val needInstallPermission = _needInstallPermission.receiveAsFlow()
 
+    private var pendingInstallFile: File? = null
+
     fun handleEvent(event: UpdateEvent) {
         when (event) {
             UpdateEvent.CheckUpdate -> checkForUpdate(silent = false)
@@ -43,6 +45,7 @@ class UpdateViewModel(
             UpdateEvent.DismissDialog -> _state.update { it.copy(pendingRelease = null, error = null) }
             UpdateEvent.StartDownload -> downloadAndInstall()
             UpdateEvent.ConsumeNoUpdatesMessage -> _state.update { it.copy(noUpdatesAvailable = false) }
+            UpdateEvent.RetryInstall -> retryInstall()
         }
     }
 
@@ -83,13 +86,24 @@ class UpdateViewModel(
             }.onSuccess { file ->
                 _state.update { it.copy(isDownloading = false, downloadProgress = 1f) }
                 if (context.packageManager.canRequestPackageInstalls()) {
+                    pendingInstallFile = null
                     _installFile.send(file)
                 } else {
+                    pendingInstallFile = file
                     _needInstallPermission.send(Unit)
                 }
             }.onFailure { e ->
                 _state.update { it.copy(isDownloading = false, error = e.message) }
             }
+        }
+    }
+
+    private fun retryInstall() {
+        val file = pendingInstallFile ?: return
+        if (!context.packageManager.canRequestPackageInstalls()) return
+        viewModelScope.launch {
+            pendingInstallFile = null
+            _installFile.send(file)
         }
     }
 

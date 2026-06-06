@@ -24,7 +24,7 @@ android {
         minSdk = 28
         targetSdk = 36
         versionCode = 10
-        versionName = System.getenv("VERSION_NAME")?.removePrefix("v") ?: "0.3.2"
+        versionName = System.getenv("VERSION_NAME")?.removePrefix("v") ?: "0.3.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
