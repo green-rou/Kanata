@@ -26,24 +26,24 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val viewModelModule = module {
-    viewModel { MainViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get<ParserRegistry>(), get<InfoProviderRegistry>(), get<DownloadFeatureRegistry>(), get<MangaModRegistry>(), get<ChapterParserRegistry>()) }
+    viewModel { MainViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get<ParserRegistry>(), get<InfoProviderRegistry>(), get<DownloadFeatureRegistry>(), get<MangaModRegistry>(), get<ChapterParserRegistry>(), get()) }
     viewModel { AnimeDetailsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get<ParserRegistry>(), get<ChapterParserRegistry>(), get<MangaModRegistry>(), get()) }
     viewModel { FavoritesViewModel(get(), get(), get(), get(), get()) }
     viewModel { MoodViewModel(get(), get(), get(), get(), get(), get(), get<MangaModRegistry>()) }
     viewModel { RandomImageViewModel(get(), get(), get(), get(), get(), get(), get<MangaModRegistry>()) }
     viewModel { params ->
-        EpisodeListViewModel(get(), get(), get(), get(), get(), get(), get<DownloadFeatureRegistry>(), params.get(), params.get(), params.get(), params.get(), params.get())
+        EpisodeListViewModel(get(), get(), get(), get(), get(), get(), get<DownloadFeatureRegistry>(), get(), params.get(), params.get(), params.get(), params.get(), params.get())
     }
     viewModel { params ->
-        ChapterListViewModel(get(), get(), get(), get(), get<DownloadFeatureRegistry>(), params.get(), params.get(), params.get())
+        ChapterListViewModel(get(), get(), get(), get(), get(), get<DownloadFeatureRegistry>(), params.get(), params.get(), params.get())
     }
     viewModel { params ->
-        PageReaderViewModel(get(), params.get(), params.get(), params.get())
+        PageReaderViewModel(get(), get(), get(), params.get(), params.get(), params.get(), params.get(), params.get())
     }
     viewModel { params ->
-        PlayerViewModel(get(), get(), get(), get(), get<DownloadFeatureRegistry>(), params.get(), params.get(), params.get(), params.get(), params.get(), params.get(), params.get())
+        PlayerViewModel(get(), get(), get(), get(), get<DownloadFeatureRegistry>(), params.get(), params.get(), params.get(), params.get(), params.get(), params.get(), params.get(), get(), get(), params.get())
     }
-    viewModel { DownloadManagerViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { DownloadManagerViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     viewModel { WebPlayerViewModel(get(), get()) }
     viewModel { ModsViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { params -> OnlineSearchViewModel(get(), get(), get(), params.get()) }

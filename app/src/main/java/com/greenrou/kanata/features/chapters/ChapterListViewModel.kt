@@ -7,9 +7,11 @@ import com.greenrou.kanata.domain.model.DownloadItem
 import com.greenrou.kanata.domain.usecase.GetChapterListUseCase
 import com.greenrou.kanata.domain.usecase.GetCompletedDownloadsUseCase
 import com.greenrou.kanata.domain.usecase.GetDownloadQueueUseCase
+import com.greenrou.kanata.domain.usecase.ObserveWatchProgressUseCase
 import com.greenrou.kanata.domain.usecase.StartChapterDownloadUseCase
 import com.greenrou.kanata.features.chapters.model.ChapterListEvent
 import com.greenrou.kanata.features.chapters.model.ChapterListState
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,6 +33,7 @@ class ChapterListViewModel(
     private val startChapterDownload: StartChapterDownloadUseCase,
     private val getDownloadQueue: GetDownloadQueueUseCase,
     private val getCompletedDownloads: GetCompletedDownloadsUseCase,
+    private val observeWatchProgress: ObserveWatchProgressUseCase,
     downloadFeatureRegistry: DownloadFeatureRegistry,
     val pageUrl: String,
     val label: String,
@@ -42,6 +45,8 @@ class ChapterListViewModel(
 
     private val _events = Channel<ChapterListEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
+
+    private var watchProgressJob: Job? = null
 
     val isDownloadFeatureEnabled = downloadFeatureRegistry.isEnabled
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
@@ -90,7 +95,12 @@ class ChapterListViewModel(
             repeat(MAX_RETRIES + 1) { attempt ->
                 val result = getChapterList(pageUrl)
                 if (result.isSuccess) {
-                    _state.update { it.copy(isLoading = false, chapters = result.getOrDefault(emptyList()), retryAttempt = 0) }
+                    val chapters = result.getOrDefault(emptyList())
+                    _state.update { it.copy(isLoading = false, chapters = chapters, retryAttempt = 0) }
+                    watchProgressJob?.cancel()
+                    watchProgressJob = observeWatchProgress(chapters.map { it.url })
+                        .onEach { map -> _state.update { it.copy(watchProgress = map) } }
+                        .launchIn(viewModelScope)
                     return@launch
                 }
                 if (attempt < MAX_RETRIES) {

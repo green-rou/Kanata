@@ -7,8 +7,8 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
-    entities = [StorageEntity::class, FavoriteEntity::class, DownloadEntity::class, SavedPageEntity::class, InstalledModEntity::class],
-    version = 9,
+    entities = [StorageEntity::class, FavoriteEntity::class, DownloadEntity::class, SavedPageEntity::class, InstalledModEntity::class, WatchProgressEntity::class],
+    version = 10,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -19,8 +19,28 @@ abstract class StorageDatabase : RoomDatabase() {
     abstract fun downloadDao(): DownloadDao
     abstract fun savedPagesDao(): SavedPagesDao
     abstract fun installedModDao(): InstalledModDao
+    abstract fun watchProgressDao(): WatchProgressDao
 
     companion object {
+        val MIGRATION_9_10 = object : Migration(9, 10) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS watch_progress (
+                        episodeUrl TEXT NOT NULL PRIMARY KEY,
+                        playbackUrl TEXT NOT NULL DEFAULT '',
+                        episodeTitle TEXT NOT NULL DEFAULT '',
+                        animeTitle TEXT NOT NULL DEFAULT '',
+                        isManga INTEGER NOT NULL DEFAULT 0,
+                        positionMs INTEGER NOT NULL DEFAULT 0,
+                        durationMs INTEGER NOT NULL DEFAULT 0,
+                        updatedAt INTEGER NOT NULL DEFAULT 0
+                    )
+                    """.trimIndent()
+                )
+            }
+        }
+
         val MIGRATION_8_9 = object : Migration(8, 9) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE favorites ADD COLUMN isManga INTEGER NOT NULL DEFAULT 0")

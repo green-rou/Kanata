@@ -25,21 +25,21 @@ import com.greenrou.kanata.features.webplayer.WebPlayerScreen
 @Composable
 fun NavGraph(backStack: SnapshotStateList<Any>) {
     BackHandler(enabled = backStack.size > 1) {
-        backStack.removeAt(backStack.size - 1)
+        if (backStack.size > 1) backStack.removeAt(backStack.size - 1)
     }
 
     val gridState = rememberLazyGridState()
 
     var selectedTabName by rememberSaveable { mutableStateOf(BottomNavItem.AnimeList.name) }
 
-    when (val current = backStack.last()) {
+    when (val current = backStack.lastOrNull() ?: return) {
         is MainRoute -> MainScreen(
             gridState = gridState,
             selectedTabName = selectedTabName,
             onTabSelected = @Suppress("UNUSED_VALUE") { selectedTabName = it },
             onNavigateToDetails = { id -> backStack.add(AnimeDetailsRoute(id)) },
-            onNavigateToPlayer = { path, title ->
-                backStack.add(PlayerRoute(listOf(path), listOf(title), 0))
+            onNavigateToPlayer = { paths, titles, startIndex, pageUrls ->
+                backStack.add(PlayerRoute(paths, titles, startIndex, episodePageUrls = pageUrls))
             },
             onOpenEpisodeList = { animePageUrl, sourceName, animeTitle ->
                 backStack.add(EpisodeListRoute(animePageUrl, sourceName, animeTitle))
@@ -54,13 +54,13 @@ fun NavGraph(backStack: SnapshotStateList<Any>) {
             onNavigateToWebPlayer = { url -> backStack.add(WebPlayerRoute(url)) },
             onNavigateToMods = { backStack.add(ModsRoute) },
             onNavigateToOnlineSearch = { query -> backStack.add(OnlineSearchRoute(query)) },
-            onReadMangaChapter = { folderPath, title ->
-                backStack.add(PageReaderRoute(listOf("file://$folderPath"), listOf(title), 0))
+            onReadMangaChapter = { folderPath, title, chapterPageUrl, animeTitle ->
+                backStack.add(PageReaderRoute(listOf("file://$folderPath"), listOf(title), 0, chapterPageUrls = listOf(chapterPageUrl), animeTitle = animeTitle))
             },
         )
         is AnimeDetailsRoute -> AnimeDetailsScreen(
             animeId = current.animeId,
-            onNavigateBack = { backStack.removeAt(backStack.size - 1) },
+            onNavigateBack = { if (backStack.isNotEmpty()) backStack.removeAt(backStack.size - 1) },
             onNavigateToEpisodeList = { source, animeTitle, episodeCount ->
                 backStack.add(EpisodeListRoute(source.animePageUrl, source.label, animeTitle, current.animeId, episodeCount))
             },
@@ -84,7 +84,7 @@ fun NavGraph(backStack: SnapshotStateList<Any>) {
                 animeTitle = current.animeTitle,
                 animeId = current.animeId,
                 episodeCount = current.episodeCount,
-                onNavigateBack = { backStack.removeAt(backStack.size - 1) },
+                onNavigateBack = { if (backStack.isNotEmpty()) backStack.removeAt(backStack.size - 1) },
                 onEpisodeClick = { urls, titles, index ->
                     backStack.add(
                         PlayerRoute(
@@ -93,6 +93,7 @@ fun NavGraph(backStack: SnapshotStateList<Any>) {
                             startIndex = index,
                             animeTitle = current.animeTitle,
                             sourceName = current.label,
+                            episodePageUrls = urls,
                         )
                     )
                 },
@@ -107,12 +108,13 @@ fun NavGraph(backStack: SnapshotStateList<Any>) {
                 sourceName = current.sourceName,
                 headerKeys = current.headerKeys,
                 headerValues = current.headerValues,
-                onNavigateBack = { backStack.removeAt(backStack.size - 1) },
+                episodePageUrls = current.episodePageUrls,
+                onNavigateBack = { if (backStack.isNotEmpty()) backStack.removeAt(backStack.size - 1) },
             )
         }
         is WebPlayerRoute -> WebPlayerScreen(
             initialUrl = current.initialUrl,
-            onNavigateBack = { backStack.removeAt(backStack.size - 1) },
+            onNavigateBack = { if (backStack.isNotEmpty()) backStack.removeAt(backStack.size - 1) },
             onNavigateToPlayer = { streamUrl, referer ->
                 backStack.add(
                     PlayerRoute(
@@ -126,16 +128,16 @@ fun NavGraph(backStack: SnapshotStateList<Any>) {
             },
         )
         is ModsRoute -> ModsScreen(
-            onNavigateBack = { backStack.removeAt(backStack.size - 1) },
+            onNavigateBack = { if (backStack.isNotEmpty()) backStack.removeAt(backStack.size - 1) },
         )
         is ChapterListRoute -> key(current) {
             ChapterListScreen(
                 pageUrl = current.pageUrl,
                 label = current.label,
                 title = current.title,
-                onNavigateBack = { backStack.removeAt(backStack.size - 1) },
+                onNavigateBack = { if (backStack.isNotEmpty()) backStack.removeAt(backStack.size - 1) },
                 onChapterClick = { urls, titles, index ->
-                    backStack.add(PageReaderRoute(urls, titles, index))
+                    backStack.add(PageReaderRoute(urls, titles, index, chapterPageUrls = urls, animeTitle = current.title))
                 },
             )
         }
@@ -144,13 +146,15 @@ fun NavGraph(backStack: SnapshotStateList<Any>) {
                 chapterUrls = current.chapterUrls,
                 chapterTitles = current.chapterTitles,
                 startIndex = current.startIndex,
-                onNavigateBack = { backStack.removeAt(backStack.size - 1) },
+                chapterPageUrls = current.chapterPageUrls,
+                animeTitle = current.animeTitle,
+                onNavigateBack = { if (backStack.isNotEmpty()) backStack.removeAt(backStack.size - 1) },
             )
         }
         is OnlineSearchRoute -> key(current) {
             OnlineSearchScreen(
                 query = current.query,
-                onNavigateBack = { backStack.removeAt(backStack.size - 1) },
+                onNavigateBack = { if (backStack.isNotEmpty()) backStack.removeAt(backStack.size - 1) },
                 onNavigateToDetails = { animeId -> backStack.add(AnimeDetailsRoute(animeId)) },
                 onNavigateToEpisodeList = { pageUrl, label, title ->
                     backStack.add(EpisodeListRoute(pageUrl, label, title))

@@ -10,6 +10,8 @@ import com.greenrou.kanata.domain.usecase.DeleteCompletedDownloadUseCase
 import com.greenrou.kanata.domain.usecase.GetCompletedDownloadsUseCase
 import com.greenrou.kanata.domain.usecase.GetDownloadFolderUseCase
 import com.greenrou.kanata.domain.usecase.GetDownloadQueueUseCase
+import com.greenrou.kanata.domain.usecase.GetSiblingDownloadsUseCase
+import com.greenrou.kanata.domain.usecase.ObserveWatchProgressUseCase
 import com.greenrou.kanata.domain.usecase.ReorderDownloadQueueUseCase
 import com.greenrou.kanata.domain.usecase.RetryDownloadUseCase
 import com.greenrou.kanata.domain.usecase.SetDownloadFolderUseCase
@@ -19,6 +21,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -34,7 +37,9 @@ class DownloadManagerViewModel(
     private val getDownloadFolder: GetDownloadFolderUseCase,
     private val setDownloadFolder: SetDownloadFolderUseCase,
     private val retryDownload: RetryDownloadUseCase,
+    private val getSiblingDownloads: GetSiblingDownloadsUseCase,
     private val settingsManager: SettingsManager,
+    private val observeWatchProgress: ObserveWatchProgressUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(DownloadManagerState())
@@ -70,6 +75,11 @@ class DownloadManagerViewModel(
             val folder = getDownloadFolder()
             _state.update { it.copy(downloadFolder = folder) }
         }
+
+        getCompletedDownloads()
+            .flatMapLatest { list -> observeWatchProgress(list.map { it.episodePageUrl }) }
+            .onEach { map -> _state.update { it.copy(watchProgress = map) } }
+            .launchIn(viewModelScope)
     }
 
     fun handleEvent(event: DownloadManagerEvent) {
@@ -92,9 +102,21 @@ class DownloadManagerViewModel(
                 val item = event.item
                 val path = item.localFilePath ?: return@launch
                 if (item.isManga) {
-                    _events.send(DownloadManagerEvent.NavigateToReader(path, item.episodeTitle))
+                    _events.send(DownloadManagerEvent.NavigateToReader(path, item.episodeTitle, item.episodePageUrl, item.animeTitle))
                 } else {
-                    _events.send(DownloadManagerEvent.NavigateToPlayer("file://$path", item.episodeTitle))
+                    val siblings = getSiblingDownloads(item.animeTitle).filter { it.localFilePath != null }
+                    val paths = siblings.map { "file://${it.localFilePath}" }
+                    val titles = siblings.map { it.episodeTitle }
+                    val pageUrls = siblings.map { it.episodePageUrl }
+                    val startIndex = siblings.indexOfFirst { it.id == item.id }.takeIf { it >= 0 } ?: 0
+                    _events.send(
+                        DownloadManagerEvent.NavigateToPlayer(
+                            localFilePaths = if (paths.isEmpty()) listOf("file://$path") else paths,
+                            titles = if (titles.isEmpty()) listOf(item.episodeTitle) else titles,
+                            startIndex = startIndex,
+                            episodePageUrls = if (pageUrls.isEmpty()) listOf(item.episodePageUrl) else pageUrls,
+                        )
+                    )
                 }
             }
             is DownloadManagerEvent.FolderChosen -> viewModelScope.launch {

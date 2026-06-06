@@ -18,6 +18,7 @@ import com.greenrou.kanata.data.repository.SearchRepositoryImpl
 import com.greenrou.kanata.data.repository.SettingsManagerImpl
 import com.greenrou.kanata.data.repository.UpdateRepositoryImpl
 import com.greenrou.kanata.data.repository.VideoRepositoryImpl
+import com.greenrou.kanata.data.repository.WatchProgressRepositoryImpl
 import com.greenrou.kanata.domain.repository.AnimeRepository
 import com.greenrou.kanata.domain.repository.ChapterListRepository
 import com.greenrou.kanata.domain.repository.ContentPagesRepository
@@ -30,6 +31,7 @@ import com.greenrou.kanata.domain.repository.SearchRepository
 import com.greenrou.kanata.domain.repository.SettingsManager
 import com.greenrou.kanata.domain.repository.UpdateRepository
 import com.greenrou.kanata.domain.repository.VideoRepository
+import com.greenrou.kanata.domain.repository.WatchProgressRepository
 import org.koin.dsl.module
 
 val repositoryModule = module {
@@ -61,4 +63,5 @@ val repositoryModule = module {
     single<ContentSearchRepository> { ContentSearchRepositoryImpl(get(), get()) }
     single<DownloadRepository> { DownloadRepositoryImpl(get(), get(), get()) }
     single<UpdateRepository> { UpdateRepositoryImpl(get()) }
+    single<WatchProgressRepository> { WatchProgressRepositoryImpl(get()) }
 }

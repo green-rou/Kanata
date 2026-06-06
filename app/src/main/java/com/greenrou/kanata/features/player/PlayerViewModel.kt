@@ -6,6 +6,8 @@ import com.greenrou.kanata.core.analytics.AnalyticsManager
 import com.greenrou.kanata.data.mod.DownloadFeatureRegistry
 import com.greenrou.kanata.domain.usecase.GetEpisodeDownloadStatusUseCase
 import com.greenrou.kanata.domain.usecase.GetVideoStreamUseCase
+import com.greenrou.kanata.domain.usecase.GetWatchProgressUseCase
+import com.greenrou.kanata.domain.usecase.SaveWatchProgressUseCase
 import com.greenrou.kanata.domain.usecase.StartEpisodeDownloadUseCase
 import com.greenrou.kanata.features.player.model.PlayerEvent
 import com.greenrou.kanata.features.player.model.PlayerState
@@ -34,6 +36,9 @@ class PlayerViewModel(
     private val sourceName: String = "",
     private val initialHeaderKeys: List<String> = emptyList(),
     private val initialHeaderValues: List<String> = emptyList(),
+    private val saveWatchProgress: SaveWatchProgressUseCase,
+    private val getWatchProgress: GetWatchProgressUseCase,
+    private val episodePageUrls: List<String> = emptyList(),
 ) : ViewModel() {
 
     val isDownloadFeatureEnabled = downloadFeatureRegistry.isEnabled
@@ -93,9 +98,25 @@ class PlayerViewModel(
                     episodePageUrl = event.episodePageUrl,
                 )
             }
+            is PlayerEvent.SaveProgress -> viewModelScope.launch {
+                val key = episodeKey()
+                if (key.isNotEmpty()) {
+                    saveWatchProgress(
+                        episodeUrl = key,
+                        playbackUrl = episodeUrls.getOrElse(currentIndex) { "" },
+                        episodeTitle = event.episodeTitle,
+                        animeTitle = event.animeTitle,
+                        isManga = false,
+                        positionMs = event.positionMs,
+                        durationMs = event.durationMs,
+                    )
+                }
+            }
             PlayerEvent.NavigateBack -> Unit
         }
     }
+
+    private fun episodeKey() = episodePageUrls.getOrElse(currentIndex) { episodeUrls.getOrElse(currentIndex) { "" } }
 
     private fun previousEpisode() {
         if (currentIndex > 0) {
@@ -129,15 +150,17 @@ class PlayerViewModel(
         }
     }
 
+    suspend fun fetchResumePosition(): Long = getWatchProgress(episodeKey())?.positionMs ?: 0L
+
     private fun loadStream() {
         val url = episodeUrls.getOrNull(currentIndex) ?: return
-        if (url.startsWith("file://") || isDirectStreamUrl(url)) {
-            val headers = initialHeaderKeys.zip(initialHeaderValues).toMap()
-            _state.update { it.copy(isLoading = false, streamUrl = url, streamHeaders = headers, isChangingEpisode = false) }
-            return
-        }
         loadJob?.cancel()
         loadJob = viewModelScope.launch {
+            if (url.startsWith("file://") || isDirectStreamUrl(url)) {
+                val headers = initialHeaderKeys.zip(initialHeaderValues).toMap()
+                _state.update { it.copy(isLoading = false, streamUrl = url, streamHeaders = headers, isChangingEpisode = false) }
+                return@launch
+            }
             _state.update { it.copy(isLoading = true, error = null) }
             getVideoStream(url)
                 .onSuccess { stream ->

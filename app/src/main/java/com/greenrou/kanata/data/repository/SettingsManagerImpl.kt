@@ -30,6 +30,7 @@ class SettingsManagerImpl(private val context: Context) : SettingsManager {
         val IS_MANGA_MODE = booleanPreferencesKey("is_manga_mode")
         val MOD_INDEX_URL = stringPreferencesKey("mod_index_url")
         val MOD_SOURCE_INPUT = stringPreferencesKey("mod_source_input")
+        val SHOW_CONTINUE_WATCHING_DIALOG = booleanPreferencesKey("show_continue_watching_dialog")
     }
 
     override val showAdultContent: Flow<Boolean> = context.dataStore.data
@@ -187,6 +188,15 @@ class SettingsManagerImpl(private val context: Context) : SettingsManager {
     override suspend fun setModSourceInput(input: String) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.MOD_SOURCE_INPUT] = input
+        }
+    }
+
+    override val showContinueWatchingDialog: Flow<Boolean> = context.dataStore.data
+        .map { preferences -> preferences[PreferencesKeys.SHOW_CONTINUE_WATCHING_DIALOG] ?: true }
+
+    override suspend fun setShowContinueWatchingDialog(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SHOW_CONTINUE_WATCHING_DIALOG] = enabled
         }
     }
 }

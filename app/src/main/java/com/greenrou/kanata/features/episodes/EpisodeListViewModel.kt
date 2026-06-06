@@ -10,9 +10,11 @@ import com.greenrou.kanata.domain.usecase.GetAnimegongoTranslationsUseCase
 import com.greenrou.kanata.domain.usecase.GetCompletedDownloadsUseCase
 import com.greenrou.kanata.domain.usecase.GetDownloadQueueUseCase
 import com.greenrou.kanata.domain.usecase.GetEpisodeListUseCase
+import com.greenrou.kanata.domain.usecase.ObserveWatchProgressUseCase
 import com.greenrou.kanata.domain.usecase.StartEpisodeDownloadUseCase
 import com.greenrou.kanata.features.episodes.model.EpisodeListEvent
 import com.greenrou.kanata.features.episodes.model.EpisodeListState
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -34,6 +36,7 @@ class EpisodeListViewModel(
     private val getAnimegongoTranslations: GetAnimegongoTranslationsUseCase,
     private val analytics: AnalyticsManager,
     downloadFeatureRegistry: DownloadFeatureRegistry,
+    private val observeWatchProgress: ObserveWatchProgressUseCase,
     val animePageUrl: String,
     val label: String,
     val animeTitle: String,
@@ -49,6 +52,8 @@ class EpisodeListViewModel(
 
     private val _events = Channel<EpisodeListEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
+
+    private var watchProgressJob: Job? = null
 
     init {
         analytics.setScreen("episode_list")
@@ -149,6 +154,11 @@ class EpisodeListViewModel(
             getEpisodeList(animePageUrl, expectedEpisodes)
                 .onSuccess { episodes ->
                     _state.update { it.copy(isLoading = false, episodes = episodes) }
+                    val urls = episodes.map { it.url }
+                    watchProgressJob?.cancel()
+                    watchProgressJob = observeWatchProgress(urls)
+                        .onEach { map -> _state.update { it.copy(watchProgress = map) } }
+                        .launchIn(viewModelScope)
                 }
                 .onFailure { e ->
                     analytics.recordError(e, "episode_list_load", mapOf("source" to label, "anime" to animeTitle))

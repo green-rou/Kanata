@@ -18,8 +18,10 @@ interface SettingsManager {
     val isMangaMode: Flow<Boolean>
     val modIndexUrl: Flow<String>
     val modSourceInput: Flow<String>
+    val showContinueWatchingDialog: Flow<Boolean>
     suspend fun setModIndexUrl(url: String)
     suspend fun setModSourceInput(input: String)
+    suspend fun setShowContinueWatchingDialog(enabled: Boolean)
 
     suspend fun setShowAdultContent(show: Boolean)
     suspend fun setDarkTheme(isDark: Boolean)
