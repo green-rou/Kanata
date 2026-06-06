@@ -26,6 +26,7 @@ fun MoodScreen(
     viewModel: MoodViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val favoriteIds by viewModel.favoriteIds.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
@@ -56,8 +57,10 @@ fun MoodScreen(
             MoodResultContent(
                 mood = mood,
                 state = state,
+                favoriteIds = favoriteIds,
                 onBack = { viewModel.handleEvent(MoodEvent.ClearMood) },
                 onAnimeClick = { viewModel.handleEvent(MoodEvent.AnimeClicked(it)) },
+                onFavoriteClick = { viewModel.handleEvent(MoodEvent.ToggleFavorite(it)) },
                 topPadding = contentPadding.calculateTopPadding(),
                 bottomPadding = contentPadding.calculateBottomPadding(),
             )

@@ -32,10 +32,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -51,6 +54,9 @@ import coil.request.ImageRequest
 import com.greenrou.kanata.R
 import com.greenrou.kanata.core.composable.KanataLoader
 import com.greenrou.kanata.features.pagereader.model.PageReaderEvent
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -64,9 +70,11 @@ fun PageReaderScreen(
     chapterTitles: List<String>,
     startIndex: Int,
     onNavigateBack: () -> Unit,
+    chapterPageUrls: List<String> = emptyList(),
+    animeTitle: String = "",
     viewModel: PageReaderViewModel = koinViewModel(
         key = "reader_${startIndex}_${chapterUrls.firstOrNull()}",
-        parameters = { parametersOf(chapterUrls, chapterTitles, startIndex) },
+        parameters = { parametersOf(chapterUrls, chapterTitles, startIndex, animeTitle, chapterPageUrls) },
     ),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -74,6 +82,7 @@ fun PageReaderScreen(
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
+        viewModel.refreshResumePage()
         viewModel.events.collect { event ->
             when (event) {
                 PageReaderEvent.NavigateBack -> onNavigateBack()
@@ -82,11 +91,38 @@ fun PageReaderScreen(
         }
     }
 
-    LaunchedEffect(state.currentChapterIndex) {
-        listState.scrollToItem(0)
+    LaunchedEffect(state.currentChapterIndex, state.resumePageIndex) {
+        val resumeIndex = state.resumePageIndex
+        if (resumeIndex > 0) {
+            snapshotFlow { listState.layoutInfo.totalItemsCount }
+                .first { it > 0 }
+            listState.scrollToItem(resumeIndex)
+        } else {
+            listState.scrollToItem(0)
+        }
     }
 
     val currentPage by remember { derivedStateOf { (listState.firstVisibleItemIndex + 1).coerceAtMost(state.pages.size.coerceAtLeast(1)) } }
+
+    val pagesState = rememberUpdatedState(state.pages)
+    DisposableEffect(Unit) {
+        onDispose {
+            val total = pagesState.value.size
+            if (total > 0) {
+                viewModel.handleEvent(PageReaderEvent.SaveProgress(listState.firstVisibleItemIndex, total))
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        snapshotFlow { listState.firstVisibleItemIndex }
+            .collectLatest { index ->
+                if (state.pages.isNotEmpty()) {
+                    delay(2000)
+                    viewModel.handleEvent(PageReaderEvent.SaveProgress(index, state.pages.size))
+                }
+            }
+    }
 
     Box(
         modifier = Modifier

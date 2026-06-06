@@ -193,6 +193,8 @@
     <string name="settings_language_system">За замовчуванням системи</string>
     <string name="settings_language_en">English</string>
     <string name="settings_language_uk">Українська</string>
+    <string name="settings_language_pl">Polski</string>
+    <string name="settings_language_be">Беларуская</string>
     <string name="settings_section_content">Контент</string>
     <string name="settings_adult_on_title">Режим 18+</string>
     <string name="settings_adult_off_title">Дорослий контент</string>
@@ -211,6 +213,16 @@
     <string name="settings_section_downloads">Завантаження</string>
     <string name="settings_download_folder_title">Папка завантажень</string>
     <string name="settings_download_folder_default">За замовчуванням (зовнішнє сховище)</string>
+    <string name="settings_section_playback">Відтворення</string>
+    <string name="settings_continue_watching_title">Запит на продовження перегляду</string>
+    <string name="settings_continue_watching_subtitle">Показувати діалог для продовження під час запуску</string>
+    <string name="continue_watching_dialog_title">Продовжити перегляд?</string>
+    <string name="continue_watching_dialog_body">Ви зупинились на %1$s — %2$s. Продовжити?</string>
+    <string name="continue_watching_dialog_confirm">Продовжити</string>
+    <string name="continue_watching_dialog_dismiss">Не зараз</string>
+    <string name="continue_reading_dialog_title">Продовжити читання?</string>
+    <string name="continue_reading_dialog_body">Ви зупинились на %1$s — %2$s. Продовжити читання?</string>
+    <string name="episode_watched_label">Дивились цю</string>
     <string name="settings_section_webplayer">Веб-плеєр</string>
     <string name="settings_adblock_on_title">Adblock: Увімкнено</string>
     <string name="settings_adblock_off_title">Adblock: Вимкнено</string>

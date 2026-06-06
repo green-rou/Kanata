@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Kanata</string>
+
+    <!-- Common -->
+    <string name="action_retry">Spróbuj ponownie</string>
+    <string name="action_back">Wróć</string>
+    <string name="action_save">Zapisz</string>
+    <string name="error_something_wrong">Coś poszło nie tak</string>
+    <string name="error_service_title">Problemy techniczne</string>
+    <string name="error_service_subtitle">Usługa jest chwilowo niedostępna.\nSpróbuj ponownie później.</string>
+    <string name="error_offline_title">Brak połączenia z internetem</string>
+    <string name="error_offline_subtitle">Sprawdź połączenie i spróbuj ponownie.\nTreść załaduje się automatycznie po przywróceniu połączenia.</string>
+    <string name="error_offline_banner">Brak połączenia z internetem</string>
+
+    <!-- Bottom nav -->
+    <string name="tab_anime">Anime</string>
+    <string name="tab_favorites">Ulubione</string>
+    <string name="tab_discover">Odkrywaj</string>
+    <string name="tab_downloads">Pobrane</string>
+    <string name="tab_settings">Ustawienia</string>
+
+    <!-- Main screen -->
+    <string name="main_title">Kanata</string>
+    <string name="main_subtitle">Odkryj anime</string>
+    <string name="main_search_anime_hint">Szukaj…</string>
+    <string name="main_search_downloads_hint">Szukaj w pobranych…</string>
+    <string name="main_cd_close_search">Zamknij wyszukiwanie</string>
+    <string name="main_cd_search">Szukaj</string>
+    <string name="main_cd_filter">Filtr</string>
+    <string name="main_cd_search_downloads">Szukaj w pobranych</string>
+    <string name="main_no_anime_found">Nie znaleziono anime</string>
+    <string name="main_search_in_mods">Szukaj w zasobach modów</string>
+
+    <!-- Anime details -->
+    <string name="detail_title_fallback">Szczegóły anime</string>
+    <string name="detail_error">Błąd: %s</string>
+    <string name="detail_episodes_count">%d odcinków</string>
+    <string name="detail_chapters_count">%d rozdziałów</string>
+    <string name="detail_volumes_count">%d tomów</string>
+    <string name="detail_watch_offline">Oglądaj offline</string>
+    <string name="detail_offline_picker_title">Pobrane odcinki</string>
+    <string name="detail_available_streams">Źródła anime</string>
+    <string name="detail_no_streams">Nie znaleziono źródeł</string>
+    <string name="detail_chapter_sources">Źródła rozdziałów</string>
+    <string name="detail_tap_chapter_source">Wybierz źródło, aby przeglądać rozdziały</string>
+    <string name="detail_slow_search_hint">Aby przyspieszyć ładowanie, możesz wyłączyć niektóre źródła w ustawieniach</string>
+    <string name="detail_tap_source">Wybierz źródło, aby przeglądać odcinki</string>
+    <string name="detail_synopsis">Opis</string>
+    <string name="detail_synopsis_via">przez %s</string>
+    <string name="detail_studios">Studia</string>
+    <string name="detail_source_ann">Źródło: Anime News Network</string>
+    <string name="detail_cd_copy">Kopiuj</string>
+    <string name="detail_cd_copied">Skopiowano</string>
+    <string name="detail_cd_retry_search">Ponów wyszukiwanie źródeł</string>
+    <plurals name="detail_downloaded_episodes">
+        <item quantity="one">%d odcinek pobrany</item>
+        <item quantity="few">%d odcinki pobrane</item>
+        <item quantity="many">%d odcinków pobranych</item>
+        <item quantity="other">%d odcinków pobranych</item>
+    </plurals>
+
+    <!-- Episodes -->
+    <string name="episode_list_count">%d odcinków</string>
+    <string name="episode_empty_title">Nie znaleziono odcinków</string>
+    <string name="episode_empty_subtitle">To źródło nie ma dostępnych odcinków</string>
+    <string name="episode_cd_downloaded">Pobrano</string>
+    <string name="episode_cd_queued">W kolejce do pobrania</string>
+    <string name="episode_cd_failed">Błąd pobierania</string>
+    <string name="episode_cd_download">Pobierz odcinek %d</string>
+    <string name="episode_cd_play">Odtwórz odcinek %d</string>
+    <string name="translation_sheet_title">Wybierz dubbing</string>
+    <string name="translation_type_voice">Dubbing</string>
+    <string name="translation_type_subtitles">Napisy</string>
+
+    <!-- Chapter list -->
+    <string name="chapter_list_count">%d rozdziałów</string>
+    <string name="chapter_empty_title">Nie znaleziono rozdziałów</string>
+    <string name="chapter_empty_subtitle">To źródło nie ma dostępnych rozdziałów</string>
+    <string name="chapter_error_title">Nie udało się załadować rozdziałów</string>
+    <string name="chapter_cd_read">Czytaj rozdział %d</string>
+    <string name="chapter_cd_download">Pobierz rozdział %d</string>
+    <string name="download_card_cd_read">Czytaj</string>
+
+    <!-- Page reader -->
+    <string name="reader_page_of">%1$d / %2$d</string>
+    <string name="reader_cd_prev">Poprzedni rozdział</string>
+    <string name="reader_cd_next">Następny rozdział</string>
+    <string name="reader_error_empty">Nie znaleziono stron dla tego rozdziału</string>
+    <string name="reader_retrying">Ponawiam… %d / 3</string>
+
+    <!-- Favorites -->
+    <string name="favorites_empty_title">Brak ulubionych</string>
+    <string name="favorites_empty_subtitle">Anime, które dodasz do ulubionych, pojawią się tutaj</string>
+    <string name="favorites_explore">Przeglądaj anime</string>
+    <string name="favorites_saved_pages_title">Zapisane strony</string>
+    <string name="saved_page_delete">Usuń zapisaną stronę</string>
+
+    <!-- Downloads screen -->
+    <string name="downloads_tab_downloaded">Pobrane (%d)</string>
+    <string name="downloads_tab_queue">Kolejka (%d)</string>
+    <string name="downloads_cd_drag">Przeciągnij, aby zmienić kolejność</string>
+    <string name="downloads_queue_empty_title">Kolejka jest pusta</string>
+    <string name="downloads_queue_empty_subtitle">Dotknij przycisku pobierania przy dowolnym odcinku, aby rozpocząć</string>
+    <string name="downloads_empty_title">Brak pobranych</string>
+    <string name="downloads_empty_subtitle">Pobrane odcinki pojawią się tutaj</string>
+    <string name="downloads_cd_anime_details">Szczegóły anime</string>
+    <string name="downloads_cd_episode_list">Otwórz listę odcinków</string>
+
+    <!-- Download card -->
+    <string name="download_card_cd_cancel">Anuluj pobieranie</string>
+    <string name="download_card_unknown_error">Nieznany błąd</string>
+    <string name="download_card_retry">Ponów</string>
+    <string name="download_card_remove">Usuń</string>
+    <string name="download_card_cd_play">Odtwórz</string>
+    <string name="download_card_cd_delete">Usuń</string>
+
+    <!-- Notifications -->
+    <string name="notif_channel_downloads">Pobieranie</string>
+    <string name="notif_downloading">Pobieranie: %s</string>
+
+    <!-- Web player -->
+    <string name="webplayer_hint">Wprowadź URL…</string>
+    <string name="webplayer_stream_found">Wykryto strumień</string>
+    <string name="webplayer_open_in_player">Otwórz w odtwarzaczu</string>
+    <string name="webplayer_cd_reload">Odśwież</string>
+    <string name="webplayer_cd_open_webplayer">Otwórz odtwarzacz webowy</string>
+    <string name="webplayer_guide_title">Odtwarzacz webowy</string>
+    <string name="webplayer_guide_subtitle">Streamuj wideo z dowolnej strony bezpośrednio do odtwarzacza</string>
+    <string name="webplayer_guide_step1">Wprowadź adres strony w polu powyżej</string>
+    <string name="webplayer_guide_step2">Przejdź do odcinka i uruchom wideo</string>
+    <string name="webplayer_guide_step3">Gdy wykryto strumień — dotknij „Otwórz w odtwarzaczu"</string>
+    <string name="webplayer_adblock_warning">Niektóre strony mogą blokować odtwarzanie przy włączonym blokerze reklam.</string>
+    <string name="webplayer_adblock_warning_hint">Możesz go ponownie włączyć w ustawieniach aplikacji.</string>
+    <string name="webplayer_adblock_warning_disable">Wyłącz bloker reklam</string>
+    <string name="webplayer_save_page">Zapisz stronę</string>
+    <string name="webplayer_save_page_title">Zapisz stronę</string>
+    <string name="webplayer_save_page_hint">Nazwa strony</string>
+
+    <!-- Player -->
+    <string name="player_cd_exit_fullscreen">Wyjdź z pełnego ekranu</string>
+    <string name="player_cd_fullscreen">Pełny ekran</string>
+    <string name="player_cd_prev_episode">Poprzedni odcinek</string>
+    <string name="player_cd_next_episode">Następny odcinek</string>
+    <string name="player_up_next">Następny</string>
+    <string name="player_cd_play_next">Odtwórz następny odcinek</string>
+    <string name="player_error_title">Błąd odtwarzania</string>
+    <string name="player_error_subtitle">Coś poszło nie tak podczas ładowania tego odcinka</string>
+    <string name="player_try_again">Spróbuj ponownie</string>
+    <string name="player_episode_of">Odcinek %1$d z %2$d</string>
+    <string name="player_cd_downloaded">Pobrano</string>
+    <string name="player_cd_queued">W kolejce do pobrania</string>
+    <string name="player_cd_failed">Błąd pobierania</string>
+    <string name="player_cd_download">Pobierz odcinek</string>
+
+    <!-- Mood -->
+    <string name="mood_title">Jak się czujesz?</string>
+    <string name="mood_subtitle">Wybierz nastrój i odkryj idealne anime</string>
+    <string name="mood_no_results">Nie znaleziono anime dla tego nastroju</string>
+
+    <!-- Random / Discover -->
+    <string name="tab_by_mood">Wg nastroju</string>
+    <string name="tab_random">Losowe</string>
+    <string name="tab_wallpaper">Tapety</string>
+    <string name="random_your_pick">Twój losowy wybór</string>
+    <string name="random_pick_another">Inny wybór</string>
+    <string name="random_cd_wallpaper">Losowa tapeta anime</string>
+    <string name="random_download_started">Pobieranie rozpoczęte</string>
+    <string name="random_cd_download">Pobierz</string>
+    <string name="random_wallpaper_set">Tapeta ustawiona!</string>
+    <string name="random_wallpaper_failed">Nie udało się ustawić tapety</string>
+    <string name="random_cd_set_wallpaper">Ustaw jako tapetę</string>
+    <string name="random_new">Nowe</string>
+    <string name="random_wallpaper_dm_title">Tapeta anime</string>
+    <string name="random_wallpaper_dm_desc">Zapisywanie do Zdjęcia</string>
+
+    <!-- Filters -->
+    <string name="filter_title">Filtry</string>
+    <string name="filter_clear_all">Wyczyść wszystko</string>
+    <string name="filter_section_format">Format</string>
+    <string name="filter_section_genre">Gatunek</string>
+
+    <!-- Settings -->
+    <string name="settings_section_appearance">Wygląd</string>
+    <string name="settings_theme_dark">Ciemny motyw</string>
+    <string name="settings_theme_light">Jasny motyw</string>
+    <string name="settings_theme_subtitle">Przełącz między jasnym a ciemnym trybem</string>
+    <string name="settings_cover_title">Okładka pod paskiem tytułu</string>
+    <string name="settings_cover_extends">Obraz rozciąga się za pasek tytułu</string>
+    <string name="settings_cover_below">Obraz wyświetlany w całości poniżej paska</string>
+    <string name="settings_accent_color_title">Kolor akcentu</string>
+    <string name="settings_language_title">Język</string>
+    <string name="settings_language_system">Domyślny systemu</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_language_uk">Українська</string>
+    <string name="settings_language_pl">Polski</string>
+    <string name="settings_language_be">Беларуская</string>
+    <string name="settings_section_content">Treść</string>
+    <string name="settings_adult_on_title">Tryb 18+</string>
+    <string name="settings_adult_off_title">Treści dla dorosłych</string>
+    <string name="settings_adult_on_subtitle">Wyświetlane są tylko tytuły 18+</string>
+    <string name="settings_adult_off_subtitle">Wyświetlaj tylko tytuły bez 18+</string>
+    <string name="settings_content_type_anime">Tryb anime</string>
+    <string name="settings_content_type_manga">Tryb mangi</string>
+    <string name="settings_content_type_subtitle">Przełącz między anime a mangą</string>
+    <string name="settings_section_sources">Źródła</string>
+    <string name="settings_sources_select">Wybierz aktywne źródła</string>
+    <string name="settings_section_extensions">Rozszerzenia</string>
+    <string name="settings_extensions_manage_title">Zarządzaj rozszerzeniami</string>
+    <string name="settings_extensions_manage_subtitle">Instaluj lub usuń mody</string>
+    <string name="settings_info_provider_select">Źródło informacji o anime</string>
+    <string name="settings_info_provider_none">Brak (tylko AniList)</string>
+    <string name="settings_section_downloads">Pobieranie</string>
+    <string name="settings_download_folder_title">Folder pobierania</string>
+    <string name="settings_download_folder_default">Domyślny (zewnętrzna pamięć aplikacji)</string>
+    <string name="settings_section_playback">Odtwarzanie</string>
+    <string name="settings_continue_watching_title">Monit o kontynuowanie</string>
+    <string name="settings_continue_watching_subtitle">Pokaż okno dialogowe do wznawiania odtwarzania przy starcie</string>
+    <string name="continue_watching_dialog_title">Kontynuować oglądanie?</string>
+    <string name="continue_watching_dialog_body">Zatrzymałeś się na %1$s — %2$s. Kontynuować?</string>
+    <string name="continue_watching_dialog_confirm">Kontynuuj</string>
+    <string name="continue_watching_dialog_dismiss">Nie teraz</string>
+    <string name="continue_reading_dialog_title">Kontynuować czytanie?</string>
+    <string name="continue_reading_dialog_body">Zatrzymałeś się na %1$s — %2$s. Kontynuować czytanie?</string>
+    <string name="episode_watched_label">Oglądano</string>
+    <string name="settings_section_webplayer">Odtwarzacz webowy</string>
+    <string name="settings_adblock_on_title">Bloker reklam: Włączony</string>
+    <string name="settings_adblock_off_title">Bloker reklam: Wyłączony</string>
+    <string name="settings_adblock_on_subtitle">Reklamy i trackery są blokowane</string>
+    <string name="settings_adblock_off_subtitle">Reklamy nie są blokowane w odtwarzaczu webowym</string>
+    <string name="settings_web_back_fab_title">Nawigacja wstecz: Przycisk</string>
+    <string name="settings_web_back_fab_subtitle">Nad stroną pojawia się przycisk wstecz</string>
+    <string name="settings_web_back_topbar_title">Nawigacja wstecz: Pasek tytułu</string>
+    <string name="settings_web_back_topbar_subtitle">Przycisk wstecz na pasku tytułu nawiguje w obrębie strony</string>
+    <string name="settings_section_privacy">Prywatność</string>
+    <string name="settings_analytics_on_title">Analityka i raporty: Włączona</string>
+    <string name="settings_analytics_off_title">Analityka i raporty: Wyłączona</string>
+    <string name="settings_analytics_on_subtitle">Pomaga ulepszać aplikację poprzez zbieranie danych o użyciu</string>
+    <string name="settings_analytics_off_subtitle">Dane o użyciu nie są zbierane</string>
+    <string name="analytics_consent_title">Pomóż ulepszyć Kanata</string>
+    <string name="analytics_consent_body">Zbieramy anonimowe raporty o awariach i analitykę użycia, aby ulepszyć aplikację. Żadne dane osobowe nie są zbierane. Możesz to zmienić w dowolnym momencie w ustawieniach aplikacji.</string>
+    <string name="analytics_consent_allow">Zezwól</string>
+    <string name="analytics_consent_deny">Odmów</string>
+    <string name="settings_section_about">O aplikacji</string>
+    <string name="settings_version">Kanata v%s</string>
+    <string name="settings_made_by">Stworzone przez GreenRou</string>
+    <string name="settings_github">GitHub</string>
+    <string name="settings_github_subtitle">green-rou/Kanata</string>
+    <string name="settings_support">Wesprzyj na Ko-fi</string>
+    <string name="settings_support_subtitle">ko-fi.com/C0C31ZLH6K</string>
+    <string name="settings_check_update">Sprawdź aktualizacje</string>
+    <string name="settings_check_update_checking">Sprawdzanie…</string>
+    <string name="settings_check_update_subtitle">Sprawdź, czy jest nowa wersja</string>
+    <string name="update_available_title">Dostępna aktualizacja</string>
+    <string name="update_button">Aktualizuj</string>
+    <string name="update_skip_button">Pomiń</string>
+    <string name="update_github_link">Zobacz na GitHub</string>
+    <string name="update_skip_hint">Jeśli pominiesz, to okno nie pojawi się ponownie dla wersji %s</string>
+    <string name="update_downloading">Pobieranie…</string>
+    <string name="update_no_updates">Brak aktualizacji</string>
+    <string name="online_search_button">Szukaj online</string>
+    <string name="online_search_searching">Szukam na %s…</string>
+    <string name="online_search_empty">Nie znaleziono na %s</string>
+    <string name="online_search_error">Błąd na %s</string>
+</resources>

@@ -159,7 +159,7 @@ private fun lightScheme(accentColor: String) = when (accentColor) {
         tertiaryContainer = AnimeLight_TertiaryContainer, onTertiaryContainer = AnimeLight_OnTertiaryContainer,
         outline = AnimeLight_Outline,
     )
-    else -> lightColorScheme( // Gray (default)
+    else -> lightColorScheme(
         primary = GrayLight_Primary, onPrimary = GrayLight_OnPrimary,
         primaryContainer = GrayLight_PrimaryContainer, onPrimaryContainer = GrayLight_OnPrimaryContainer,
         background = GrayLight_Background, onBackground = GrayLight_OnBackground,
@@ -306,7 +306,7 @@ private fun darkScheme(accentColor: String) = when (accentColor) {
         tertiaryContainer = AnimeDark_TertiaryContainer, onTertiaryContainer = AnimeDark_OnTertiaryContainer,
         outline = AnimeDark_Outline,
     )
-    else -> darkColorScheme( // Gray (default)
+    else -> darkColorScheme(
         primary = GrayDark_Primary, onPrimary = GrayDark_OnPrimary,
         primaryContainer = GrayDark_PrimaryContainer, onPrimaryContainer = GrayDark_OnPrimaryContainer,
         background = GrayDark_Background, onBackground = GrayDark_OnBackground,

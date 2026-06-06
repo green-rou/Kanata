@@ -6,7 +6,6 @@ import com.greenrou.kanata.domain.repository.ContentPagesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.net.URI
 import java.net.URL
 
 class ContentPagesRepositoryImpl(
@@ -16,7 +15,7 @@ class ContentPagesRepositoryImpl(
     override suspend fun getPages(chapterUrl: String): Result<List<ContentPage>> = withContext(Dispatchers.IO) {
         runCatching {
             if (chapterUrl.startsWith("file://")) {
-                val folder = File(URI(chapterUrl))
+                val folder = File(chapterUrl.removePrefix("file://"))
                 folder.listFiles()
                     ?.filter { it.extension.lowercase() in listOf("jpg", "jpeg", "png", "webp") }
                     ?.sortedBy { it.name }

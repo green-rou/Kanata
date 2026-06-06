@@ -68,6 +68,8 @@ import com.greenrou.kanata.features.player.content.PlayerErrorContent
 import com.greenrou.kanata.features.player.content.PlayerInfoSection
 import com.greenrou.kanata.features.player.content.PlayerStatusOverlay
 import com.greenrou.kanata.features.player.model.PlayerEvent
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -82,10 +84,11 @@ fun PlayerScreen(
     sourceName: String = "",
     headerKeys: List<String> = emptyList(),
     headerValues: List<String> = emptyList(),
+    episodePageUrls: List<String> = emptyList(),
     onNavigateBack: () -> Unit,
     viewModel: PlayerViewModel = koinViewModel(
         key = "${episodeUrls.firstOrNull() ?: "player"}_$startIndex",
-        parameters = { parametersOf(episodeUrls, episodeTitles, startIndex, animeTitle, sourceName, headerKeys, headerValues) },
+        parameters = { parametersOf(episodeUrls, episodeTitles, startIndex, animeTitle, sourceName, headerKeys, headerValues, episodePageUrls) },
     ),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -153,11 +156,39 @@ fun PlayerScreen(
                     PlayerEvent.PlaybackError(error.cause?.message ?: error.message ?: "Playback failed")
                 )
             }
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                if (!isPlaying && exoPlayer.currentPosition > 0) {
+                    viewModel.handleEvent(
+                        PlayerEvent.SaveProgress(
+                            positionMs = exoPlayer.currentPosition,
+                            durationMs = exoPlayer.duration.coerceAtLeast(0),
+                            episodeTitle = viewModel.currentEpisodeTitle(),
+                            animeTitle = viewModel.animeTitle(),
+                        )
+                    )
+                }
+            }
         }
         exoPlayer.addListener(listener)
         onDispose {
             exoPlayer.removeListener(listener)
             exoPlayer.release()
+        }
+    }
+
+    LaunchedEffect(exoPlayer) {
+        while (isActive) {
+            delay(5000)
+            if (exoPlayer.isPlaying) {
+                viewModel.handleEvent(
+                    PlayerEvent.SaveProgress(
+                        positionMs = exoPlayer.currentPosition,
+                        durationMs = exoPlayer.duration.coerceAtLeast(0),
+                        episodeTitle = viewModel.currentEpisodeTitle(),
+                        animeTitle = viewModel.animeTitle(),
+                    )
+                )
+            }
         }
     }
 
@@ -176,6 +207,8 @@ fun PlayerScreen(
                 ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(mediaItem)
             }
             exoPlayer.setMediaSource(mediaSource)
+            val resumeMs = viewModel.fetchResumePosition()
+            if (resumeMs > 0L) exoPlayer.seekTo(resumeMs)
             exoPlayer.prepare()
             exoPlayer.play()
         }

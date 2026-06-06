@@ -13,5 +13,12 @@ sealed interface PlayerEvent {
         val sourceName: String,
     ) : PlayerEvent
 
+    data class SaveProgress(
+        val positionMs: Long,
+        val durationMs: Long,
+        val episodeTitle: String,
+        val animeTitle: String,
+    ) : PlayerEvent
+
     data object NavigateBack : PlayerEvent
 }

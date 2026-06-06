@@ -8,6 +8,8 @@ object LanguagePrefs {
     const val SYSTEM = "system"
     const val ENGLISH = "en"
     const val UKRAINIAN = "uk"
+    const val POLISH = "pl"
+    const val BELARUSIAN = "be"
 
     fun get(context: Context): String =
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)

@@ -191,6 +191,8 @@
     <string name="settings_language_system">System default</string>
     <string name="settings_language_en">English</string>
     <string name="settings_language_uk">Українська</string>
+    <string name="settings_language_pl">Polski</string>
+    <string name="settings_language_be">Беларуская</string>
     <string name="settings_section_content">Content</string>
     <string name="settings_adult_on_title">18+ Mode</string>
     <string name="settings_adult_off_title">Adult Content</string>
@@ -209,6 +211,16 @@
     <string name="settings_section_downloads">Downloads</string>
     <string name="settings_download_folder_title">Download folder</string>
     <string name="settings_download_folder_default">Default (app external storage)</string>
+    <string name="settings_section_playback">Playback</string>
+    <string name="settings_continue_watching_title">Continue Watching Prompt</string>
+    <string name="settings_continue_watching_subtitle">Show a dialog to resume playback on app start</string>
+    <string name="continue_watching_dialog_title">Continue Watching?</string>
+    <string name="continue_watching_dialog_body">You stopped at %1$s — %2$s. Continue?</string>
+    <string name="continue_watching_dialog_confirm">Continue</string>
+    <string name="continue_watching_dialog_dismiss">Not Now</string>
+    <string name="continue_reading_dialog_title">Continue Reading?</string>
+    <string name="continue_reading_dialog_body">You stopped at %1$s — %2$s. Continue reading?</string>
+    <string name="episode_watched_label">Watched this</string>
     <string name="settings_section_webplayer">Web Player</string>
     <string name="settings_adblock_on_title">Ad Blocker: On</string>
     <string name="settings_adblock_off_title">Ad Blocker: Off</string>

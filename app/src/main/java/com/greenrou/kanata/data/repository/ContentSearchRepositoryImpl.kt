@@ -35,30 +35,9 @@ class ContentSearchRepositoryImpl(
                     var deadThisRound = false
                     parser.search(title).fold(
                         onSuccess = { url ->
-                            val chaptersResult = runCatching { parser.getChapters(url) }
-                            chaptersResult.fold(
-                                onSuccess = { chapters ->
-                                    if (chapters.isNotEmpty()) {
-                                        Log.d(TAG, "[${parser.label}] ✓ '$title' → $url (${chapters.size} chapters)")
-                                        send(ContentSource(parser.label, url))
-                                        found = true
-                                    } else {
-                                        Log.w(TAG, "[${parser.label}] ✗ '$title': no chapters at $url")
-                                    }
-                                },
-                                onFailure = { e ->
-                                    val msg = e.message ?: ""
-                                    if (e is java.net.UnknownHostException || "Unable to resolve host" in msg) {
-                                        val host = msg.substringAfter('"').substringBefore('"').takeIf { it.isNotBlank() }
-                                        host?.let { deadHosts.add(it) }
-                                        Log.w(TAG, "[${parser.label}] ✗ dead host on chapters fetch: ${host ?: msg}")
-                                        deadThisRound = true
-                                        hitDeadHost = true
-                                    } else {
-                                        Log.w(TAG, "[${parser.label}] ✗ '$title': chapters fetch failed — $msg")
-                                    }
-                                },
-                            )
+                            Log.d(TAG, "[${parser.label}] ✓ '$title' → $url")
+                            send(ContentSource(parser.label, url))
+                            found = true
                         },
                         onFailure = { e ->
                             val msg = e.message ?: ""

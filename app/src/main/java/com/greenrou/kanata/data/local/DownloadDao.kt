@@ -40,4 +40,7 @@ interface DownloadDao {
 
     @Query("SELECT MAX(queuePosition) FROM downloads WHERE status IN ('QUEUED','DOWNLOADING')")
     suspend fun getMaxQueuePosition(): Int?
+
+    @Query("SELECT * FROM downloads WHERE status = 'COMPLETED' AND animeTitle = :animeTitle AND isManga = 0 ORDER BY episodeTitle ASC")
+    suspend fun getCompletedVideosByAnimeTitle(animeTitle: String): List<DownloadEntity>
 }

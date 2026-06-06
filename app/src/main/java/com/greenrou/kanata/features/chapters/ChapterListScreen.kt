@@ -128,27 +128,32 @@ fun ChapterListScreen(
                     onRetry = { viewModel.handleEvent(ChapterListEvent.RetryClicked) },
                 )
                 state.chapters.isEmpty() -> ChapterEmptyState()
-                else -> LazyColumn(
-                    state = listState,
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    itemsIndexed(state.chapters) { index, chapter ->
-                        ChapterCard(
-                            number = index + 1,
-                            title = chapter.title,
-                            onClick = { viewModel.handleEvent(ChapterListEvent.ChapterClicked(index)) },
-                            showDownloadButton = isDownloadFeatureEnabled,
-                            downloadStatus = state.downloadStatuses[chapter.url]?.status,
-                            onDownloadClick = {
-                                viewModel.handleEvent(
-                                    ChapterListEvent.DownloadChapter(
-                                        chapterUrl = chapter.url,
-                                        chapterTitle = chapter.title,
+                else -> {
+                    val lastWatchedUrl = state.watchProgress.values.maxByOrNull { it.updatedAt }?.episodeUrl
+                    LazyColumn(
+                        state = listState,
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        itemsIndexed(state.chapters) { index, chapter ->
+                            ChapterCard(
+                                number = index + 1,
+                                title = chapter.title,
+                                onClick = { viewModel.handleEvent(ChapterListEvent.ChapterClicked(index)) },
+                                showDownloadButton = isDownloadFeatureEnabled,
+                                downloadStatus = state.downloadStatuses[chapter.url]?.status,
+                                onDownloadClick = {
+                                    viewModel.handleEvent(
+                                        ChapterListEvent.DownloadChapter(
+                                            chapterUrl = chapter.url,
+                                            chapterTitle = chapter.title,
+                                        )
                                     )
-                                )
-                            },
-                        )
+                                },
+                                watchProgress = state.watchProgress[chapter.url],
+                                isLastWatched = chapter.url == lastWatchedUrl,
+                            )
+                        }
                     }
                 }
             }

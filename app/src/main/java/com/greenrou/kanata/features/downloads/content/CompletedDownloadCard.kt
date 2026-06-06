@@ -1,16 +1,20 @@
 package com.greenrou.kanata.features.downloads.content
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,6 +26,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.greenrou.kanata.R
 import com.greenrou.kanata.domain.model.DownloadItem
+import com.greenrou.kanata.domain.model.WatchProgress
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -38,8 +43,14 @@ internal fun CompletedDownloadCard(
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
     isManga: Boolean = false,
+    watchProgress: WatchProgress? = null,
+    isLastWatched: Boolean = false,
 ) {
-    ElevatedCard(modifier = modifier.fillMaxWidth()) {
+    val shape = MaterialTheme.shapes.medium
+    val borderMod = if (isLastWatched)
+        Modifier.border(2.dp, MaterialTheme.colorScheme.primary, shape)
+    else Modifier
+    ElevatedCard(modifier = modifier.fillMaxWidth().then(borderMod), shape = shape) {
         Row(
             modifier = Modifier.padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -64,11 +75,26 @@ internal fun CompletedDownloadCard(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                if (isLastWatched) {
+                    Spacer(Modifier.height(2.dp))
+                    Text(
+                        text = stringResource(R.string.episode_watched_label),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
+                if (watchProgress != null && !watchProgress.isCompleted && watchProgress.fraction > 0f) {
+                    Spacer(Modifier.height(4.dp))
+                    LinearProgressIndicator(
+                        progress = { watchProgress.fraction },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
             }
             IconButton(onClick = onPlay) {
                 if (isManga) {
                     Icon(
-                        imageVector = Icons.Filled.MenuBook,
+                        imageVector = Icons.AutoMirrored.Filled.MenuBook,
                         contentDescription = stringResource(R.string.download_card_cd_read),
                         tint = MaterialTheme.colorScheme.primary,
                     )
