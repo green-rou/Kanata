@@ -213,6 +213,16 @@
     <string name="settings_section_downloads">Pobieranie</string>
     <string name="settings_download_folder_title">Folder pobierania</string>
     <string name="settings_download_folder_default">Domyślny (zewnętrzna pamięć aplikacji)</string>
+    <string name="settings_section_playback">Odtwarzanie</string>
+    <string name="settings_continue_watching_title">Monit o kontynuowanie</string>
+    <string name="settings_continue_watching_subtitle">Pokaż okno dialogowe do wznawiania odtwarzania przy starcie</string>
+    <string name="continue_watching_dialog_title">Kontynuować oglądanie?</string>
+    <string name="continue_watching_dialog_body">Zatrzymałeś się na %1$s — %2$s. Kontynuować?</string>
+    <string name="continue_watching_dialog_confirm">Kontynuuj</string>
+    <string name="continue_watching_dialog_dismiss">Nie teraz</string>
+    <string name="continue_reading_dialog_title">Kontynuować czytanie?</string>
+    <string name="continue_reading_dialog_body">Zatrzymałeś się na %1$s — %2$s. Kontynuować czytanie?</string>
+    <string name="episode_watched_label">Oglądano</string>
     <string name="settings_section_webplayer">Odtwarzacz webowy</string>
     <string name="settings_adblock_on_title">Bloker reklam: Włączony</string>
     <string name="settings_adblock_off_title">Bloker reklam: Wyłączony</string>

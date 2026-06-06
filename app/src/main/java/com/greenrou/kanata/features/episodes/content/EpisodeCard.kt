@@ -1,10 +1,12 @@
 package com.greenrou.kanata.features.episodes.content
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -19,6 +21,7 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -32,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import com.greenrou.kanata.R
 import com.greenrou.kanata.core.composable.KanataSmallLoader
 import com.greenrou.kanata.domain.model.DownloadStatus
+import com.greenrou.kanata.domain.model.WatchProgress
 
 @Composable
 internal fun EpisodeCard(
@@ -42,10 +46,17 @@ internal fun EpisodeCard(
     showDownloadButton: Boolean = false,
     downloadStatus: DownloadStatus? = null,
     onDownloadClick: () -> Unit = {},
+    watchProgress: WatchProgress? = null,
+    isLastWatched: Boolean = false,
 ) {
+    val shape = MaterialTheme.shapes.medium
+    val borderMod = if (isLastWatched)
+        Modifier.border(2.dp, MaterialTheme.colorScheme.primary, shape)
+    else Modifier
     ElevatedCard(
         onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().then(borderMod),
+        shape = shape,
     ) {
         Row(
             modifier = Modifier
@@ -76,6 +87,21 @@ internal fun EpisodeCard(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
+                if (isLastWatched) {
+                    Spacer(Modifier.height(2.dp))
+                    Text(
+                        text = stringResource(R.string.episode_watched_label),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
+                if (watchProgress != null && !watchProgress.isCompleted && watchProgress.fraction > 0f) {
+                    Spacer(Modifier.height(4.dp))
+                    LinearProgressIndicator(
+                        progress = { watchProgress.fraction },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
             }
             if (showDownloadButton) {
                 Spacer(Modifier.width(8.dp))

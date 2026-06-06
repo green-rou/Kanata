@@ -213,6 +213,16 @@
     <string name="settings_section_downloads">Спампоўкі</string>
     <string name="settings_download_folder_title">Папка спамповак</string>
     <string name="settings_download_folder_default">Па змаўчанні (вонкавая памяць)</string>
+    <string name="settings_section_playback">Прайграванне</string>
+    <string name="settings_continue_watching_title">Запыт на працяг прагляду</string>
+    <string name="settings_continue_watching_subtitle">Паказваць дыялог для аднаўлення прайгравання пры запуску</string>
+    <string name="continue_watching_dialog_title">Працягнуць прагляд?</string>
+    <string name="continue_watching_dialog_body">Вы спыніліся на %1$s — %2$s. Працягнуць?</string>
+    <string name="continue_watching_dialog_confirm">Працягнуць</string>
+    <string name="continue_watching_dialog_dismiss">Не зараз</string>
+    <string name="continue_reading_dialog_title">Працягнуць чытанне?</string>
+    <string name="continue_reading_dialog_body">Вы спыніліся на %1$s — %2$s. Працягнуць чытанне?</string>
+    <string name="episode_watched_label">Ужо глядзелі</string>
     <string name="settings_section_webplayer">Вэб-плэер</string>
     <string name="settings_adblock_on_title">Блакавальнік рэкламы: Уключаны</string>
     <string name="settings_adblock_off_title">Блакавальнік рэкламы: Адключаны</string>

@@ -30,6 +30,9 @@ sealed interface MainEvent {
     data object AcceptAnalytics : MainEvent
     data object DenyAnalytics : MainEvent
 
+    data object ToggleContinueWatchingDialog : MainEvent
+    data object DismissContinueWatching : MainEvent
+
     data class NavigateToDetail(val animeId: Int) : MainEvent
     data class ShowError(val message: String) : MainEvent
 }

@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.greenrou.kanata.R
+import com.greenrou.kanata.domain.model.WatchProgress
 import com.greenrou.kanata.features.downloads.content.CompletedDownloadCard
 import com.greenrou.kanata.features.downloads.content.QueuedDownloadCard
 import com.greenrou.kanata.features.downloads.model.DownloadManagerEvent
@@ -63,9 +64,9 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun DownloadManagerScreen(
-    onPlayDownloaded: (localFilePath: String, title: String) -> Unit,
+    onPlayDownloaded: (localFilePaths: List<String>, titles: List<String>, startIndex: Int, episodePageUrls: List<String>) -> Unit,
     modifier: Modifier = Modifier,
-    onReadMangaChapter: (chapterFolderPath: String, title: String) -> Unit = { _, _ -> },
+    onReadMangaChapter: (chapterFolderPath: String, title: String, chapterPageUrl: String, animeTitle: String) -> Unit = { _, _, _, _ -> },
     onOpenEpisodeList: (animePageUrl: String, sourceName: String, animeTitle: String) -> Unit = { _, _, _ -> },
     onOpenChapterList: (pageUrl: String, sourceName: String, animeTitle: String) -> Unit = { _, _, _ -> },
     onNavigateToAnimeDetails: (animeId: Int) -> Unit = {},
@@ -81,9 +82,9 @@ fun DownloadManagerScreen(
         viewModel.events.collect { event ->
             when (event) {
                 is DownloadManagerEvent.NavigateToPlayer ->
-                    onPlayDownloaded(event.localFilePath, event.title)
+                    onPlayDownloaded(event.localFilePaths, event.titles, event.startIndex, event.episodePageUrls)
                 is DownloadManagerEvent.NavigateToReader ->
-                    onReadMangaChapter(event.chapterFolderPath, event.title)
+                    onReadMangaChapter(event.chapterFolderPath, event.title, event.chapterPageUrl, event.animeTitle)
                 is DownloadManagerEvent.ShowSnackbar ->
                     onShowSnackbar(event.message)
                 else -> Unit
@@ -112,6 +113,7 @@ fun DownloadManagerScreen(
             when (page) {
                 0 -> DownloadedTab(
                     items = state.completedDownloads,
+                    watchProgress = state.watchProgress,
                     onPlay = { item -> viewModel.handleEvent(DownloadManagerEvent.PlayDownloaded(item)) },
                     onDelete = { item ->
                         viewModel.handleEvent(DownloadManagerEvent.DeleteDownload(item.id, item.localFilePath))
@@ -249,6 +251,7 @@ private fun QueueTab(
 @Composable
 private fun DownloadedTab(
     items: List<com.greenrou.kanata.domain.model.DownloadItem>,
+    watchProgress: Map<String, WatchProgress> = emptyMap(),
     onPlay: (com.greenrou.kanata.domain.model.DownloadItem) -> Unit,
     onDelete: (com.greenrou.kanata.domain.model.DownloadItem) -> Unit,
     onOpenEpisodeList: (animePageUrl: String, sourceName: String, animeTitle: String) -> Unit,
@@ -278,6 +281,10 @@ private fun DownloadedTab(
             val animePageUrl = episodes.firstOrNull { it.animePageUrl.isNotBlank() }?.animePageUrl
             val animeId = episodes.firstOrNull { it.animeId > 0 }?.animeId ?: 0
             val isMangaGroup = episodes.any { it.isManga }
+            val groupPageUrls = episodes.map { it.episodePageUrl }
+            val lastWatchedUrl = watchProgress.values
+                .filter { it.episodeUrl in groupPageUrls }
+                .maxByOrNull { it.updatedAt }?.episodeUrl
             item(key = "header_$animeTitle") {
                 androidx.compose.foundation.layout.Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -329,6 +336,8 @@ private fun DownloadedTab(
                     onPlay = { onPlay(item) },
                     onDelete = { onDelete(item) },
                     isManga = item.isManga,
+                    watchProgress = watchProgress[item.episodePageUrl],
+                    isLastWatched = item.episodePageUrl == lastWatchedUrl,
                 )
             }
         }

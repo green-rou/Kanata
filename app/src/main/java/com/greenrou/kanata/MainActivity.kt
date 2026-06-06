@@ -26,6 +26,7 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.greenrou.kanata.core.util.LanguagePrefs
 import com.greenrou.kanata.features.main.MainViewModel
+import com.greenrou.kanata.features.main.content.ContinueWatchingDialog
 import com.greenrou.kanata.features.main.model.MainEvent
 import com.greenrou.kanata.features.update.AnalyticsConsentDialog
 import com.greenrou.kanata.features.update.UpdateDialog
@@ -33,6 +34,8 @@ import com.greenrou.kanata.features.update.UpdateViewModel
 import com.greenrou.kanata.features.update.model.UpdateEvent
 import com.greenrou.kanata.navigation.MainRoute
 import com.greenrou.kanata.navigation.NavGraph
+import com.greenrou.kanata.navigation.PageReaderRoute
+import com.greenrou.kanata.navigation.PlayerRoute
 import com.greenrou.kanata.ui.theme.KanataTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
@@ -144,6 +147,39 @@ class MainActivity : ComponentActivity() {
                             analyticsConsentVisible = false
                             mainViewModel.handleEvent(MainEvent.DenyAnalytics)
                         },
+                    )
+                }
+
+                val pending = state.pendingContinueWatching
+                if (pending != null && state.showContinueWatchingDialog) {
+                    ContinueWatchingDialog(
+                        progress = pending,
+                        isManga = pending.isManga,
+                        onContinue = {
+                            mainViewModel.handleEvent(MainEvent.DismissContinueWatching)
+                            if (pending.isManga) {
+                                backStack.add(
+                                    PageReaderRoute(
+                                        chapterUrls = listOf(pending.playbackUrl),
+                                        chapterTitles = listOf(pending.episodeTitle),
+                                        startIndex = 0,
+                                        chapterPageUrls = listOf(pending.episodeUrl),
+                                        animeTitle = pending.animeTitle,
+                                    )
+                                )
+                            } else {
+                                backStack.add(
+                                    PlayerRoute(
+                                        episodeUrls = listOf(pending.playbackUrl),
+                                        episodeTitles = listOf(pending.episodeTitle),
+                                        startIndex = 0,
+                                        animeTitle = pending.animeTitle,
+                                        episodePageUrls = listOf(pending.episodeUrl),
+                                    )
+                                )
+                            }
+                        },
+                        onDismiss = { mainViewModel.handleEvent(MainEvent.DismissContinueWatching) },
                     )
                 }
             }

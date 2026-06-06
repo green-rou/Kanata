@@ -20,17 +20,22 @@ import com.greenrou.kanata.domain.usecase.GetEpisodeDownloadStatusUseCase
 import com.greenrou.kanata.domain.usecase.GetEpisodeListUseCase
 import com.greenrou.kanata.domain.usecase.GetFavoritesUseCase
 import com.greenrou.kanata.domain.usecase.GetInstalledModsUseCase
+import com.greenrou.kanata.domain.usecase.GetLastWatchedUseCase
 import com.greenrou.kanata.domain.usecase.GetRandomAnimeUseCase
 import com.greenrou.kanata.domain.usecase.GetRandomImageUseCase
 import com.greenrou.kanata.domain.usecase.GetSavedPagesUseCase
+import com.greenrou.kanata.domain.usecase.GetSiblingDownloadsUseCase
 import com.greenrou.kanata.domain.usecase.GetVideoStreamUseCase
+import com.greenrou.kanata.domain.usecase.GetWatchProgressUseCase
 import com.greenrou.kanata.domain.usecase.InstallModFromFileUseCase
 import com.greenrou.kanata.domain.usecase.InstallModUseCase
 import com.greenrou.kanata.domain.usecase.IsFavoriteUseCase
+import com.greenrou.kanata.domain.usecase.ObserveWatchProgressUseCase
 import com.greenrou.kanata.domain.usecase.RemoveFavoriteUseCase
 import com.greenrou.kanata.domain.usecase.ReorderDownloadQueueUseCase
 import com.greenrou.kanata.domain.usecase.RetryDownloadUseCase
 import com.greenrou.kanata.domain.usecase.SavePageUseCase
+import com.greenrou.kanata.domain.usecase.SaveWatchProgressUseCase
 import com.greenrou.kanata.domain.usecase.SearchContentSourcesUseCase
 import com.greenrou.kanata.domain.usecase.SearchExternalAnimeUseCase
 import com.greenrou.kanata.domain.usecase.SearchOnlineUseCase
@@ -65,6 +70,7 @@ val useCaseModule = module {
     factory { CancelDownloadUseCase(get(), get()) }
     factory { GetDownloadQueueUseCase(get()) }
     factory { GetCompletedDownloadsUseCase(get()) }
+    factory { GetSiblingDownloadsUseCase(get()) }
     factory { GetEpisodeDownloadStatusUseCase(get()) }
     factory { DeleteCompletedDownloadUseCase(get()) }
     factory { ReorderDownloadQueueUseCase(get()) }
@@ -82,4 +88,8 @@ val useCaseModule = module {
     factory { InstallModFromFileUseCase(androidContext(), get(), get()) }
     factory { UninstallModUseCase(get()) }
     factory { ToggleModUseCase(get()) }
+    factory { SaveWatchProgressUseCase(get()) }
+    factory { GetWatchProgressUseCase(get()) }
+    factory { ObserveWatchProgressUseCase(get()) }
+    factory { GetLastWatchedUseCase(get()) }
 }

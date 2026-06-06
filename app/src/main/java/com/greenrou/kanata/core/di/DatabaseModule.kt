@@ -8,6 +8,7 @@ import com.greenrou.kanata.data.local.SavedPagesDao
 import com.greenrou.kanata.data.local.StorageDao
 import com.greenrou.kanata.data.local.StorageDataSource
 import com.greenrou.kanata.data.local.StorageDatabase
+import com.greenrou.kanata.data.local.WatchProgressDao
 import com.greenrou.kanata.data.repository.FavoritesManagerImpl
 import com.greenrou.kanata.data.repository.SavedPagesManagerImpl
 import com.greenrou.kanata.data.repository.StorageManagerImpl
@@ -31,6 +32,7 @@ val databaseModule = module {
             StorageDatabase.MIGRATION_6_7,
             StorageDatabase.MIGRATION_7_8,
             StorageDatabase.MIGRATION_8_9,
+            StorageDatabase.MIGRATION_9_10,
         ).build()
     }
 
@@ -39,6 +41,7 @@ val databaseModule = module {
     single<DownloadDao> { get<StorageDatabase>().downloadDao() }
     single<SavedPagesDao> { get<StorageDatabase>().savedPagesDao() }
     single<InstalledModDao> { get<StorageDatabase>().installedModDao() }
+    single<WatchProgressDao> { get<StorageDatabase>().watchProgressDao() }
 
     single { StorageDataSource(get()) }
 

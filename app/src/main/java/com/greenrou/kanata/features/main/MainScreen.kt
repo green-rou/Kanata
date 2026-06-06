@@ -98,14 +98,14 @@ fun MainScreen(
     selectedTabName: String,
     onTabSelected: (String) -> Unit,
     onNavigateToDetails: (Int) -> Unit,
-    onNavigateToPlayer: (localFilePath: String, title: String) -> Unit = { _, _ -> },
+    onNavigateToPlayer: (localFilePaths: List<String>, titles: List<String>, startIndex: Int, episodePageUrls: List<String>) -> Unit = { _, _, _, _ -> },
     onOpenEpisodeList: (animePageUrl: String, sourceName: String, animeTitle: String) -> Unit = { _, _, _ -> },
     onOpenChapterList: (pageUrl: String, sourceName: String, animeTitle: String) -> Unit = { _, _, _ -> },
     onNavigateToAnimeDetails: (animeId: Int) -> Unit = {},
     onOpenWebPlayer: () -> Unit = {},
     onNavigateToWebPlayer: (url: String) -> Unit = {},
     onNavigateToMods: () -> Unit = {},
-    onReadMangaChapter: (chapterFolderPath: String, title: String) -> Unit = { _, _ -> },
+    onReadMangaChapter: (chapterFolderPath: String, title: String, chapterPageUrl: String, animeTitle: String) -> Unit = { _, _, _, _ -> },
     onNavigateToOnlineSearch: (query: String) -> Unit = {},
     viewModel: MainViewModel = koinViewModel(),
 ) {
@@ -521,6 +521,8 @@ fun MainScreen(
                     )
 
                     BottomNavItem.Settings -> SettingsScreen(
+                        showContinueWatchingDialog = state.showContinueWatchingDialog,
+                        onToggleContinueWatchingDialog = { viewModel.handleEvent(MainEvent.ToggleContinueWatchingDialog) },
                         showAdultContent = state.showAdultContent,
                         onToggleAdultContent = { viewModel.handleEvent(MainEvent.ToggleAdultContent) },
                         isDarkTheme = state.isDarkTheme,
