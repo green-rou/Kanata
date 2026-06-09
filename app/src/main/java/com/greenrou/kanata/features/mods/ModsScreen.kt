@@ -528,7 +528,7 @@ private fun LanguageBadge(language: String, modifier: Modifier = Modifier) {
         color = MaterialTheme.colorScheme.secondaryContainer,
     ) {
         Text(
-            text = language.uppercase(),
+            text = if (language.lowercase() == "uk") "UA" else language.uppercase(),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSecondaryContainer,
             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),

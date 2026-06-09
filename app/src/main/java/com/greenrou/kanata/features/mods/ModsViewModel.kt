@@ -155,6 +155,8 @@ class ModsViewModel(
     }
 
     companion object {
+        private const val DEFAULT_INDEX_URL =
+            "https://raw.githubusercontent.com/AbaturSrc/kanata-extentions/main/index.json"
         private val MANGA_SOURCE_IDS = setOf(
             "source-frameworks",
             "source-heancms",
@@ -219,6 +221,7 @@ class ModsViewModel(
 
     private fun resolveToIndexUrl(input: String): String {
         val trimmed = input.trim()
+        if (trimmed.equals("extension", ignoreCase = true)) return DEFAULT_INDEX_URL
         if (trimmed.startsWith("https://raw.githubusercontent.com/")) return trimmed
         val ownerRepo = Regex("github\\.com/([\\w.-]+/[\\w.-]+)").find(trimmed)?.groupValues?.get(1)
             ?: if (trimmed.matches(Regex("[\\w.-]+/[\\w.-]+"))) trimmed else return trimmed
